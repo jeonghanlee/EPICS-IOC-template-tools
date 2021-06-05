@@ -1,0 +1,9 @@
+test:
+    image: alpine
+    stage: test
+    before_script:
+    - apk update
+    - apk --no-cache add bash git shellcheck
+    script:
+    - git ls-files --exclude='*.bash' --ignored | xargs shellcheck
+
