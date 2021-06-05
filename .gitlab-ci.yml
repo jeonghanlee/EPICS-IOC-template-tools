@@ -7,3 +7,11 @@ Style:
     script:
     - git ls-files --exclude='*.bash' --ignored | xargs shellcheck
 
+CentOS:
+    image: centos:7.9.2009
+    stage: test
+    before_script:
+    - yum update
+    - yum -y install bash git shellcheck
+    script:
+    - git ls-files --exclude='*.bash' --ignored | xargs shellcheck
