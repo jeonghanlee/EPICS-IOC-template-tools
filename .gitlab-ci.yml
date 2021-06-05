@@ -1,6 +1,6 @@
-test:
+styles_checker:
     image: alpine
-    stage: test
+    stage: shellcheck
     before_script:
     - apk update
     - apk --no-cache add bash git shellcheck

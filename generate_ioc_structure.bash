@@ -20,9 +20,13 @@
 # Date    : Fri Jun  4 15:17:17 PDT 2021
 # version : 0.0.1
 
-declare -gr SC_SCRIPT="$(realpath "$0")"
-declare -gr SC_SCRIPTNAME=${0##*/}
-declare -gr SC_TOP="${SC_SCRIPT%/*}"
+declare -g SC_RPATH;
+#declare -g SC_NAME;
+declare -g SC_TOP;
+
+SC_RPATH="$(realpath "$0")";
+#SC_NAME=${0##*/};
+SC_TOP="${SC_RPATH%/*}"
 
 function pushd { builtin pushd "$@" > /dev/null || exit; }
 function popd  { builtin popd  > /dev/null || exit; }
@@ -81,7 +85,7 @@ fi
 APPTOP="${SC_TOP}/${APPNAME}"
 
 mkdir -p "${APPTOP}"
-pushd "${APPTOP}"
+pushd "${APPTOP}" || exit
 
 for folder in *
 do
