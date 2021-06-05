@@ -17,8 +17,8 @@
 #
 # Author  : Jeong Han Lee
 # email   : JeongLee@lbl.gov
-# Date    : Fri Jun  4 15:17:17 PDT 2021
-# version : 0.0.1
+# Date    : Fri Jun  4 20:16:05 PDT 2021
+# version : 0.0.2
 
 declare -g SC_RPATH;
 #declare -g SC_NAME;
@@ -74,6 +74,18 @@ done
 shift $((OPTIND-1))
 
 
+if [ -z "$EPICS_BASE" ]; then
+    echo ""
+    echo "Pease set EPICS_BASE, and other EPICS environment varialbles first."
+    echo "Here is the example for them.";
+    echo "  export EPICS_BASE=/somewhere/your_base";
+    echo "  export EPICS_HOST_ARCH=darwin-aarch64";
+    echo "  export PATH=\${EPICS_BASE}/bin/\${EPICS_HOST_ARCH}:\${PATH}";
+    echo "  export LD_LIBRARY_PATH=\${EPICS_BASE}/lib/\${EPICS_HOST_ARCH}:\${LD_LIBRARY_PATH}";
+    echo "";
+    exit;
+fi
+
 if [ -z "$APPNAME" ]; then
     usage;
 fi
@@ -82,7 +94,15 @@ if [ -z "$LOCATION" ]; then
     usage;
 fi
 
-APPTOP="${SC_TOP}/${APPNAME}"
+TOP=${PWD};
+
+if [[ "${TOP}" == "$SC_TOP" ]]; then
+    echo "Please call $0 outside ${SC_TOP}"
+    exit;
+fi
+
+
+APPTOP="${TOP}/${APPNAME}"
 
 mkdir -p "${APPTOP}"
 pushd "${APPTOP}" || exit
