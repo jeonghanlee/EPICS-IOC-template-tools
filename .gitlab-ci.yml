@@ -1,3 +1,6 @@
+include:
+  - template: Code-Quality.gitlab-ci.yml
+
 Style:
     image: alpine
     stage: test
@@ -17,3 +20,16 @@ CentOS:
     - yum -y install bash git ShellCheck
     script:
     - git ls-files --exclude='*.bash' --ignored | xargs shellcheck
+
+Debian:
+    image: Debian:stable-slim
+    stage: test
+    - apt update
+    - apt install -y install bash git shellcheck
+    script:
+    - git ls-files --exclude='*.bash' --ignored | xargs shellcheck
+
+code_quality:
+  artifacts:
+    paths: [gl-code-quality-report.json]
+
