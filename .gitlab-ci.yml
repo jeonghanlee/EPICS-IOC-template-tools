@@ -14,7 +14,7 @@ CentOS:
     - yum -y install git bash sudo
     - yum -y update
     - git clone https://github.com/jeonghanlee/pkg_automation
-    - cd pkg_automation && bash pkg_automation.bash -y
+    - bash ${CI_BUILD_PATH}/pkg_automation.bash -y
     - yum -y install ShellCheck
     script:
     - git ls-files --exclude='*.bash' --ignored | xargs shellcheck
