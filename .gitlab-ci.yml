@@ -26,5 +26,6 @@ Debian:
     - apt update
     - apt install -y bash git shellcheck
     script:
+    - export SHELLCHECK_OPTS="-e SC1117"
     - git ls-files --exclude='*.bash' --ignored | xargs shellcheck
 
