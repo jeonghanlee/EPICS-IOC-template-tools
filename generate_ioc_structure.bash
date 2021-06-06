@@ -202,7 +202,7 @@ ShellCheck:
     - apk update
     - apk --no-cache add bash git shellcheck
     script:
-    - git ls-files --exclude='*.bash' --ignored | xargs shellcheck
+    - git ls-files --exclude='*.bash' --ignored | xargs shellcheck || echo "No script found!"
 EOF
 }
 
