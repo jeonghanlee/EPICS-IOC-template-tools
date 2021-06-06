@@ -51,7 +51,9 @@ function usage
 # Must call within git repo path
 function add_gitignore
 {
-    cat > .gitignore <<EOF
+    local ignorefile=".gitignore";
+    if [ ! -f "$ignorefile" ]; then
+        cat > "${ignorefile}" <<EOF
 # EPICS site : https://epics-controls.org/
 # References : epics-base / epics-modules / @ralphlange / @jeonghanlee
 # Directories built by EPICS building system 
@@ -72,7 +74,6 @@ O.*/
 /*Top/html/
 /*Top/include/
 /*Top/templates/
-
 
 # User-specific files for local modifications
 /configure/*.local
@@ -106,11 +107,17 @@ Payara-src
 *.list
 *.swp
 EOF
+    else
+        printf "Exist : %s\n" "${ignorefile}";
+    fi
 }
 
 function add_gitattributes
 {
-   cat > .gitattributes <<EOF
+    local attrfile=".gitattributes";
+
+    if [ ! -f "${attrfile}" ]; then
+        cat > "${attrfile}" <<EOF
 # Set the default behavior, in case people don't have core.autocrlf set.
 * text=auto
 
@@ -126,6 +133,9 @@ function add_gitattributes
 *.png binary
 *.jpg binary
 EOF
+    else
+        printf "Exist : %s\n" "${attrfile}";
+    fi
 }
 
 
@@ -134,21 +144,41 @@ function add_submodule
 {
     local src_url="$1"; shift;
     local tgt_name="$1"; shift;
-    printf "%s is adding as submodule %s.\\n" "${src_url}" "${tgt_name}";
-    git submodule add "${src_url}" "${tgt_name}"  ||  die 1 "We cannot add ${src_url} as submodule : Please check it" ;
-    printf "\\n";
-    git submodule update --init --recursive  ||  die 1 "We cannot init the gitsubmodule : Please check it" ;
+    if [ ! -d "$tgt_name" ]; then
+        printf "%s is adding as submodule %s.\n" "${src_url}" "${tgt_name}";
+        git submodule add "${src_url}" "${tgt_name}"  ||  die 1 "We cannot add ${src_url} as submodule : Please check it" ;
+        printf "\n";
+        git submodule update --init --recursive  ||  die 1 "We cannot init the gitsubmodule : Please check it" ;
+    else
+        printf "Exist : %s\n" "${tgt_name}";
+    fi
 }  
 
 function epics_ci
 {
     local url="https://github.com/epics-base/ci-scripts";
     local tgt=".ci";
+    local cifile=".gitlab-ci.yml";
+    local localpath=".ci-local";
+    local localfile1="stable.set";
+
     add_submodule "$url" "$tgt";
-    mkdir -p .ci-local
-    echo "BASE=7.0" > .ci-local/stable.set
-    git add .ci-local/stable.set
-    cat > .gitlab-ci.yml <<EOF
+    if [ ! -d "${localpath}" ]; then
+        echo "CREATE : ${localpath}";
+        mkdir -p "${localpath}";
+    else
+        echo "Exist : ${localpath}";
+    fi
+    pushd "${localpath}" || exit;
+    if [ ! -f "${localfile1}" ]; then
+        echo "BASE=7.0" > "${localfile1}"
+    else
+        printf "Exist : %s\n" "${localfile1}"
+    fi
+    popd || exit;
+
+    if [ ! -f "${cifile}" ]; then
+        cat > "${cifile}" <<EOF
 # .gitlab-ci.yml for testing EPICS Base ci-scripts
 # (see: https://github.com/epics-base/ci-scripts)
 
@@ -204,6 +234,9 @@ ShellCheck:
     script:
     - git ls-files --exclude='*.bash' --ignored | xargs shellcheck || echo "No script found!"
 EOF
+    else
+        printf "Exist : %s\n" "${cifile}";
+    fi
 }
 
 options="n:l:cia"
@@ -233,6 +266,8 @@ while getopts "${options}" opt; do
     esac
 done
 shift $((OPTIND-1))
+
+#: "${EPICS_BASE:?}"
 
 
 if [ -z "$EPICS_BASE" ]; then
