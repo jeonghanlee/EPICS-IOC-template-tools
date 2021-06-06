@@ -7,12 +7,9 @@ Build:
         - apk update
         - apk --no-cache add bash git shellcheck libstdc++ readline git g++ make perl-dev readline-dev wget tree
         - wget -c https://epics-controls.org/download/base/base-7.0.5.tar.gz
-        - mkdir -p base
-        - EPICS_BASE=${CI_PROJECT_DIR}/base
-        - tar -xvzf base-7.0.5.tar.gz -C  ${EPICS_BASE}
-        - EPICS_HOST_ARCH=$(sh $EPICS_BASE/startup/EpicsHostArch)
-        - export ${EPICS_BASE}
-        - export ${EPICS_HOST_ARCH}
+        - tar -xvzf base-7.0.5.tar.gz
+        - export EPICS_BASE=${CI_PROJECT_DIR}/base-7.0.5
+        - export EPICS_HOST_ARCH=$(sh $EPICS_BASE/startup/EpicsHostArch)
     script:
         - make -C ${EPICS_BASE}
     after_script:
