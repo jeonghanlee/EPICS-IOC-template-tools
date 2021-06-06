@@ -1,21 +1,19 @@
 
-.build_alpine:
-    image: alpine
-    stage: build
-    before_script:
+image: alpine
+
+before_script:
     - apk update
     - apk --no-cache add bash git shellcheck
+
+after_script:
     - shellcheck -y
-
-
+    
 ShellCheck:
-    extends: .build_alpine
-    stage: test
+    stage: build
     script:
     - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
 
 FunctionalTest:
-    extends: .build_alpine
     stage: test
     scrpit:
     - bash ${CI_PROJECT_DIR}/test.bash
