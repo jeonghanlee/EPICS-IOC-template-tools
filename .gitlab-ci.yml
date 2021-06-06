@@ -23,7 +23,7 @@ Debian:
     stage: test
     before_script:
     - apt update
-    - apt install -y install bash git shellcheck
+    - apt install -y bash git shellcheck
     script:
     - git ls-files --exclude='*.bash' --ignored | xargs shellcheck
 
