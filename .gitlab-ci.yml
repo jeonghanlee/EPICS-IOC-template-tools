@@ -1,4 +1,4 @@
-Style:
+Alpine:
     image: alpine
     stage: test
     before_script:
@@ -19,7 +19,7 @@ CentOS:
     - git ls-files --exclude='*.bash' --ignored | xargs shellcheck
 
 Debian:
-    image: Debian:stable-slim
+    image: debian:buster-slim
     stage: test
     before_script:
     - apt update
