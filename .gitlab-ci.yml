@@ -1,6 +1,3 @@
-include:
-  - template: Code-Quality.gitlab-ci.yml
-
 Style:
     image: alpine
     stage: test
@@ -24,6 +21,7 @@ CentOS:
 Debian:
     image: Debian:stable-slim
     stage: test
+    before_script:
     - apt update
     - apt install -y install bash git shellcheck
     script:
