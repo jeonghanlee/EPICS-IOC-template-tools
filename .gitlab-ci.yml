@@ -1,12 +1,27 @@
-Alpine:
+cache:
+  key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
+  paths:
+    - .cache/
+
+.build_alpine:
     image: alpine
-    stage: test
+    stage: build
     before_script:
     - apk update
     - apk --no-cache add bash git shellcheck
-    - shellcheck -V
+    - shellcheck -y
+
+
+ShellCheck:
+    extends: .build_alpine
     script:
     - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
+
+FunctionalTest:
+    extends: .build_alpine
+    scrpit:
+    - bash ${CI_PROJECT_DIR}/test.bash
+
 
 #CentOS:
 #    image: centos:7.9.2009
