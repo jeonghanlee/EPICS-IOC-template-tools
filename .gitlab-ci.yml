@@ -11,11 +11,10 @@ CentOS:
     image: centos:7.9.2009
     stage: test
     before_script:
-    - yum -y update
     - yum -y install git bash epel-release && yum repolist
     - yum -y update
     - git clone https://github.com/jeonghanlee/pkg_automation
-    - cd pkg_automation && bash pkg_automation -y
+    - cd pkg_automation && bash pkg_automation.bash -y
     script:
     - git ls-files --exclude='*.bash' --ignored | xargs shellcheck
 
