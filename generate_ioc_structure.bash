@@ -200,6 +200,7 @@ ShellCheck:
     before_script:
     - apk update
     - apk --no-cache add bash git shellcheck
+    - shellcheck -V
     script:
     - git ls-files --exclude='*.bash' --ignored | xargs shellcheck || echo "No script found!"
 EOF
