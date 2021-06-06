@@ -14,7 +14,7 @@ CentOS:
 #    - yum -y install git bash sudo
 #    - yum -y update
 #    - git clone https://github.com/jeonghanlee/pkg_automation
-    - echo "PWD ${PWD}""
+    - echo "PWD ${PWD}"
     - echo "CI_BUILD_DIR ${CI_BUILDS_DIR}"
     - echo "CI_PROJECT_DIR} ${CI_PROJECT_DIR}"
     - echo "CI_CONFIG_PATH ${CI_CONFIG_PATH}"
