@@ -135,8 +135,8 @@ function add_submodule
 {
     local src_url="$1"; shift;
     local tgt_name="$1"; shift;
-    printf "${src_url} is adding as submodule ${tgt_name}.\n";
-    git submodule add ${src_url} ${tgt_name}  ||  die 1 "We cannot add ${src_url} as submodule : Please check it" ;
+    printf "%s is adding as submodule %s.\n" "${src_url}" "${tgt_name}";
+    git submodule add "${src_url}" "${tgt_name}"  ||  die 1 "We cannot add ${src_url} as submodule : Please check it" ;
     printf "\n";
     git submodule update --init --recursive  ||  die 1 "We cannot init the gitsubmodule : Please check it" ;
 }  
