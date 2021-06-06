@@ -11,7 +11,7 @@ CentOS:
     image: centos:7.9.2009
     stage: test
     before_script:
-    - yum -y install git bash epel-release && yum repolist
+    - yum -y install git bash sudo
     - yum -y update
     - git clone https://github.com/jeonghanlee/pkg_automation
     - cd pkg_automation && bash pkg_automation.bash -y
