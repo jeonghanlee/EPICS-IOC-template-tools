@@ -6,7 +6,7 @@ before_script:
     - apk --no-cache add bash git shellcheck
 
 after_script:
-    - shellcheck -y
+    - shellcheck -V
     
 ShellCheck:
     stage: build
