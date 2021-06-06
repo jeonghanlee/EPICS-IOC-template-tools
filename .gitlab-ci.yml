@@ -27,7 +27,3 @@ Debian:
     script:
     - git ls-files --exclude='*.bash' --ignored | xargs shellcheck
 
-code_quality:
-  artifacts:
-    paths: [gl-code-quality-report.json]
-
