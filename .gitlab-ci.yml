@@ -11,15 +11,11 @@ CentOS:
     image: centos:7.9.2009
     stage: test
     before_script:
-#    - yum -y install git bash sudo
-#    - yum -y update
-#    - git clone https://github.com/jeonghanlee/pkg_automation
-    - echo "PWD ${PWD}"
-    - echo "CI_BUILD_DIR ${CI_BUILDS_DIR}"
-    - echo "CI_PROJECT_DIR ${CI_PROJECT_DIR}"
-    - echo "CI_CONFIG_PATH ${CI_CONFIG_PATH}"
-#    - bash ${CI_BUILDS_DIR}/pkg_automation/pkg_automation.bash -y
-#    - yum -y install ShellCheck
+    - yum -y install git bash sudo
+    - yum -y update
+    - git clone https://github.com/jeonghanlee/pkg_automation
+    - bash ${CI_PROJECT_DIR}/pkg_automation/pkg_automation.bash -y
+    - yum -y install ShellCheck
     script:
     - git ls-files --exclude='*.bash' --ignored | xargs shellcheck
 
