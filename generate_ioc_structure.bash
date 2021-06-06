@@ -34,17 +34,16 @@ function popd  { builtin popd  > /dev/null || exit; }
 function usage
 {
     {
-	echo "";
-	echo "Usage    : $0 [-n APPNAME] [-l LOCATION] <-c> <-a>"
-	echo "";
-	echo "               -n : APPNAME"
-	echo "               -l : LOCATION"
-    echo "               -c : Optional : Add git, and gitlab ci"
-    echo "               -a : Optional : WITHIN an existing a , add git, and gitlab ci"
-	echo "";
-	echo " bash $0 -n APPNAME -l LOCATION"
-	echo ""
-
+        echo "";
+        echo "Usage    : $0 [-n APPNAME] [-l LOCATION] <-c> <-a>"
+        echo "";
+        echo "              -n : APPNAME"
+        echo "              -l : LOCATION"
+        echo "              -c : Optional : Add git, and gitlab ci"
+        echo "              -a : Optional : WITHIN an existing a , add git, and gitlab ci"
+        echo "";
+        echo " bash $0 -n APPNAME -l LOCATION"
+        echo ""
     } 1>&2;
     exit 1;
 }
