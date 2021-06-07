@@ -1,4 +1,4 @@
-Build:
+build:
     image: alpine:latest
     stage: build
     script:
@@ -15,21 +15,26 @@ Build:
         reports:
             dotenv: build.env
 
-ShellCheck:
+shellcheck:
     stage: test
     script:
     - shellcheck -V
     - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
 
-FunctionalTest:
+test:
     stage: test
     before_script:
-        - echo ${EPICS_BASE}
-        - echo ${EPICS_HOST_ARCH}
-        - echo ${PATH}
-        - echo ${LD_LIBRARY_PATH}
+    - echo ${EPICS_BASE}
+    - echo ${EPICS_HOST_ARCH}
+    - echo ${PATH}
+    - echo ${LD_LIBRARY_PATH}
+    
     script:
     - bash ${CI_PROJECT_DIR}/test.bash
+    
+    needs:
+    - job: build
+      artifacts: true
 
 
 #CentOS:
