@@ -10,7 +10,7 @@ build:
         - EPICS_HOST_ARCH=$(sh $EPICS_BASE/startup/EpicsHostArch) >> build.env
         - PATH=${EPICS_BASE}/bin/${EPICS_HOST_ARCH}:${PATH} >> build.env
         - LD_LIBRARY_PATH=${EPICS_BASE}/lib/${EPICS_HOST_ARCH}:${LD_LIBRARY_PATH} >> build.env
-        - make -j -C ${EPICS_BASE} -D__UCLIBC_MAJOR__=0
+        - make -j -C ${EPICS_BASE} CFLAGS="-D__UCLIBC_MAJOR__=0:"
     artifacts:
         reports:
             dotenv: build.env
