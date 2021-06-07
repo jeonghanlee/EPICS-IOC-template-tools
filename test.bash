@@ -25,24 +25,29 @@ APPNAME="temp"
 LOCATION="ALSU"
 
 
-
+echo ">>> Test 1"
 pushd "${SC_TOP}/.." || exit;
 bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -n "${APPNAME}"
 tree2 "${APPNAME}"
 
+echo ">>> Test 2"
 bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -n "${APPNAME}" -c
 tree2 "${APPNAME}"
 
 rm -rf "${APPNAME}";
 popd || exit;
 
+echo ">>> Test 3" 
 pushd "${SC_TOP}/.." || exit;
 bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -n "${APPNAME}"
 tree2 "${APPNAME}"
-
-pushd "${APPNAME}" || exit;
-bash "${SC_TOP}/generate_ioc_structure.bash" -c -a
-tree2 "${APPNAME}" "3"
 popd || exit;
 
 
+echo ">>> Test 4" 
+pushd "${SC_TOP}/../${APPNAME}" || exit;
+bash "${SC_TOP}/generate_ioc_structure.bash" -c -a
+popd || exit;
+tree2 "${SC_TOP}/../${APPNAME}" "3"
+
+echo ">>> Done"
