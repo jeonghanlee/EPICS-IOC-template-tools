@@ -10,7 +10,7 @@ build:
         - apk update
         - apk --no-cache add bash git shellcheck libstdc++ readline git g++ make perl-dev readline-dev wget tree linux-headers libexecinfo-dev
         - wget -c https://epics-controls.org/download/base/base-7.0.5.tar.gz
-        - tar -xvzf base-7.0.5.tar.gz
+        - tar -xzf base-7.0.5.tar.gz
         - EPICS_BASE=${CI_PROJECT_DIR}/base-7.0.5 >> build.env
         - EPICS_HOST_ARCH=$(sh $EPICS_BASE/startup/EpicsHostArch) >> build.env
         - PATH=${EPICS_BASE}/bin/${EPICS_HOST_ARCH}:${PATH} >> build.env
