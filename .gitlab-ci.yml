@@ -1,5 +1,5 @@
 cache:
-  key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
+  key: ${CI_COMMIT_REF_SLUG}
   paths:
     - .cache/
 
@@ -15,7 +15,7 @@ build:
         - EPICS_HOST_ARCH=$(sh $EPICS_BASE/startup/EpicsHostArch) >> build.env
         - PATH=${EPICS_BASE}/bin/${EPICS_HOST_ARCH}:${PATH} >> build.env
         - LD_LIBRARY_PATH=${EPICS_BASE}/lib/${EPICS_HOST_ARCH}:${LD_LIBRARY_PATH} >> build.env
-        - make -j -C ${EPICS_BASE} CFLAGS="-D__UCLIBC_MAJOR__=0 -fPIC" CXXFLAGS="-D__UCLIBC_MAJOR__=0 -fPIC"
+        - make -j -s -C ${EPICS_BASE} CFLAGS="-D__UCLIBC_MAJOR__=0 -fPIC" CXXFLAGS="-D__UCLIBC_MAJOR__=0 -fPIC"
     artifacts:
         reports:
             dotenv: build.env
@@ -25,6 +25,9 @@ shellcheck:
     script:
     - shellcheck -V
     - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
+    needs:
+    - job: build
+      artifacts: true
 
 test:
     stage: test
