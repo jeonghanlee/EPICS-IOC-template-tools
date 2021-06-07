@@ -10,7 +10,8 @@ Build:
         - tar -xvzf base-7.0.5.tar.gz
 
     script:
-        - make -C ${EPICS_BASE} -j
+        - make -j -C ${EPICS_BASE}
+        
     after_script:
         - export EPICS_BASE=${CI_PROJECT_DIR}/base-7.0.5
         - export EPICS_HOST_ARCH=$(sh $EPICS_BASE/startup/EpicsHostArch)
