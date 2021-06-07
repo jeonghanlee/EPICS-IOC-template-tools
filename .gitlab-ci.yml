@@ -1,11 +1,12 @@
-cache:
-  key: ${CI_COMMIT_REF_SLUG}
-  paths:
-    - .cache/
+image: alpine:latest
 
 build:
-    image: alpine:latest
     stage: build
+    before_script:
+    - apk update
+    - apk --no-cache add bash git shellcheck libstdc++ readline git g++ make perl-dev readline-dev wget tree linux-headers libexecinfo-dev
+    - shellcheck -V
+    - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
     script:
         - apk update
         - apk --no-cache add bash git shellcheck libstdc++ readline git g++ make perl-dev readline-dev wget tree linux-headers libexecinfo-dev
@@ -16,33 +17,12 @@ build:
         - PATH=${EPICS_BASE}/bin/${EPICS_HOST_ARCH}:${PATH} >> build.env
         - LD_LIBRARY_PATH=${EPICS_BASE}/lib/${EPICS_HOST_ARCH}:${LD_LIBRARY_PATH} >> build.env
         - make -j -s -C ${EPICS_BASE} CFLAGS="-D__UCLIBC_MAJOR__=0 -fPIC" CXXFLAGS="-D__UCLIBC_MAJOR__=0 -fPIC"
-    artifacts:
-        reports:
-            dotenv: build.env
-
-shellcheck:
-    stage: test
-    script:
-    - shellcheck -V
-    - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
-    needs:
-    - job: build
-      artifacts: true
-
-test:
-    stage: test
-    before_script:
+    after_script:
     - echo ${EPICS_BASE}
     - echo ${EPICS_HOST_ARCH}
     - echo ${PATH}
     - echo ${LD_LIBRARY_PATH}
-    
-    script:
     - bash ${CI_PROJECT_DIR}/test.bash
-    
-    needs:
-    - job: build
-      artifacts: true
 
 
 #CentOS:
