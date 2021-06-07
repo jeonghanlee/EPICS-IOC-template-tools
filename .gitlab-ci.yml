@@ -25,7 +25,7 @@ Test:
         - export PATH
         - export LD_LIBRARY_PATH
         - export USERNAME="gitlab"
-        - make -j -s -C ${EPICS_BASE} CFLAGS="-D__UCLIBC_MAJOR__=0 -fPIC" CXXFLAGS="-D__UCLIBC_MAJOR__=0 -fPIC"
+        - make -s -C ${EPICS_BASE} CFLAGS="-D__UCLIBC_MAJOR__=0 -fPIC" CXXFLAGS="-D__UCLIBC_MAJOR__=0 -fPIC"
         - echo ${EPICS_BASE}
         - echo ${EPICS_HOST_ARCH}
         - echo ${PATH}
