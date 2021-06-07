@@ -10,7 +10,7 @@ Build:
         - tar -xvzf base-7.0.5.tar.gz
 
     script:
-        - make -j -C ${EPICS_BASE}
+        - make -C ${EPICS_BASE}
         
     after_script:
         - export EPICS_BASE=${CI_PROJECT_DIR}/base-7.0.5
