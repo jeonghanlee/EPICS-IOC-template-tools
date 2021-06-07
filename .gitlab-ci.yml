@@ -16,10 +16,14 @@ Test:
         - apk --no-cache add bash libstdc++ readline git g++ make perl-dev readline-dev wget tree linux-headers libexecinfo-dev
         - wget -c https://epics-controls.org/download/base/base-7.0.5.tar.gz
         - tar -xzf base-7.0.5.tar.gz
-        - EPICS_BASE=${CI_PROJECT_DIR}/base-7.0.5 >> build.env
-        - EPICS_HOST_ARCH=$(sh $EPICS_BASE/startup/EpicsHostArch) >> build.env
-        - PATH=${EPICS_BASE}/bin/${EPICS_HOST_ARCH}:${PATH} >> build.env
-        - LD_LIBRARY_PATH=${EPICS_BASE}/lib/${EPICS_HOST_ARCH}:${LD_LIBRARY_PATH} >> build.env
+        - EPICS_BASE=${CI_PROJECT_DIR}/base-7.0.5
+        - EPICS_HOST_ARCH=$(sh $EPICS_BASE/startup/EpicsHostArch)
+        - PATH=${EPICS_BASE}/bin/${EPICS_HOST_ARCH}:${PATH}
+        - LD_LIBRARY_PATH=${EPICS_BASE}/lib/${EPICS_HOST_ARCH}:${LD_LIBRARY_PATH}
+        - export EPICS_BASE
+        - export EPICS_HOST_ARCH
+        - export PATH
+        - export LD_LIBRARY_PATH
         - make -j -s -C ${EPICS_BASE} CFLAGS="-D__UCLIBC_MAJOR__=0 -fPIC" CXXFLAGS="-D__UCLIBC_MAJOR__=0 -fPIC"
         - echo ${EPICS_BASE}
         - echo ${EPICS_HOST_ARCH}
