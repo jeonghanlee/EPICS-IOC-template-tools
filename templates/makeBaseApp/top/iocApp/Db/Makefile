@@ -8,6 +8,25 @@ include $(TOP)/configure/CONFIG
 # databases, templates, substitutions like this
 #DB += xxx.db
 
+
+
+ifneq ($(ASYN),)
+DB_INSTALLS += $(ASYN)/db/asynRecord.db
+endif
+
+ifneq ($(devIocStats),)
+DB_INSTALLS += $(devIocStats)/db/iocAdminSoft.db
+DB_INSTALLS += $(devIocStats)/db/ioc_stats.db
+endif
+
+ifneq ($(RECCASTER),)
+DB_INSTALLS += $(RECCASTER)/db/reccaster.db
+endif
+
+ifneq ($(AUTOSAVE),)
+DB_INSTALLS += $(AUTOSAVE)/db/save_restoreStatus.db
+endif
+
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add
 # <anyname>_template = <templatename>
