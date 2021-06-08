@@ -1,5 +1,5 @@
 alpine:
-    image: alpine:latest
+    image: alpine:3
     stage: build
     script:
     - apk update
@@ -9,7 +9,7 @@ alpine:
 
 
 Test:
-    image: alpine:latest
+    image: alpine:3
     stage: test
     script:
         - apk update
