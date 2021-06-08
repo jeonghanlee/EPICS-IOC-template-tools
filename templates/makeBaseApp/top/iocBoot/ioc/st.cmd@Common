@@ -7,15 +7,29 @@
 
 cd "${TOP}"
 
-## Register all support components
+epicsEnvSet("DB_TOP", "$(TOP)/db")
+epicsEnvSet("IOCSH_TOP", "ioc_top")
+epicsEnvSet("ENGINEER", "_USER_")
+epicsEnvSet("LOCATION", "ALS")
+epicsEnvSet("WIKI", "wikiurl")
+epicsEnvSet("IOCNAME", "xxx-_APPNAME_")
+
+iocshLoad("$(IOCSH_TOP)/als_default.iocsh")
+
 dbLoadDatabase "dbd/_APPNAME_.dbd"
 _CSAFEAPPNAME__registerRecordDeviceDriver pdbbase
 
-## Load record instances
-#dbLoadRecords("db/xxx.db","user=_USER_")
+
+#dbLoadRecords("$(DB_TOP)/xxx.db","user=_USER_")
 
 cd "${TOP}/iocBoot/${IOC}"
+
 iocInit
+
+#epicsEnvShow > /vxboot/PVenv/${IOC}.softioc
+#dbl > /vxboot/PVnames/${IOC}
+#- we have to convert the above lines to an iocsh file.
+#-iocshLoad("$(IOCSH_TOP)/als_after_iocInit.iocsh", "IOC=${IOC}")
 
 ## Start any sequence programs
 #seq sncxxx,"user=_USER_"

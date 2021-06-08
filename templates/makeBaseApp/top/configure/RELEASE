@@ -26,7 +26,24 @@
 #MYMODULE = $(MODULES)/my-module
 
 # If using the sequencer, point SNCSEQ at its top directory:
-#SNCSEQ = $(MODULES)/seq-ver
+
+
+#ALS_IOCSH = $(MODULES)/iocsh
+
+#ASYN = $(MODULES)/asyn
+#SNCSEQ = $(MODULES)/seq
+#MODBUS = $(MODULES)/modbus
+#SNMP = $(MODULES)/snmp
+#STD = $(MODULES)/std
+#CALC = $(MODULES)/calc
+#AUTOSAVE = $(MODULES)/autosave
+#RECCASTER = $(MODULES)/reccaster
+#STREAM = $(MODULES)/stream
+#RETOOLS = $(MODULES)/retools
+#CAPUTLOG = $(MODULES)/caPutLog
+#devIocStats = $(MODULES)/iocStats
+
+
 
 # EPICS_BASE should appear last so earlier modules can override stuff:
 EPICS_BASE = _EPICS_BASE_
