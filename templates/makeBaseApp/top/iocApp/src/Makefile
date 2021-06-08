@@ -17,66 +17,72 @@ Common_DBDs += system.dbd
 
 Common_SRCs +=
 
-ifneq($(ASYN),)
-Common_dbds += asyn.dbd
-Common_libs += asyn
+ifneq ($(ASYN),)
+Common_DBDs += asyn.dbd
+Common_DBDs += drvAsynIPPort.dbd
+Common_DBDs += drvAsynSerialPort.dbd
+Common_LIBs += asyn
 endif
 
-ifneq($(MODBUS),)
-Common_dbds += modbus.dbd
-Common_dbds += modbusSupport.dbd
-Common_libs += modbus
+ifneq ($(MODBUS),)
+Common_DBDs += modbus.dbd
+Common_DBDs += modbusSupport.dbd
+Common_LIBs += modbus
 endif
 
-ifneq($(SNMP),)
-Common_dbds += devSnmp.dbd
-Common_libs += devSnmp
+ifneq ($(SNMP),)
+Common_DBDs += devSnmp.dbd
+Common_LIBs += devSnmp
 endif
-
-Common_srcs +=
 
 ifneq ($(STD),)
-Common_dbds += std.dbd
-Common_libs += std
+Common_DBDs += std.dbd
+Common_LIBs += std
 endif
 
 ifneq ($(CALC),)
-Common_dbds += calcSupport.dbd
-Common_dbds += transformRecord.dbd
-Common_libs += calc
+Common_DBDs += calcSupport.dbd
+Common_DBDs += transformRecord.dbd
+Common_LIBs += calc
 endif
 
 ifneq ($(AUTOSAVE),)
-Common_dbds += as.dbd
-Common_dbds += asSupport.dbd
-Common_libs += autosave
+Common_DBDs += as.dbd
+Common_DBDs += asSupport.dbd
+Common_LIBs += autosave
 endif
 
 ifneq ($(devIocStats),)
-Common_dbds += devIocStats.dbd
-Common_libs += devIocStats
+Common_DBDs += devIocStats.dbd
+Common_LIBs += devIocStats
 endif
 
 ifneq ($(RECCASTER),)
-Common_dbds += reccaster.dbd
-Common_libs += reccaster
+Common_DBDs += reccaster.dbd
+Common_LIBs += reccaster
 endif
 
 ifneq ($(SNCSEQ),)
 sncExample_SNCFLAGS += +r
+#Common_DBDs += sncExample.dbd
 # A .stt sequence program is *not* pre-processed:
-#Common_srcs += sncExample.stt
-Common_libs += seq pv
+#Common_SRCs += sncExample.stt
+Common_LIBs += seq pv
+endif
+
+ifneq ($(STREAM),)
+Common_DBDs += stream.dbd
+Common_LIBs += stream
 endif
 
 ifneq ($(RETOOLS),)
-Common_dbds += retools.dbd
-Common_libs += retools
+Common_DBDs += retools.dbd
+Common_LIBs += retools
 endif
 
 ifneq ($(CAPUTLOG),)
-Common_dbds += caPutLog.dbd
-Common_libs += caPutLog
+Common_DBDs += caPutLog.dbd
+Common_LIBs += caPutLog
 endif
 
 # Include dbd files from all support applications:
