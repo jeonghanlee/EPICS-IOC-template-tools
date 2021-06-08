@@ -239,12 +239,14 @@ EOF
     fi
 }
 
-options="n:l:cia"
+options="n:l:cat"
 APPNAME=""
 LOCATION=""
 EPICS_CI="NO"
 APPNAME_EXIST="FALSE"
 ADDONLYCONFIG="NO"
+APPTEMPLATE="YES"
+MAKEBASEAPP_OPTS=""
 
 while getopts "${options}" opt; do
     case "${opt}" in
@@ -252,7 +254,8 @@ while getopts "${options}" opt; do
 	    l) LOCATION=${OPTARG}  ;;
         c) EPICS_CI="YES"      ;;
         a) ADDONLYCONFIG="YES" ;;
-   	    :)
+        t) APPTEMPLATE="NO"    ;;
+        :)
 	        echo "Option -$OPTARG requires an argument." >&2
 	        usage
 	    ;;
@@ -281,6 +284,7 @@ if [ -z "$EPICS_BASE" ]; then
     echo "";
     exit;
 fi
+
 
 if [[ "$ADDONLYCONFIG" == "NO" ]]; then
 
@@ -311,12 +315,16 @@ if [[ "$ADDONLYCONFIG" == "NO" ]]; then
     done
 
     if [[ "$APPNAME_EXIST" == "FALSE" ]]; then
-        makeBaseApp.pl -t ioc "${APPNAME}"
+        if [[ "$APPTEMPLATE" == "YES" ]]; then
+            makeBaseApp.pl -t ioc -T "${SC_TOP}"/templates/makeBaseApp/top "${APPNAME}"
+        else
+            makeBaseApp.pl -t ioc -T "${MAKEBASEAPP_OPTS}" "${APPNAME}"
+        fi
     fi
 
     IOCNAME="${LOCATION}-${APPNAME}"
     makeBaseApp.pl -i -t ioc -p "${APPNAME}" "${IOCNAME}"
-
+    
     README=README.md
 
     if [[ ! -f "${README}" ]]; then

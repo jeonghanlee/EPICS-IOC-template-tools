@@ -8,7 +8,7 @@ This script is developed to reduce the workflow that is defined in EPICS IOC Dev
 The script must be called in a directory where the script is located.
 
 ```bash
-bash tools/generate_ioc_structure.bash -l test -a tctemp
+bash tools/generate_ioc_structure.bash -n tctemp -l test
 ```
 
 In case, one wants to add the gitlab CI configuration into the existing folder.
@@ -21,6 +21,9 @@ bash ../tools/generate_ioc_structure.bash -c -a
 In case, one wants to create everything together.
 
 ```bash
-bash tools/generate_ioc_structure.bash -l test -a tctemp -c
+bash tools/generate_ioc_structure.bash -n tctemp -l test -c
 ```
+
+The default option will use the makeBaseApp template to help users to modify Makefile less. One can disable this option via the `-t` option.
+Please check `templates/makeBaseApp/top/iocApp` path for the default template for `xxxApp/{Db,src}/Makefile`.
 
