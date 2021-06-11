@@ -22,7 +22,7 @@
 # the CONFIG_SITE file.
 
 # Variables and paths to dependent modules:
-#MODULES = /path/to/modules
+MODULES = $(EPICS_BASE)/../modules
 #MYMODULE = $(MODULES)/my-module
 
 # If using the sequencer, point SNCSEQ at its top directory:
@@ -42,7 +42,6 @@
 #RETOOLS = $(MODULES)/retools
 #CAPUTLOG = $(MODULES)/caPutLog
 #devIocStats = $(MODULES)/iocStats
-
 
 
 # EPICS_BASE should appear last so earlier modules can override stuff:

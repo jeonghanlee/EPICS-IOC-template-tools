@@ -1,18 +1,43 @@
 #!../../bin/_ARCH_/_APPNAME_
 
-#- You may have to change _APPNAME_ to something else
-#- everywhere it appears in this file
+< envPaths
 
-#< envPaths
+cd "${TOP}"
 
-## Register all support components
-dbLoadDatabase("../../dbd/_APPNAME_.dbd",0,0)
-_CSAFEAPPNAME__registerRecordDeviceDriver(pdbbase) 
+#epicsEnvSet("EPICS_CA_ADDR_LIST","131.243.71.255")
+#epicsEnvSet("EPICS_CA_AUTO_ADDR_LIST","YES")
 
-## Load record instances
-dbLoadRecords("../../db/_APPNAME_.db","user=_USER_")
+epicsEnvSet("DB_TOP", "$(TOP)/db")
+epicsEnvSet("IOCSH_TOP", "$(EPICS_BASE)/../modules/soft/iocsh")
+epicsEnvSet("ENGINEER", "_USER_")
+epicsEnvSet("LOCATION", "")
+epicsEnvSet("WIKI", "")
+#- 
+epicsEnvSet("IOCNAME", "_IOCNAME_")
+epicsEnvSet("IOC", "_IOC_")
+#-
+epicsEnvSet("P", "AAAA:")
+epicsEnvSet("R", "BBBB:")
 
-iocInit()
+dbLoadDatabase "dbd/_APPNAME_.dbd"
+_CSAFEAPPNAME__registerRecordDeviceDriver pdbbase
+
+#dbLoadRecords("$(DB_TOP)/_APPNAME_.db","user=_USER_")
+
+iocshLoad("$(IOCSH_TOP)/als_default.iocsh")
+
+
+# access control list
+#asSetFilename("$(TOP)/access_security/_IOCNANE_.acf")
+
+cd "${TOP}/iocBoot/${IOC}"
+
+iocInit
+
+epicsEnvShow > /vxboot/PVenv/${IOC}.softioc
+dbl > /vxboot/PVnames/${IOC}
+#- we have to convert the above lines to an iocsh file.
+#-iocshLoad("$(IOCSH_TOP)/als_after_iocInit.iocsh", "IOC=${IOC}")
 
 ## Start any sequence programs
-#seq snc_APPNAME_,"user=_USER_"
+#seq sncxxx,"user=_USER_"

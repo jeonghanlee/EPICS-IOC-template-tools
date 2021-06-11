@@ -17,8 +17,9 @@
 #
 # Author  : Jeong Han Lee
 # email   : JeongLee@lbl.gov
-# Date    : Sat Jun  5 23:14:23 PDT 2021
-# version : 0.0.3
+# Date    : Thu 10 Jun 2021 05:36:59 PM PDT
+# version : 0.0.4
+
 
 declare -g SC_RPATH;
 #declare -g SC_NAME;
@@ -239,6 +240,16 @@ EOF
     fi
 }
 
+function sed_file
+{
+    local appname="$1"; shift;
+    local iocname="$1"; shift;
+    local ioc="$1";     shift;
+    local input="$1";   shift;
+    local output="$1";  shift;
+    sed -e "s|_APPNAME_|${appname}|g" -e "s|_IOCNAME_|${iocname}|g" -e "s|_IOC_|${ioc}|g" < "${input}" > "${output}"
+}
+
 options="n:l:cat"
 APPNAME=""
 LOCATION=""
@@ -246,7 +257,6 @@ EPICS_CI="NO"
 APPNAME_EXIST="FALSE"
 ADDONLYCONFIG="NO"
 APPTEMPLATE="YES"
-MAKEBASEAPP_OPTS=""
 
 while getopts "${options}" opt; do
     case "${opt}" in
@@ -316,22 +326,44 @@ if [[ "$ADDONLYCONFIG" == "NO" ]]; then
 
     if [[ "$APPNAME_EXIST" == "FALSE" ]]; then
         if [[ "$APPTEMPLATE" == "YES" ]]; then
-            makeBaseApp.pl -t ioc -T "${SC_TOP}"/templates/makeBaseApp/top "${APPNAME}"
-        else
-            makeBaseApp.pl -t ioc -T "${MAKEBASEAPP_OPTS}" "${APPNAME}"
-        fi
+            export EPICS_MBA_TEMPLATE_TOP="${SC_TOP}"/templates/makeBaseApp/top
+        fi    
+        makeBaseApp.pl -t ioc "${APPNAME}"
     fi
 
     IOCNAME="${LOCATION}-${APPNAME}"
+    IOC="ioc${IOCNAME}"
+
     makeBaseApp.pl -i -t ioc -p "${APPNAME}" "${IOCNAME}"
+
+
+    file_list=( "attach" "run" "rund" "st.screen" "screenrc" );
+    if [[ "$APPTEMPLATE" == "YES" ]]; then
+    #
+    # We don't have APPNAME in a file in file_list, but leave there
+    #
+        for afile in "${file_list[@]}"; do
+            sed_file "${APPNAME}"  "${IOCNAME}" "${IOC}" "$EPICS_MBA_TEMPLATE_TOP/../als/${afile}" "${APPTOP}/iocBoot/${IOC}/${afile}"
+            chmod +x "${APPTOP}/iocBoot/${IOC}/${afile}"
+        done
+
+        chmod -x "${APPTOP}/iocBoot/${IOC}/screenrc";
+
+        sed_file "${APPNAME}" "${IOCNAME}" "${IOC}" "${APPTOP}/iocBoot/${IOC}/st.cmd" "${APPTOP}/iocBoot/${IOC}/st.cmd~"
+        mv "${APPTOP}/iocBoot/${IOC}/st.cmd~" "${APPTOP}/iocBoot/${IOC}/st.cmd"
+        chmod +x "${APPTOP}/iocBoot/${IOC}/st.cmd"
+
+    fi    
+
     
     README=README.md
 
     if [[ ! -f "${README}" ]]; then
-        echo "# EPICS IOC for ${IOCNAME}"  > "${README}"
-        echo ""                           >> "${README}"
-        echo ""                           >> "${README}"
+        echo "# EPICS IOC for ${IOC}"  > "${README}"
+        echo ""                       >> "${README}"
+        echo ""                       >> "${README}"
     fi
+
 fi
 
 if [[ "$EPICS_CI" == "YES" ]]; then
