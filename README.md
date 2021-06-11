@@ -33,6 +33,7 @@ bash tools/generate_ioc_structure.bash -n APPNAME -l LOCATION
 
 ```bash
 bash tools/generate_ioc_structure.bash -n APPNAME -l LOCATION -t
+```
 
 ### Add git and gitlab CI into an exsiting repository
 
