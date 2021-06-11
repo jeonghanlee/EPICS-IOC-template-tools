@@ -66,6 +66,10 @@ make -C ../../
 exit
 ```
 
+|![TestExample](docs/TestExample.png)|
+| :---: |
+|**Figure 1** EPICS IOC within the customized screen window.|
+
 
 ## References
 
