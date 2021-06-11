@@ -1,0 +1,4 @@
+#!/bin/sh
+cd "/vxboot/_APPNAME_/boot/iocBoot/_IOC_"
+exec ./st.cmd
+

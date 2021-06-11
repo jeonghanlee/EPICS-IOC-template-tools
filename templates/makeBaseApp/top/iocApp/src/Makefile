@@ -63,7 +63,7 @@ Common_LIBs += reccaster
 endif
 
 ifneq ($(SNCSEQ),)
-sncExample_SNCFLAGS += +r
+#sncExample_SNCFLAGS += +r
 #Common_DBDs += sncExample.dbd
 # A .stt sequence program is *not* pre-processed:
 #Common_SRCs += sncExample.stt
@@ -96,7 +96,7 @@ _APPNAME__SRCS += _APPNAME__registerRecordDeviceDriver.cpp
 _APPNAME__SRCS_DEFAULT += _APPNAME_Main.cpp
 _APPNAME__SRCS_vxWorks += -nil-
 
-#_APPNAME__OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
+_APPNAME__OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 _APPNAME__LIBS += $(EPICS_BASE_IOC_LIBS)
 
 #===========================
