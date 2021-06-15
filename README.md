@@ -20,19 +20,19 @@ In addtion, it uses the ALS site-specific EPICS `makeBaseApp` template to prepar
 ### EPICS IOC, git, gitlab CI, and ALS Site Specific Configuration
 
 ```bash
-bash tools/generate_ioc_structure.bash -n APPNAME -l LOCATION -c
+bash tools/generate_ioc_structure.bash -p APPNAME -l LOCATION -c
 ```
 
 ### EPICS IOC and EPICS Standard Configuration
 
 ```bash
-bash tools/generate_ioc_structure.bash -n APPNAME -l LOCATION
+bash tools/generate_ioc_structure.bash -p APPNAME -l LOCATION
 ```
 
 ### EPICS IOC, git, gitlab CI, and EPICS Standard Configuration
 
 ```bash
-bash tools/generate_ioc_structure.bash -n APPNAME -l LOCATION -t
+bash tools/generate_ioc_structure.bash -p APPNAME -l LOCATION -t
 ```
 
 ### Add git and gitlab CI into an exsiting repository
