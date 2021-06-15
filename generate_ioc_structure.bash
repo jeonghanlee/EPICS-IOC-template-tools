@@ -36,14 +36,14 @@ function usage
 {
     {
         echo "";
-        echo "Usage    : $0 [-n APPNAME] [-l LOCATION] <-c> <-a>"
+        echo "Usage    : $0 [-p APPNAME] [-l LOCATION] <-c> <-a>"
         echo "";
-        echo "              -n : APPNAME"
+        echo "              -p : APPNAME"
         echo "              -l : LOCATION"
         echo "              -c : Optional : Add git, and gitlab ci"
         echo "              -a : Optional : WITHIN an existing a , add git, and gitlab ci"
         echo "";
-        echo " bash $0 -n APPNAME -l LOCATION"
+        echo " bash $0 -p APPNAME -l LOCATION"
         echo ""
     } 1>&2;
     exit 1;
@@ -54,7 +54,7 @@ function add_gitignore
 {
     local ignorefile=".gitignore";
     if [ ! -f "$ignorefile" ]; then
-        cat > "${ignorefile}" <<EOF
+        cat > "${ignorefile}" <<"EOF"
 # EPICS site : https://epics-controls.org/
 # References : epics-base / epics-modules / @ralphlange / @jeonghanlee
 # Directories built by EPICS building system 
@@ -118,7 +118,7 @@ function add_gitattributes
     local attrfile=".gitattributes";
 
     if [ ! -f "${attrfile}" ]; then
-        cat > "${attrfile}" <<EOF
+        cat > "${attrfile}" <<"EOF"
 # Set the default behavior, in case people don't have core.autocrlf set.
 * text=auto
 
@@ -179,7 +179,7 @@ function epics_ci
     popd || exit;
 
     if [ ! -f "${cifile}" ]; then
-        cat > "${cifile}" <<EOF
+        cat > "${cifile}" <<"EOF"
 # .gitlab-ci.yml for testing EPICS Base ci-scripts
 # (see: https://github.com/epics-base/ci-scripts)
 
@@ -250,7 +250,7 @@ function sed_file
     sed -e "s|_APPNAME_|${appname}|g" -e "s|_IOCNAME_|${iocname}|g" -e "s|_IOC_|${ioc}|g" < "${input}" > "${output}"
 }
 
-options="n:l:cat"
+options="p:l:cat"
 APPNAME=""
 LOCATION=""
 EPICS_CI="NO"
@@ -260,22 +260,19 @@ APPTEMPLATE="YES"
 
 while getopts "${options}" opt; do
     case "${opt}" in
-        n) APPNAME=${OPTARG}   ;;
-	    l) LOCATION=${OPTARG}  ;;
+        p) APPNAME=${OPTARG}   ;;
+        l) LOCATION=${OPTARG}  ;;
         c) EPICS_CI="YES"      ;;
         a) ADDONLYCONFIG="YES" ;;
         t) APPTEMPLATE="NO"    ;;
         :)
-	        echo "Option -$OPTARG requires an argument." >&2
-	        usage
-	    ;;
-	    h)
-	        usage
-	    ;;
+	    echo "Option -$OPTARG requires an argument." >&2
+	    usage ;;
+        h)
+	    usage ;;
         \?)
 	    echo "Invalid option: -$OPTARG" >&2
-	    usage
-	    ;;
+	    usage ;;
     esac
 done
 shift $((OPTIND-1))
@@ -324,11 +321,11 @@ if [[ "$ADDONLYCONFIG" == "NO" ]]; then
         fi
     done
 
-    if [[ "$APPNAME_EXIST" == "FALSE" ]]; then
-        if [[ "$APPTEMPLATE" == "YES" ]]; then
-            export EPICS_MBA_TEMPLATE_TOP="${SC_TOP}"/templates/makeBaseApp/top
-        fi    
-        makeBaseApp.pl -t ioc "${APPNAME}"
+    if [[ "$APPTEMPLATE" == "YES" ]]; then
+        export EPICS_MBA_TEMPLATE_TOP="${SC_TOP}"/templates/makeBaseApp/top
+        if [[ "$APPNAME_EXIST" == "FALSE" ]]; then
+            makeBaseApp.pl -t ioc "${APPNAME}"
+        fi
     fi
 
     IOCNAME="${LOCATION}-${APPNAME}"
@@ -336,15 +333,19 @@ if [[ "$ADDONLYCONFIG" == "NO" ]]; then
 
     makeBaseApp.pl -i -t ioc -p "${APPNAME}" "${IOCNAME}"
 
-
     file_list=( "attach" "run" "rund" "st.screen" "screenrc" );
     if [[ "$APPTEMPLATE" == "YES" ]]; then
     #
     # We don't have APPNAME in a file in file_list, but leave there
     #
         for afile in "${file_list[@]}"; do
-            sed_file "${APPNAME}"  "${IOCNAME}" "${IOC}" "$EPICS_MBA_TEMPLATE_TOP/../als/${afile}" "${APPTOP}/iocBoot/${IOC}/${afile}"
-            chmod +x "${APPTOP}/iocBoot/${IOC}/${afile}"
+            
+            if [ ! -f "${APPTOP}/iocBoot/${IOC}/${afile}" ]; then
+                sed_file "${APPNAME}"  "${IOCNAME}" "${IOC}" "$EPICS_MBA_TEMPLATE_TOP/../als/${afile}" "${APPTOP}/iocBoot/${IOC}/${afile}"
+                chmod +x "${APPTOP}/iocBoot/${IOC}/${afile}"
+            else
+                printf "Exist : %s\n" "${APPTOP}/iocBoot/${IOC}/${afile}";
+            fi
         done
 
         chmod -x "${APPTOP}/iocBoot/${IOC}/screenrc";
@@ -375,12 +376,5 @@ if [[ "$EPICS_CI" == "YES" ]]; then
    add_gitattributes;
    git add . -u;
    git add --renormalize .
-else
-    echo "--------"
-    echo "  Please create ${APPNAME} as Project Name in the ALS git server.";
-    echo "  ${APPNAME} also is used for Project slug in the gitlab server.";
-    echo "  ";
-    echo "  After this, one may need to execute the following command:";
-    echo "  git remote add origin ssh:........./${APPNAME}.git"
-    echo "--------"
 fi
+
