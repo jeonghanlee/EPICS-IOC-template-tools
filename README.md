@@ -58,7 +58,7 @@ git clone ssh://git....../tools tools
 cd tools
 mkdir -p testing
 cd testing
-bash ../generate_ioc_structure.bash -n NAME -l LOCATION -c
+bash ../generate_ioc_structure.bash -p NAME -l LOCATION -c
 cd NAME/iocBoot/iocLOCATION-NAME/
 make -C ../../
 ./run
