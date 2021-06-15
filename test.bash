@@ -18,7 +18,7 @@ function tree2
     if [ -z "${level}" ]; then
         level=2;
     fi
-    tree -I '.ci|.git' --charset=utf-8 -a -L "${level}" "${path}";
+    tree -I '.ci|.git' --charset=ascii -a -L "${level}" "${path}";
 }
 
 APPNAME="temp"
@@ -27,11 +27,11 @@ LOCATION="ALSU"
 
 echo ">>> Test 1"
 pushd "${SC_TOP}/.." || exit;
-bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -n "${APPNAME}"
+bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}"
 tree2 "${APPNAME}"
 
 echo ">>> Test 2"
-bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -n "${APPNAME}" -c
+bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}" -c
 tree2 "${APPNAME}"
 
 rm -rf "${APPNAME}";
@@ -39,7 +39,7 @@ popd || exit;
 
 echo ">>> Test 3" 
 pushd "${SC_TOP}/.." || exit;
-bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -n "${APPNAME}"
+bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}"
 tree2 "${APPNAME}"
 popd || exit;
 
