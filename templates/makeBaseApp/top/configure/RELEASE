@@ -37,12 +37,16 @@ MODULES = $(EPICS_BASE)/../modules
 #STD = $(MODULES)/std
 #CALC = $(MODULES)/calc
 #AUTOSAVE = $(MODULES)/autosave
-#RECCASTER = $(MODULES)/reccaster
+#RECCASTER = $(MODULES)/recsync
 #STREAM = $(MODULES)/stream
 #RETOOLS = $(MODULES)/retools
 #CAPUTLOG = $(MODULES)/caPutLog
 #devIocStats = $(MODULES)/iocStats
-
+#MEASCOMP = $(MODULES)/measComp
+#SSCAN=$(MODULES)/sscan
+#BUSY=$(MODULES)/busy
+#SCALER=$(MODULES)/scaler
+#MCA=$(MODULES)/mca
 
 # EPICS_BASE should appear last so earlier modules can override stuff:
 EPICS_BASE = _EPICS_BASE_

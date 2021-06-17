@@ -85,12 +85,44 @@ Common_DBDs += caPutLog.dbd
 Common_LIBs += caPutLog
 endif
 
+ifneq ($(MEASCOMP),)
+Common_DBDs += measCompApp.dbd
+Common_DBDs += measCompSupport.dbd
+Common_LIBs += measComp
+_APPNAME__LIBS_Linux += cbw_linux
+_APPNAME__LIBS_Linux += measCompLinuxDrivers
+endif
+
+ifneq ($(SSCAN),)
+Common_DBDs += sscan.dbd
+Common_LIBs += sscan
+endif
+
+ifneq ($(BUSY),)
+Common_DBDs += busyRecord.dbd
+Common_DBDs += busySupport.dbd
+Common_LIBs += busy
+endif
+
+ifneq ($(SCALER),)
+Common_DBDs += scalerRecord.dbd
+Common_DBDs += scalerSupport.dbd
+Common_LIBs += scaler
+endif
+
+ifneq ($(MCA),)
+Common_DBDs += mca.dbd
+Common_LIBs += mca
+endif
+
 # Include dbd files from all support applications:
 _APPNAME__DBD  += $(Common_DBDs)
 _APPNAME__LIBS += $(Common_LIBs)
 _APPNAME__SRCS += $(Common_SRCs)
 _APPNAME__SRCS += _APPNAME__registerRecordDeviceDriver.cpp
 
+# System Libraries
+_APPNAME_SYS_LIBS_Linux +=
 
 # Build the main IOC entry point on workstation OSs.
 _APPNAME__SRCS_DEFAULT += _APPNAME_Main.cpp
