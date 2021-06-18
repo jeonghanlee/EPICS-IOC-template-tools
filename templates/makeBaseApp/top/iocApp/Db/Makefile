@@ -16,7 +16,7 @@ endif
 
 ifneq ($(devIocStats),)
 DB_INSTALLS += $(devIocStats)/db/iocAdminSoft.db
-DB_INSTALLS += $(devIocStats)/db/ioc_stats.db
+#DB_INSTALLS += $(devIocStats)/db/ioc_stats.db
 endif
 
 ifneq ($(RECCASTER),)
@@ -26,6 +26,13 @@ endif
 ifneq ($(AUTOSAVE),)
 DB_INSTALLS += $(AUTOSAVE)/db/save_restoreStatus.db
 endif
+
+DB += $(patsubst ../%, %, $(wildcard ../*.template))
+DB += $(patsubst ../%, %, $(wildcard ../*.db))
+DB += $(patsubst ../%, %, $(wildcard ../*.vdb))
+DB += $(patsubst ../%, %, $(wildcard ../*.substitutions))
+
+REQ += $(patsubst ../%, %, $(wildcard ../*.req))
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add
