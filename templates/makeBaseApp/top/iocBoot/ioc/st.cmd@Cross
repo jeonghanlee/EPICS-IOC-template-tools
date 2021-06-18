@@ -1,16 +1,18 @@
 #!../../bin/_ARCH_/_APPNAME_
-
+#-
 < envPaths
-
+#-
 cd "${TOP}"
-
-#epicsEnvSet("EPICS_CA_ADDR_LIST","131.243.71.255")
-#epicsEnvSet("EPICS_CA_AUTO_ADDR_LIST","YES")
-
-epicsEnvSet("DB_TOP", "$(TOP)/db")
-epicsEnvSet("IOCSH_TOP", "$(EPICS_BASE)/../modules/soft/iocsh")
-epicsEnvSet("ENGINEER", "_USER_")
-epicsEnvSet("LOCATION", "")
+#-
+#-epicsEnvSet("EPICS_CA_ADDR_LIST","131.243.71.255")
+#-epicsEnvSet("EPICS_CA_AUTO_ADDR_LIST","YES")
+#-
+epicsEnvSet("DB_TOP",          "$(TOP)/db")
+epicsEnvSet("IOCSH_TOP_LOCAL", "$(TOP)/iocsh")
+epicsEnvSet("IOCSH_TOP",       "$(EPICS_BASE)/../modules/soft/iocsh")
+#-
+epicsEnvSet("ENGINEER",  "_USER_")
+epicsEnvSet("LOCATION",  "")
 epicsEnvSet("WIKI", "")
 #- 
 epicsEnvSet("IOCNAME", "_IOCNAME_")
@@ -22,22 +24,29 @@ epicsEnvSet("R", "BBBB:")
 dbLoadDatabase "dbd/_APPNAME_.dbd"
 _CSAFEAPPNAME__registerRecordDeviceDriver pdbbase
 
-#dbLoadRecords("$(DB_TOP)/_APPNAME_.db","user=_USER_")
+#-
+#- iocshLoad("$(IOCSH_TOP)/als_default.iocsh")
+#- iocshLoad("$(IOCSH_TOP)/iocLog.iocsh",    "IOCNAME=$(IOCNAME), LOG_INET=$(LOG_DEST), LOG_INET_PORT=$(LOG_PORT)")
+#-# Load record instances
+#- iocshLoad("$(IOCSH_TOP)/iocStats.iocsh",  "IOCNAME=$(IOCNAME), DATABASE_TOP=$(DB_TOP)")
+#- iocshLoad("$(IOCSH_TOP)/reccaster.iocsh", "IOCNAME=$(IOCNAME), DATABASE_TOP=$(DB_TOP)")
+#- iocshLoad("$(IOCSH_TOP)/caPutLog.iocsh",  "IOCNAME=$(IOCNAME), LOG_INET=$(LOG_DEST), LOG_INET_PORT=$(LOG_PORT)")
+#- iocshLoad("$(IOCSH_TOP)/autosave.iocsh", "AS_TOP=$(TOP),IOCNAME=$(IOCNAME),DATABASE_TOP=$(DB_TOP),SEQ_PERIOD=60")
 
-iocshLoad("$(IOCSH_TOP)/als_default.iocsh")
-
-
-# access control list
-#asSetFilename("$(TOP)/access_security/_IOCNANE_.acf")
+#- access control list
+#-asSetFilename("$(TOP)/access_security_IOCNAME_.acf")
 
 cd "${TOP}/iocBoot/${IOC}"
 
+#epicsEnvSet("PORT_1",    "$(IOCNAME)-1")
+#epicsEnvSet("TC32_IP_1", "128.3.130.203")
+#iocshLoad("$(IOCSH_TOP_LOCAL)/_APPNAME_.iocsh", "P=$(P),R=$(R),DATABASE_TOP=$(DB_TOP),PORT=$(PORT_1),IPADDR=$(TC32_IP_1)")
+
 iocInit
 
-epicsEnvShow > /vxboot/PVenv/${IOC}.softioc
-dbl > /vxboot/PVnames/${IOC}
-#- we have to convert the above lines to an iocsh file.
-#-iocshLoad("$(IOCSH_TOP)/als_after_iocInit.iocsh", "IOC=${IOC}")
+#- epicsEnvShow > /vxboot/PVenv/${IOC}.softioc
+#- dbl > /vxboot/PVnames/${IOC}
+#- iocshLoad("$(IOCSH_TOP)/after_iocInit.iocsh", "IOC=$(IOC),TRAGET_TOP=/vxboot")
 
 ## Start any sequence programs
 #seq sncxxx,"user=_USER_"
