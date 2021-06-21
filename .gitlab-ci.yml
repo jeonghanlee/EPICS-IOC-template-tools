@@ -15,3 +15,11 @@ build-debian10:
     script:
         - shellcheck -V
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
+
+build-rock8:
+    stage: build
+    tags:
+        - rocky8-epics
+
+    script:
+        - tree /usr/local/epics
