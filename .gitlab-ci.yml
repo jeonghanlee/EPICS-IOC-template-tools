@@ -2,8 +2,6 @@ build-centos7:
     stage: build
     tags:
         - centos7-epics
-
-    entrypoint: [ "/bin/bash" ]
     
     script:
         - shellcheck -v
@@ -13,8 +11,6 @@ build-debian10:
     stage: build
     tags:
         - debian10-epics
-    
-    entrypoint: [ "/bin/bash" ]
 
     script:
         - shellcheck -v
