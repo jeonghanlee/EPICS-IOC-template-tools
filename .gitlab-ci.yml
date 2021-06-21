@@ -6,6 +6,8 @@ build-centos7:
     script:
         - shellcheck -V
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
+        - tree /usr/local/epics
+        - caget -h
 
 build-debian10:
     stage: build
