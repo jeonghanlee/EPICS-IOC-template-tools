@@ -4,7 +4,7 @@ build-centos7:
         - centos7-epics
     
     script:
-        - shellcheck -v
+        - shellcheck -V
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
 
 build-debian10:
@@ -13,5 +13,5 @@ build-debian10:
         - debian10-epics
 
     script:
-        - shellcheck -v
+        - shellcheck -V
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
