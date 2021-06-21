@@ -1,4 +1,3 @@
-
 build-centos7:
     stage: build
     tags:
@@ -11,5 +10,6 @@ build-debian10:
     stage: build
     tags:
         - debian10-epics
+    script:
         - shellcheck -v
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
