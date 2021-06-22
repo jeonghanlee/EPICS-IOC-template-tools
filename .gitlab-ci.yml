@@ -1,13 +1,15 @@
+include:
+  - project: alsu/ci
+    file: setEnv-template.yml
+
 build-centos7:
     stage: build
     tags:
         - centos7-epics
     
     script:
-        - source /usr/local/setEnv
         - shellcheck -V
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
-        - caget -h
 
 test-centos7:
     stage: test
@@ -15,7 +17,6 @@ test-centos7:
     tags:
         - centos7-epics
     script:
-        - source /usr/local/setEnv
         - export USERNAME="gitlab"
         - bash ${CI_PROJECT_DIR}/test.bash
 
@@ -25,10 +26,8 @@ build-debian10:
     tags:
         - debian10-epics
     script:
-        - source /usr/local/setEnv
         - shellcheck -V
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
-        - caget -h
 
 test-debian10:
     stage: test
@@ -36,18 +35,15 @@ test-debian10:
     tags:
         - debian10-epics
     script:
-        - source /usr/local/setEnv
         - export USERNAME="gitlab"
         - bash ${CI_PROJECT_DIR}/test.bash
-
 
 build-rocky8:
     stage: build
     tags:
         - rocky8-epics
     script:
-        - source /usr/local/setEnv
-        - caget -h
+        - run.sh pmd -h
 
 test-rocky8:
     stage: test
@@ -55,7 +51,6 @@ test-rocky8:
     tags:
         - rocky8-epics
     script:
-        - source /usr/local/setEnv
         - export USERNAME="gitlab"
         - bash ${CI_PROJECT_DIR}/test.bash
         
