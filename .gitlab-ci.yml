@@ -37,6 +37,7 @@ test-debian10:
         - debian10-epics
     script:
         - source /usr/local/setEnv
+        - export USERNAME="gitlab"
         - bash ${CI_PROJECT_DIR}/test.bash
 
 
@@ -46,7 +47,6 @@ build-rocky8:
         - rocky8-epics
     script:
         - source /usr/local/setEnv
-        - export USERNAME="gitlab"
         - caget -h
 
 test-rocky8:
