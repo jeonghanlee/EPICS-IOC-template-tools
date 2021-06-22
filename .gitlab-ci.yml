@@ -18,11 +18,12 @@ build-debian10:
         - shellcheck -V
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
         - caget -h
+
 test-debian10:
     stage: test
     tags:
         - debian10-epics
-    scripts:
+    script:
         - bash ${CI_PROJECT_DIR}/test.bash
 
 
