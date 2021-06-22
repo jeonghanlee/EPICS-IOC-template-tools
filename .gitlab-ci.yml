@@ -17,6 +17,8 @@ build-debian10:
     script:
         - shellcheck -V
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
+        - tree /usr/local/epics
+        - caget -h
 
 build-rock8:
     stage: build
@@ -25,3 +27,4 @@ build-rock8:
 
     script:
         - tree /usr/local/epics
+        - caget -h
