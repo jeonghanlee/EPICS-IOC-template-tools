@@ -13,14 +13,20 @@ build-debian10:
     stage: build
     tags:
         - debian10-epics
-
     script:
         - source /usr/local/setEnv
         - shellcheck -V
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
         - caget -h
+test-debian10:
+    stage: test
+    tags:
+        - debian10-epics
+    scripts:
+        - bash ${CI_PROJECT_DIR}/test.bash
 
-build-rock8:
+
+build-rocky8:
     stage: build
     tags:
         - rocky8-epics
