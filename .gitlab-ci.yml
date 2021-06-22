@@ -9,6 +9,16 @@ build-centos7:
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
         - caget -h
 
+test-centos7:
+    stage: test
+    needs: [ "build-centos7" ]
+    tags:
+        - centos7-epics
+    script:
+        - source /usr/local/setEnv
+        - bash ${CI_PROJECT_DIR}/test.bash
+
+
 build-debian10:
     stage: build
     tags:
@@ -21,9 +31,11 @@ build-debian10:
 
 test-debian10:
     stage: test
+    needs: [ "build-debian10" ]
     tags:
         - debian10-epics
     script:
+        - source /usr/local/setEnv
         - bash ${CI_PROJECT_DIR}/test.bash
 
 
@@ -31,7 +43,16 @@ build-rocky8:
     stage: build
     tags:
         - rocky8-epics
-
     script:
         - source /usr/local/setEnv
         - caget -h
+
+test-rocky8:
+    stage: test
+    needs: [ "build-rocky8" ]
+    tags:
+        - rocky8-epics
+    script:
+        - source /usr/local/setEnv
+        - bash ${CI_PROJECT_DIR}/test.bash
+        
