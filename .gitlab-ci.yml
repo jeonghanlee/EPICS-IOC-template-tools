@@ -1,5 +1,5 @@
 include:
-  - project: alsu/ci
+  - project: accelerator-controls/environment/ci 
     file: setEnv-template.yml
 
 build-centos7:
