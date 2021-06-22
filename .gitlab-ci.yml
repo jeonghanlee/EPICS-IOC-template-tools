@@ -4,9 +4,9 @@ build-centos7:
         - centos7-epics
     
     script:
+        - source /usr/local/setEnv
         - shellcheck -V
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
-        - tree /usr/local/epics
         - caget -h
 
 build-debian10:
@@ -15,9 +15,9 @@ build-debian10:
         - debian10-epics
 
     script:
+        - source /usr/local/setEnv
         - shellcheck -V
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
-        - tree /usr/local/epics
         - caget -h
 
 build-rock8:
@@ -26,5 +26,5 @@ build-rock8:
         - rocky8-epics
 
     script:
-        - tree /usr/local/epics
+        - source /usr/local/setEnv
         - caget -h
