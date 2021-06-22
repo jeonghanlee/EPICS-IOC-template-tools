@@ -16,6 +16,7 @@ test-centos7:
         - centos7-epics
     script:
         - source /usr/local/setEnv
+        - export USERNAME="gitlab"
         - bash ${CI_PROJECT_DIR}/test.bash
 
 
@@ -45,6 +46,7 @@ build-rocky8:
         - rocky8-epics
     script:
         - source /usr/local/setEnv
+        - export USERNAME="gitlab"
         - caget -h
 
 test-rocky8:
@@ -54,5 +56,6 @@ test-rocky8:
         - rocky8-epics
     script:
         - source /usr/local/setEnv
+        - export USERNAME="gitlab"
         - bash ${CI_PROJECT_DIR}/test.bash
         
