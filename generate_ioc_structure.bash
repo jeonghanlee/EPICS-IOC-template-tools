@@ -155,6 +155,55 @@ function add_submodule
     fi
 }  
 
+function als_ci
+{
+    local cifile=".gitlab-ci.yml";
+
+    if [ ! -f "${cifile}" ]; then
+        cat > "${cifile}" <<"EOF"
+# Please check the following repository:
+# https://git.als.lbl.gov/accelerator-controls/environment/ci/-/tree/master
+# 
+include:
+  - project: accelerator-controls/environment/ci
+    file: setEnv.yml
+  - project: accelerator-controls/environment/ci
+    file: centos7-epics.yml
+  - project: accelerator-controls/environment/ci
+    file: debian10-epics.yml
+  - project: accelerator-controls/environment/ci
+    file: rocky8-epics.yml
+  - project: accelerator-controls/environment/ci
+    file: sl7-epics.yml
+
+# The predefined stages defined in 'os'-epics.yml
+# has only build and test
+stages:
+  - build
+  - test
+
+# One can override the debian10-builder in order to custumize ones 
+# builder configuration
+#
+#debian10-builder:
+#  script:
+#    - echo "This is the debian-builder override examples"
+#    - echo "User can set the different environment....."
+#    - echo "EPICS_BASE:=${EPICS_BASE}" > configure/RELEASE.local
+#    - make
+
+# In addtion, one can do other in the same way...
+#
+#rocky8-tester:
+#  script:
+#    - splint
+EOF
+    else
+        printf "Exist : %s\n" "${cifile}";
+    fi
+}
+
+
 function epics_ci
 {
     local url="https://github.com/epics-base/ci-scripts";
@@ -377,4 +426,6 @@ if [[ "$EPICS_CI" == "YES" ]]; then
    git add . -u;
    git add --renormalize .
 fi
+
+if [[ "$A
 
