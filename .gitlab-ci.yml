@@ -1,6 +1,6 @@
 include:
   - project: accelerator-controls/environment/ci 
-    file: setEnv-template.yml
+    file: setEnv.yml
 
 build-centos7:
     stage: build
