@@ -1,56 +1,47 @@
 include:
-  - project: accelerator-controls/environment/ci 
+  - project: accelerator-controls/environment/ci
     file: setEnv.yml
+  - project: accelerator-controls/environment/ci
+    file: centos7-epics.yml
+  - project: accelerator-controls/environment/ci
+    file: debian10-epics.yml
+  - project: accelerator-controls/environment/ci
+    file: rocky8-epics.yml
+  - project: accelerator-controls/environment/ci
+    file: sl7-epics.yml
 
-build-centos7:
-    stage: build
-    tags:
-        - centos7-epics
-    
+stages:
+  - build
+  - test
+
+centos7-builder:
     script:
         - shellcheck -V
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
 
-test-centos7:
-    stage: test
-    needs: [ "build-centos7" ]
-    tags:
-        - centos7-epics
+centos7-tester:
     script:
         - export USERNAME="gitlab"
         - bash ${CI_PROJECT_DIR}/test.bash
 
-
-build-debian10:
-    stage: build
-    tags:
-        - debian10-epics
+debian10-builder:
     script:
         - shellcheck -V
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
 
-test-debian10:
-    stage: test
-    needs: [ "build-debian10" ]
-    tags:
-        - debian10-epics
+debian10-tester:
     script:
         - export USERNAME="gitlab"
         - bash ${CI_PROJECT_DIR}/test.bash
 
-build-rocky8:
-    stage: build
-    tags:
-        - rocky8-epics
-    script:
-        - run.sh pmd -h
 
-test-rocky8:
-    stage: test
-    needs: [ "build-rocky8" ]
-    tags:
-        - rocky8-epics
+rocky8-tester:
     script:
         - export USERNAME="gitlab"
         - bash ${CI_PROJECT_DIR}/test.bash
+        
+sl7-builder:
+    script:
+        - shellcheck -V
+        - git ls-files --exclude='*.bash' --ignored | xargs shellcheck || echo "No script found!"
         
