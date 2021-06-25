@@ -34,6 +34,10 @@ debian10-tester:
         - export USERNAME="gitlab"
         - bash ${CI_PROJECT_DIR}/test.bash
 
+rocky8-builder:
+    script:
+        - shellcheck -V
+        - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
 
 rocky8-tester:
     script:
@@ -44,4 +48,8 @@ sl7-builder:
     script:
         - shellcheck -V
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck || echo "No script found!"
-        
+
+sl7-tester:
+    script:
+        - export USERNAME="gitlab"
+        - bash ${CI_PROJECT_DIR}/test.bash
