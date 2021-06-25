@@ -299,10 +299,11 @@ function sed_file
     sed -e "s|_APPNAME_|${appname}|g" -e "s|_IOCNAME_|${iocname}|g" -e "s|_IOC_|${ioc}|g" < "${input}" > "${output}"
 }
 
-options="p:l:cat"
+options="p:l:c:eat"
 APPNAME=""
 LOCATION=""
 EPICS_CI="NO"
+ALS_CI="YES"
 APPNAME_EXIST="FALSE"
 ADDONLYCONFIG="NO"
 APPTEMPLATE="YES"
@@ -311,7 +312,14 @@ while getopts "${options}" opt; do
     case "${opt}" in
         p) APPNAME=${OPTARG}   ;;
         l) LOCATION=${OPTARG}  ;;
-        c) EPICS_CI="YES"      ;;
+        c) 
+            EPICS_CI="NO";
+            ALS_CI="YES";
+        ;;
+        e)
+            EPICS_CI="YES";
+            ALS_CI="NO";
+        ;;
         a) ADDONLYCONFIG="YES" ;;
         t) APPTEMPLATE="NO"    ;;
         :)
@@ -427,5 +435,13 @@ if [[ "$EPICS_CI" == "YES" ]]; then
    git add --renormalize .
 fi
 
-if [[ "$A
+if [[ "$ALS_CI" == "YES" ]]; then
+   if [ ! -d .git ]; then
+    git init;
+   fi
+   als_ci;
+   add_gitignore;
+   add_gitattributes;
+   git add . -u;
+fi
 
