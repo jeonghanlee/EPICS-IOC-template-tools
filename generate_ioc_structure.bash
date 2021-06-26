@@ -20,13 +20,10 @@
 # Date    : Thu 10 Jun 2021 05:36:59 PM PDT
 # version : 0.0.4
 
-
 declare -g SC_RPATH;
-#declare -g SC_NAME;
 declare -g SC_TOP;
 
 SC_RPATH="$(realpath "$0")";
-#SC_NAME=${0##*/};
 SC_TOP="${SC_RPATH%/*}"
 
 function pushd { builtin pushd "$@" > /dev/null || exit; }
