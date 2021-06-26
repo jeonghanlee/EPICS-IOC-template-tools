@@ -16,7 +16,6 @@ stages:
 
 centos7-builder:
     script:
-        - shellcheck -V
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
 
 centos7-tester:
@@ -26,7 +25,6 @@ centos7-tester:
 
 debian10-builder:
     script:
-        - shellcheck -V
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
 
 debian10-tester:
@@ -36,7 +34,6 @@ debian10-tester:
 
 rocky8-builder:
     script:
-        - shellcheck -V
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
 
 rocky8-tester:
@@ -46,7 +43,6 @@ rocky8-tester:
         
 sl7-builder:
     script:
-        - shellcheck -V
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck || echo "No script found!"
 
 sl7-tester:
