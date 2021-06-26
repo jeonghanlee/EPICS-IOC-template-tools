@@ -13,7 +13,7 @@ include:
 stages:
   - build
   - test
-
+  
 centos7-builder:
     script:
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
