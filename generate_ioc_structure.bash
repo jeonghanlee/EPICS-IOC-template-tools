@@ -17,8 +17,9 @@
 #
 # Author  : Jeong Han Lee
 # email   : JeongLee@lbl.gov
-# Date    : Thu 10 Jun 2021 05:36:59 PM PDT
-# version : 0.0.4
+# Date    : Tue Jun 29 15:48:21 PDT 2021
+# version : 0.0.5
+#
 
 declare -g SC_RPATH;
 declare -g SC_TOP;
@@ -99,11 +100,10 @@ auto_positions.sav*
 \#*
 .versions
 *-src
-Payara-src
-*-amazon-corretto-*_amd64.deb*
 *.service
 *.list
 *.swp
+*.log.0
 EOF
     else
         printf "Exist : %s\n" "${ignorefile}";
@@ -161,23 +161,32 @@ function als_ci
 # Please check the following repository:
 # https://git.als.lbl.gov/accelerator-controls/environment/ci/-/tree/master
 # 
+---
 include:
   - project: accelerator-controls/environment/ci
+    ref: aecc18df382955bf158db5f35825f7ad68018ec2 # (GIT SHA) # v1.0.0 (GIT TAG) # master (GIT BRANCH)
     file: setEnv.yml
   - project: accelerator-controls/environment/ci
-    file: centos7-epics.yml
-  - project: accelerator-controls/environment/ci
+    ref: master
     file: debian10-epics.yml
   - project: accelerator-controls/environment/ci
+    ref: master
+    file: debian10-analyzers.yml
+  - project: accelerator-controls/environment/ci
+    ref: master
+    file: centos7-epics.yml
+  - project: accelerator-controls/environment/ci
+    ref: master
     file: rocky8-epics.yml
   - project: accelerator-controls/environment/ci
+    ref: master
     file: sl7-epics.yml
 
-# The predefined stages defined in 'os'-epics.yml
-# has only build and test
 stages:
   - build
   - test
+  - analyzers
+  - deploy
 
 # One can override the debian10-builder in order to custumize ones 
 # builder configuration
@@ -296,149 +305,157 @@ function sed_file
     sed -e "s|_APPNAME_|${appname}|g" -e "s|_IOCNAME_|${iocname}|g" -e "s|_IOC_|${ioc}|g" < "${input}" > "${output}"
 }
 
-options="p:l:c:eat"
-APPNAME=""
-LOCATION=""
-EPICS_CI="NO"
-ALS_CI="YES"
-APPNAME_EXIST="FALSE"
-ADDONLYCONFIG="NO"
-APPTEMPLATE="YES"
 
-while getopts "${options}" opt; do
-    case "${opt}" in
-        p) APPNAME=${OPTARG}   ;;
-        l) LOCATION=${OPTARG}  ;;
-        c) 
-            EPICS_CI="NO";
-            ALS_CI="YES";
-        ;;
-        e)
-            EPICS_CI="YES";
-            ALS_CI="NO";
-        ;;
-        a) ADDONLYCONFIG="YES" ;;
-        t) APPTEMPLATE="NO"    ;;
-        :)
-	    echo "Option -$OPTARG requires an argument." >&2
-	    usage ;;
-        h)
-	    usage ;;
-        \?)
-	    echo "Invalid option: -$OPTARG" >&2
-	    usage ;;
-    esac
-done
-shift $((OPTIND-1))
+function main
+{
 
-#: "${EPICS_BASE:?}"
+    local options="p:l:cat"
+    local APPNAME=""
+    local LOCATION=""
+    local EPICS_CI="NO"
+    local ALS_CI="YES"
+    local APPNAME_EXIST="FALSE"
+    ADDONLYCONFIG="NO"
+    APPTEMPLATE="YES"
 
+    while getopts "${options}" opt; do
+        case "${opt}" in
+            p) APPNAME=${OPTARG}   ;;
+            l) LOCATION=${OPTARG}  ;;
+            c) 
+                EPICS_CI="NO";
+                ALS_CI="YES";
+            ;;
+#            e)
+#                EPICS_CI="YES";
+#                ALS_CI="NO";
+#            ;;
+            a) ADDONLYCONFIG="YES" ;;
+            t) APPTEMPLATE="NO"    ;;
+            :)
+                echo "Option -$OPTARG requires an argument." >&2
+                usage ;;
+            h)
+                usage ;;
+            \?)
+                echo "Invalid option: -$OPTARG" >&2
+                usage ;;
+        esac
+    done
+    shift $((OPTIND-1))
 
-if [ -z "$EPICS_BASE" ]; then
-    echo ""
-    echo "Pease set EPICS_BASE, and other EPICS environment varialbles first."
-    echo "Here is the example for them.";
-    echo "  export EPICS_BASE=/somewhere/your_base";
-    echo "  export EPICS_HOST_ARCH=darwin-aarch64";
-    echo "  export PATH=\${EPICS_BASE}/bin/\${EPICS_HOST_ARCH}:\${PATH}";
-    echo "  export LD_LIBRARY_PATH=\${EPICS_BASE}/lib/\${EPICS_HOST_ARCH}:\${LD_LIBRARY_PATH}";
-    echo "";
-    exit;
-fi
+    #: "${EPICS_BASE:?}"
 
 
-if [[ "$ADDONLYCONFIG" == "NO" ]]; then
-
-    if [ -z "$APPNAME" ]; then
-        usage;
-    fi
-
-    if [ -z "$LOCATION" ]; then
-        usage;
-    fi
-
-    TOP=${PWD};
-    if [[ "${TOP}" == "$SC_TOP" ]]; then
-        echo "Please call $0 outside ${SC_TOP}"
+    if [ -z "$EPICS_BASE" ]; then
+        echo ""
+        echo "Pease set EPICS_BASE, and other EPICS environment varialbles first."
+        echo "Here is the example for them.";
+        echo "  export EPICS_BASE=/somewhere/your_base";
+        echo "  export EPICS_HOST_ARCH=darwin-aarch64";
+        echo "  export PATH=\${EPICS_BASE}/bin/\${EPICS_HOST_ARCH}:\${PATH}";
+        echo "  export LD_LIBRARY_PATH=\${EPICS_BASE}/lib/\${EPICS_HOST_ARCH}:\${LD_LIBRARY_PATH}";
+        echo "";
         exit;
     fi
 
-    APPTOP="${TOP}/${APPNAME}"
 
-    mkdir -p "${APPTOP}"
-    pushd "${APPTOP}" || exit
+    if [[ "$ADDONLYCONFIG" == "NO" ]]; then
 
-    for folder in *
-        do
-        if test "${folder#*$APPNAME}" != "$folder"; then
-            APPNAME_EXIST="TRUE";
+        if [ -z "$APPNAME" ]; then
+            usage;
         fi
-    done
 
-    if [[ "$APPTEMPLATE" == "YES" ]]; then
-        export EPICS_MBA_TEMPLATE_TOP="${SC_TOP}"/templates/makeBaseApp/top
-        if [[ "$APPNAME_EXIST" == "FALSE" ]]; then
-            makeBaseApp.pl -t ioc "${APPNAME}"
+        if [ -z "$LOCATION" ]; then
+            usage;
         fi
-    fi
 
-    IOCNAME="${LOCATION}-${APPNAME}"
-    IOC="ioc${IOCNAME}"
+        TOP=${PWD};
+        if [[ "${TOP}" == "$SC_TOP" ]]; then
+            echo "Please call $0 outside ${SC_TOP}"
+            exit;
+        fi
 
-    makeBaseApp.pl -i -t ioc -p "${APPNAME}" "${IOCNAME}"
+        APPTOP="${TOP}/${APPNAME}"
 
-    file_list=( "attach" "run" "rund" "st.screen" "screenrc" );
-    if [[ "$APPTEMPLATE" == "YES" ]]; then
-    #
-    # We don't have APPNAME in a file in file_list, but leave there
-    #
-        for afile in "${file_list[@]}"; do
-            
-            if [ ! -f "${APPTOP}/iocBoot/${IOC}/${afile}" ]; then
-                sed_file "${APPNAME}"  "${IOCNAME}" "${IOC}" "$EPICS_MBA_TEMPLATE_TOP/../als/${afile}" "${APPTOP}/iocBoot/${IOC}/${afile}"
-                chmod +x "${APPTOP}/iocBoot/${IOC}/${afile}"
-            else
-                printf "Exist : %s\n" "${APPTOP}/iocBoot/${IOC}/${afile}";
+        mkdir -p "${APPTOP}"
+        pushd "${APPTOP}" || exit
+
+        for folder in *
+            do
+            if test "${folder#*$APPNAME}" != "$folder"; then
+                APPNAME_EXIST="TRUE";
             fi
         done
 
-        chmod -x "${APPTOP}/iocBoot/${IOC}/screenrc";
+        if [[ "$APPTEMPLATE" == "YES" ]]; then
+            export EPICS_MBA_TEMPLATE_TOP="${SC_TOP}"/templates/makeBaseApp/top
+            if [[ "$APPNAME_EXIST" == "FALSE" ]]; then
+                makeBaseApp.pl -t ioc "${APPNAME}"
+            fi
+        fi
 
-        sed_file "${APPNAME}" "${IOCNAME}" "${IOC}" "${APPTOP}/iocBoot/${IOC}/st.cmd" "${APPTOP}/iocBoot/${IOC}/st.cmd~"
-        mv "${APPTOP}/iocBoot/${IOC}/st.cmd~" "${APPTOP}/iocBoot/${IOC}/st.cmd"
-        chmod +x "${APPTOP}/iocBoot/${IOC}/st.cmd"
+        IOCNAME="${LOCATION}-${APPNAME}"
+        IOC="ioc${IOCNAME}"
 
-    fi    
+        makeBaseApp.pl -i -t ioc -p "${APPNAME}" "${IOCNAME}"
 
-    
-    README=README.md
+        file_list=( "attach" "run" "rund" "st.screen" "screenrc" );
+        if [[ "$APPTEMPLATE" == "YES" ]]; then
+        #
+        # We don't have APPNAME in a file in file_list, but leave there
+        #
+            for afile in "${file_list[@]}"; do
+                
+                if [ ! -f "${APPTOP}/iocBoot/${IOC}/${afile}" ]; then
+                    sed_file "${APPNAME}"  "${IOCNAME}" "${IOC}" "$EPICS_MBA_TEMPLATE_TOP/../als/${afile}" "${APPTOP}/iocBoot/${IOC}/${afile}"
+                    chmod +x "${APPTOP}/iocBoot/${IOC}/${afile}"
+                else
+                    printf "Exist : %s\n" "${APPTOP}/iocBoot/${IOC}/${afile}";
+                fi
+            done
 
-    if [[ ! -f "${README}" ]]; then
-        echo "# EPICS IOC for ${IOC}"  > "${README}"
-        echo ""                       >> "${README}"
-        echo ""                       >> "${README}"
+            chmod -x "${APPTOP}/iocBoot/${IOC}/screenrc";
+
+            sed_file "${APPNAME}" "${IOCNAME}" "${IOC}" "${APPTOP}/iocBoot/${IOC}/st.cmd" "${APPTOP}/iocBoot/${IOC}/st.cmd~"
+            mv "${APPTOP}/iocBoot/${IOC}/st.cmd~" "${APPTOP}/iocBoot/${IOC}/st.cmd"
+            chmod +x "${APPTOP}/iocBoot/${IOC}/st.cmd"
+
+        fi    
+
+        
+        README=README.md
+
+        if [[ ! -f "${README}" ]]; then
+            echo "# EPICS IOC for ${IOC}"  > "${README}"
+            echo ""                       >> "${README}"
+            echo ""                       >> "${README}"
+        fi
+
     fi
 
-fi
+#    if [[ "$EPICS_CI" == "YES" ]]; then
+#       if [ ! -d .git ]; then
+#        git init;
+#       fi
+#       epics_ci;
+#       add_gitignore;
+#       add_gitattributes;
+#       git add . -u;
+#       git add --renormalize .
+#    fi
 
-if [[ "$EPICS_CI" == "YES" ]]; then
-   if [ ! -d .git ]; then
-    git init;
-   fi
-   epics_ci;
-   add_gitignore;
-   add_gitattributes;
-   git add . -u;
-   git add --renormalize .
-fi
+    if [[ "$ALS_CI" == "YES" ]]; then
+       if [ ! -d .git ]; then
+        git init;
+       fi
+       als_ci;
+       add_gitignore;
+       add_gitattributes;
+       git add . -u;
+    fi
 
-if [[ "$ALS_CI" == "YES" ]]; then
-   if [ ! -d .git ]; then
-    git init;
-   fi
-   als_ci;
-   add_gitignore;
-   add_gitattributes;
-   git add . -u;
-fi
+}
+
+main "$@"
 
