@@ -4,11 +4,11 @@
 #-
 cd "${TOP}"
 #-
-#-epicsEnvSet("EPICS_CA_ADDR_LIST","131.243.71.255")
+#-epicsEnvSet("EPICS_CA_ADDR_LIST","xxx.xxx.xxx.255")
 #-epicsEnvSet("EPICS_CA_AUTO_ADDR_LIST","YES")
 #-
 epicsEnvSet("DB_TOP",          "$(TOP)/db")
-epicsEnvSet("IOCSH_TOP_LOCAL", "$(TOP)/iocsh")
+#-epicsEnvSet("IOCSH_LOCAL_TOP", "$(TOP)/iocsh")
 epicsEnvSet("IOCSH_TOP",       "$(EPICS_BASE)/../modules/soft/iocsh")
 #-
 epicsEnvSet("ENGINEER",  "_USER_")
@@ -39,8 +39,8 @@ _CSAFEAPPNAME__registerRecordDeviceDriver pdbbase
 cd "${TOP}/iocBoot/${IOC}"
 
 #epicsEnvSet("PORT_1",    "$(IOCNAME)-1")
-#epicsEnvSet("TC32_IP_1", "128.3.130.203")
-#iocshLoad("$(IOCSH_TOP_LOCAL)/_APPNAME_.iocsh", "P=$(P),R=$(R),DATABASE_TOP=$(DB_TOP),PORT=$(PORT_1),IPADDR=$(TC32_IP_1)")
+#epicsEnvSet("TC32_IP_1", "xxx.xxx.xxx.xxx")
+#iocshLoad("$(IOCSH_LOCAL_TOP)/_APPNAME_.iocsh", "P=$(P),R=$(R),DATABASE_TOP=$(DB_TOP),PORT=$(PORT_1),IPADDR=$(TC32_IP_1)")
 
 iocInit
 
