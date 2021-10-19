@@ -164,7 +164,7 @@ function als_ci
 ---
 include:
   - project: accelerator-controls/environment/ci
-    ref: aecc18df382955bf158db5f35825f7ad68018ec2 # (GIT SHA) # v1.0.0 (GIT TAG) # master (GIT BRANCH)
+    ref: a22f89f2e751508cad42734cecd04783e40b468f # (GIT SHA) # v1.0.0 (GIT TAG) # master (GIT BRANCH)
     file: setEnv.yml
   - project: accelerator-controls/environment/ci
     ref: master
@@ -197,6 +197,12 @@ stages:
 #    - echo "User can set the different environment....."
 #    - echo "EPICS_BASE:=${EPICS_BASE}" > configure/RELEASE.local
 #    - make
+
+# Or override the setEnv module and base setup
+#
+#default:
+#  before_script:
+#    - echo "EPICS_BASE:=..."
 
 # In addtion, one can do other in the same way...
 #
