@@ -62,18 +62,18 @@ endif
 #Common_LIBs += reccaster
 #endif
 
-ifneq ($(SNCSEQ),)
+#ifneq ($(SNCSEQ),)
 #sncExample_SNCFLAGS += +r
 #Common_DBDs += sncExample.dbd
 # A .stt sequence program is *not* pre-processed:
 #Common_SRCs += sncExample.stt
-Common_LIBs += seq pv
-endif
+#Common_LIBs += seq pv
+#endif
 
-ifneq ($(STREAM),)
-Common_DBDs += stream.dbd
-Common_LIBs += stream
-endif
+#ifneq ($(STREAM),)
+#Common_DBDs += stream.dbd
+#Common_LIBs += stream
+#endif
 
 #ifneq ($(RETOOLS),)
 #Common_DBDs += retools.dbd
