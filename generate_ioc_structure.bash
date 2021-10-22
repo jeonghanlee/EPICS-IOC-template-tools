@@ -164,7 +164,7 @@ function als_ci
 ---
 include:
   - project: accelerator-controls/environment/ci
-    ref: a22f89f2e751508cad42734cecd04783e40b468f # (GIT SHA) # v1.0.0 (GIT TAG) # master (GIT BRANCH)
+    ref: master # a22f89f2e751508cad42734cecd04783e40b468f # (GIT SHA) # v1.0.0 (GIT TAG) # master (GIT BRANCH)
     file: setEnv.yml
   - project: accelerator-controls/environment/ci
     ref: master
