@@ -44,7 +44,7 @@ Common_SRCs +=
 #Common_DBDs += calcSupport.dbd
 #Common_DBDs += transformRecord.dbd
 #Common_LIBs += calc
-endif
+#endif
 
 #ifneq ($(AUTOSAVE),)
 #Common_DBDs += as.dbd
