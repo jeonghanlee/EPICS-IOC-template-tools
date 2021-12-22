@@ -39,6 +39,7 @@ MODULES = $(EPICS_BASE)/../modules
 #AUTOSAVE = $(MODULES)/autosave
 #RECCASTER = $(MODULES)/recsync
 #STREAM = $(MODULES)/stream
+#STREAM = $(MODULES)/StreamDevice
 #RETOOLS = $(MODULES)/retools
 #CAPUTLOG = $(MODULES)/caPutLog
 #devIocStats = $(MODULES)/iocStats
