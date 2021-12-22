@@ -327,7 +327,7 @@ function main
     local options="p:l:cat"
     local APPNAME=""
     local LOCATION=""
-    local EPICS_CI="NO"
+#    local EPICS_CI="NO"
     local ALS_CI="YES"
     local APPNAME_EXIST="FALSE"
     ADDONLYCONFIG="NO"
@@ -338,7 +338,7 @@ function main
             p) APPNAME=${OPTARG}   ;;
             l) LOCATION=${OPTARG}  ;;
             c) 
-                EPICS_CI="NO";
+#                EPICS_CI="NO";
                 ALS_CI="YES";
             ;;
 #            e)
@@ -398,7 +398,7 @@ function main
 
         for folder in *
             do
-            if test "${folder#*$APPNAME}" != "$folder"; then
+            if test "${folder#*"$APPNAME"}" != "$folder"; then
                 APPNAME_EXIST="TRUE";
             fi
         done
