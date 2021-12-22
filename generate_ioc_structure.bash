@@ -17,8 +17,8 @@
 #
 # Author  : Jeong Han Lee
 # email   : JeongLee@lbl.gov
-# Date    : Tue Jun 29 15:48:21 PDT 2021
-# version : 0.0.5
+# Date    : Tue Dec 21 19:50:39 PST 2021
+# version : 0.0.6
 #
 
 declare -g SC_RPATH;
@@ -95,6 +95,7 @@ dllPath.bat
 auto_settings.sav*
 auto_positions.sav*
 
+# General
 *~
 .\#*
 \#*
@@ -104,6 +105,14 @@ auto_positions.sav*
 *.list
 *.swp
 *.log.0
+/iocsh
+#
+.project
+.cproject
+# tex
+*.aux
+*.out
+*.toc
 EOF
     else
         printf "Exist : %s\n" "${ignorefile}";
@@ -168,10 +177,10 @@ include:
     file: setEnv.yml
   - project: accelerator-controls/environment/ci
     ref: master
-    file: debian10-epics.yml
+    file: debian11-epics.yml
   - project: accelerator-controls/environment/ci
     ref: master
-    file: debian10-analyzers.yml
+    file: debian11-analyzers.yml
   - project: accelerator-controls/environment/ci
     ref: master
     file: centos7-epics.yml
