@@ -1,10 +1,10 @@
 include:
   - project: accelerator-controls/environment/ci
-    file: setEnv.yml
+    file: setGenericEnv.yml
   - project: accelerator-controls/environment/ci
     file: centos7-epics.yml
   - project: accelerator-controls/environment/ci
-    file: debian10-epics.yml
+    file: debian11-epics.yml
   - project: accelerator-controls/environment/ci
     file: rocky8-epics.yml
   - project: accelerator-controls/environment/ci
@@ -23,11 +23,11 @@ centos7-tester:
         - export USERNAME="gitlab"
         - bash ${CI_PROJECT_DIR}/test.bash
 
-debian10-builder:
+debian11-builder:
     script:
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found!"
 
-debian10-tester:
+debian11-tester:
     script:
         - export USERNAME="gitlab"
         - bash ${CI_PROJECT_DIR}/test.bash
