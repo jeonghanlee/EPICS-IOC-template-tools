@@ -113,6 +113,7 @@ auto_positions.sav*
 *.aux
 *.out
 *.toc
+.DS_Store
 EOF
     else
         printf "Exist : %s\n" "${ignorefile}";
@@ -364,7 +365,7 @@ function main
 
     if [ -z "$EPICS_BASE" ]; then
         echo ""
-        echo "Pease set EPICS_BASE, and other EPICS environment varialbles first."
+        echo "Please set EPICS_BASE, and other EPICS environment variables first."
         echo "Here is the example for them.";
         echo "  export EPICS_BASE=/somewhere/your_base";
         echo "  export EPICS_HOST_ARCH=darwin-aarch64";
