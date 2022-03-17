@@ -1,17 +1,23 @@
-# _APPNAME_ EPICS Software Requirements Specification
+# EPICS IOC __APPNAME__ Software Requirements Specification
 
 Author: 
+
 Status:
 
 ##### Table of Contents  
 [Introduction](#introduction)  
+
 [General Description](#generaldescription)  
+
 [Use Case](#usecase)  
+
 [Interface](#interface)
+
 [Requirements](#requirements)
 
 
 <a name="introduction"/>
+
 ## Introduction
 
 ### Scope and Purpose
@@ -33,14 +39,17 @@ Status:
 
 
 <a name="generaldescription"/>
+
 ## General Description
 
 <a name="usecase"/>
+
 ## Use Case
 
 
 
 <a name="interface"/>
+
 ## Interface
 
 ### EPICS Modules (Driver) Interface
@@ -53,6 +62,7 @@ Status:
 
 
 <a name="requirements"/>
+
 ## Requirements
 
 ### Functional Requirements
