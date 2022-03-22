@@ -95,7 +95,14 @@ dllPath.bat
 auto_settings.sav*
 auto_positions.sav*
 
+
+# ALS-U IOC 
+/*App/Db/*#
+/*Boot/*/screenlog.*
+
+
 # General
+
 *~
 .\#*
 \#*
