@@ -25,6 +25,15 @@ dbLoadDatabase "dbd/_APPNAME_.dbd"
 _CSAFEAPPNAME__registerRecordDeviceDriver pdbbase
 
 #-
+#- The following termination defintion should be in st.cmd or .iocsh. 
+#- Mostly, it should be .iocsh file. Please don't use them within .proto file
+#-
+#- <0x0d> \r
+#= <0x0a> \n
+#- asynOctetSetInputEos($(PORT), 0, "\r")
+#- asynOctetSetOutputEos($(PORT), 0, "\r")
+
+#-
 #- iocshLoad("$(IOCSH_TOP)/als_default.iocsh")
 #- iocshLoad("$(IOCSH_TOP)/iocLog.iocsh",    "IOCNAME=$(IOCNAME), LOG_INET=$(LOG_DEST), LOG_INET_PORT=$(LOG_PORT)")
 #-# Load record instances
