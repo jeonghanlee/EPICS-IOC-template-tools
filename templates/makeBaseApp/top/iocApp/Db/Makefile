@@ -32,6 +32,10 @@ DB += $(patsubst ../%, %, $(wildcard ../*.db))
 DB += $(patsubst ../%, %, $(wildcard ../*.vdb))
 DB += $(patsubst ../%, %, $(wildcard ../*.substitutions))
 
+##
+DB_INSTALL += $(patsubst ../%, %, $(wildcard ../*.proto))
+DB_INSTALL += $(patsubst ../%, %, $(wildcard ../*.acf))
+
 REQ += $(patsubst ../%, %, $(wildcard ../*.req))
 
 #----------------------------------------------------
