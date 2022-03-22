@@ -10,8 +10,8 @@
 ##
 ## Here is the example, one should modify according to your IOC application
 ## Note that we mixed the variable names in somewhere (SCAN, PREC, PORT, P)
-##           we seperated the varialbe names in DATABASE_TOP from .... 
-## Please make sure you use the proper varialbe name to match st.cmd, and your DB file.
+##           we separated the variable names in DATABASE_TOP from .... 
+## Please make sure you use the proper variable name to match st.cmd, and your DB file.
 ##
 ## Configure port driver
 # MultiFunctionConfig((portName,        # The name to give to this asyn port driver
