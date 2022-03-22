@@ -47,9 +47,12 @@ _CSAFEAPPNAME__registerRecordDeviceDriver pdbbase
 
 cd "${TOP}/iocBoot/${IOC}"
 
-#epicsEnvSet("PORT_1",    "$(IOCNAME)-1")
-#epicsEnvSet("TC32_IP_1", "xxx.xxx.xxx.xxx")
-#iocshLoad("$(IOCSH_LOCAL_TOP)/_APPNAME_.iocsh", "P=$(P),R=$(R),DATABASE_TOP=$(DB_TOP),PORT=$(PORT_1),IPADDR=$(TC32_IP_1)")
+#epicsEnvSet("PORT1",      "AABBCCDD")
+#epicsEnvSet("PORT1_IP",   "xxx.xxx.xxx.xxx")
+#epicsEnvSet("PORT1_PORT", "xxxx")
+#iocshLoad("$(IOCSH_LOCAL_TOP)/_APPNAME_.iocsh", "P=$(P),R=$(R),DATABASE_TOP=$(DB_TOP),PORT=$(PORT1),IPADDR=$(PORT1_IP),IPPORT=$(PORT1_PORT)")
+
+
 
 iocInit
 
