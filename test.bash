@@ -65,5 +65,5 @@ series_test "temp" "ALSU"
 series_test "iocTest" "Lab"
 #
 # NOK (Location shall not contain ioc string"
-series_test "WHAT" "iocname"
+#series_test "WHAT" "iocname"
 
