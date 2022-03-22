@@ -1,3 +1,4 @@
 #RULES_TOP
 include $(CONFIG)/RULES_TOP
 
+-include $(TOP)/configure/RULES_ALSU
