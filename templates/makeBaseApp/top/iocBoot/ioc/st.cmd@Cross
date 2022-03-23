@@ -7,9 +7,10 @@ cd "${TOP}"
 #-epicsEnvSet("EPICS_CA_ADDR_LIST","xxx.xxx.xxx.255")
 #-epicsEnvSet("EPICS_CA_AUTO_ADDR_LIST","YES")
 #-
-epicsEnvSet("DB_TOP",          "$(TOP)/db")
-#-epicsEnvSet("IOCSH_LOCAL_TOP", "$(TOP)/iocsh")
-epicsEnvSet("IOCSH_TOP",       "$(EPICS_BASE)/../modules/soft/iocsh")
+epicsEnvSet("DB_TOP",               "$(TOP)/db")
+epicsEnvSet("STREAM_PROTOCOL_PATH", "$(DB_TOP)")
+epicsEnvSet("IOCSH_LOCAL_TOP",      "$(TOP)/iocsh")
+epicsEnvSet("IOCSH_TOP",            "$(EPICS_BASE)/../modules/soft/iocsh")
 #-
 epicsEnvSet("ENGINEER",  "_USER_")
 epicsEnvSet("LOCATION",  "")
