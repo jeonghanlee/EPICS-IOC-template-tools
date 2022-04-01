@@ -67,7 +67,7 @@ Status:
 
 ### Functional Requirements
 
-#### Opreations
+#### Operations
 
 #### Health and Status
 
@@ -84,5 +84,5 @@ Status:
 
 #### Quality
 
-#### Docuementation
+#### Documentation
 
