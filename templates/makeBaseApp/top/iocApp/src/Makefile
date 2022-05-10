@@ -115,6 +115,11 @@ Common_SRCs +=
 #Common_LIBs += mca
 #endif
 
+#ifneq ($(ETHER_IP),)
+#Common_DBDs += ether_ip.dbd
+#Common_LIBs += ether_ip
+#endif
+
 # Include dbd files from all support applications:
 _APPNAME__DBD  += $(Common_DBDs)
 _APPNAME__LIBS += $(Common_LIBs)

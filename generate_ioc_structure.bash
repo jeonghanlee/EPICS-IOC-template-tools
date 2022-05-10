@@ -18,7 +18,7 @@
 # Author  : Jeong Han Lee
 # email   : JeongLee@lbl.gov
 # Date    : Tue Dec 21 19:50:39 PST 2021
-# version : 0.0.6
+# version : 0.0.7
 #
 
 declare -g SC_RPATH;
@@ -95,7 +95,14 @@ dllPath.bat
 auto_settings.sav*
 auto_positions.sav*
 
+
+# ALS-U IOC 
+/*App/Db/*#
+/*Boot/*/screenlog.*
+
+
 # General
+
 *~
 .\#*
 \#*
@@ -318,13 +325,14 @@ function sed_file
     local ioc="$1";     shift;
     local input="$1";   shift;
     local output="$1";  shift;
+    echo "$appname $iocname $ioc $input $output"
     sed -e "s|_APPNAME_|${appname}|g" -e "s|_IOCNAME_|${iocname}|g" -e "s|_IOC_|${ioc}|g" < "${input}" > "${output}"
 }
 
 
 function main
 {
-
+    local filter="ioc"
     local options="p:l:cat"
     local APPNAME=""
     local LOCATION=""
@@ -333,6 +341,8 @@ function main
     local APPNAME_EXIST="FALSE"
     ADDONLYCONFIG="NO"
     APPTEMPLATE="YES"
+
+
 
     while getopts "${options}" opt; do
         case "${opt}" in
@@ -386,6 +396,13 @@ function main
             usage;
         fi
 
+        if test "${LOCATION#*$filter}" != "$LOCATION"; then
+            printf "\n";
+            printf ">> Location argument SHALL NOT contain an ioc string\n";
+            printf ">> Please NOT use an ioc string\n";
+            usage;
+        fi
+
         TOP=${PWD};
         if [[ "${TOP}" == "$SC_TOP" ]]; then
             echo "Please call $0 outside ${SC_TOP}"
@@ -415,7 +432,25 @@ function main
         IOC="ioc${IOCNAME}"
 
         makeBaseApp.pl -i -t ioc -p "${APPNAME}" "${IOCNAME}"
+       
+        # makeBasApp.pl strange behaviour, it could be an intension
+        # if IOCNAME contains "ioc" string, the prefix "ioc" will not be in the iocBoot path
+        # Thus, copying all files into a specific directory will not work.
+        # If IOCNAMe contains "ioc" string in anywhere, makeBaseApp will create the path without
+        # ioc prefix. So we need a logic to change their path properly.
+        # 2022-03-21 JeongLee@lbl.gov
 
+        if test "${APPNAME#*$filter}" != "$APPNAME"; then
+            IOCBOOT_IOC_PATH="${APPTOP}/iocBoot/${IOCNAME}"
+        else
+            IOCBOOT_IOC_PATH="${APPTOP}/iocBoot/${IOC}"
+        fi
+
+        printf ">> IOCNAME : $IOCNAME\n";
+        printf ">> IOC     : $IOC\n";
+        printf ">> iocBoot IOC path ${IOCBOOT_IOC_PATH}\n";
+        printf "\n";
+        
         file_list=( "attach" "run" "rund" "st.screen" "screenrc" );
         if [[ "$APPTEMPLATE" == "YES" ]]; then
         #
@@ -423,19 +458,19 @@ function main
         #
             for afile in "${file_list[@]}"; do
                 
-                if [ ! -f "${APPTOP}/iocBoot/${IOC}/${afile}" ]; then
-                    sed_file "${APPNAME}"  "${IOCNAME}" "${IOC}" "$EPICS_MBA_TEMPLATE_TOP/../als/${afile}" "${APPTOP}/iocBoot/${IOC}/${afile}"
-                    chmod +x "${APPTOP}/iocBoot/${IOC}/${afile}"
+                if [ ! -f "${IOCBOOT_IOC_PATH}/${afile}" ]; then
+                    sed_file "${APPNAME}"  "${IOCNAME}" "${IOC}" "$EPICS_MBA_TEMPLATE_TOP/../als/${afile}" "${IOCBOOT_IOC_PATH}/${afile}"
+                    chmod +x "${IOCBOOT_IOC_PATH}/${afile}"
                 else
-                    printf "Exist : %s\n" "${APPTOP}/iocBoot/${IOC}/${afile}";
+                    printf "Exist : %s\n" "${IOCBOOT_IOC_PATH}/${afile}";
                 fi
             done
 
-            chmod -x "${APPTOP}/iocBoot/${IOC}/screenrc";
+            chmod -x "${IOCBOOT_IOC_PATH}/screenrc";
 
-            sed_file "${APPNAME}" "${IOCNAME}" "${IOC}" "${APPTOP}/iocBoot/${IOC}/st.cmd" "${APPTOP}/iocBoot/${IOC}/st.cmd~"
-            mv "${APPTOP}/iocBoot/${IOC}/st.cmd~" "${APPTOP}/iocBoot/${IOC}/st.cmd"
-            chmod +x "${APPTOP}/iocBoot/${IOC}/st.cmd"
+            sed_file "${APPNAME}" "${IOCNAME}" "${IOC}" "${IOCBOOT_IOC_PATH}/st.cmd" "${IOCBOOT_IOC_PATH}/st.cmd~"
+            mv "${IOCBOOT_IOC_PATH}/st.cmd~" "${IOCBOOT_IOC_PATH}/st.cmd"
+            chmod +x "${IOCBOOT_IOC_PATH}/st.cmd"
 
         fi    
 
