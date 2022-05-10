@@ -37,6 +37,7 @@ Common_SRCs +=
 
 #ifneq ($(STD),)
 #Common_DBDs += std.dbd
+#Common_DBDs += stdSupport.dbd
 #Common_LIBs += std
 #endif
 
@@ -95,6 +96,7 @@ Common_SRCs +=
 
 #ifneq ($(SSCAN),)
 #Common_DBDs += sscan.dbd
+#Common_DBDs += sscanSupport.dbd
 #Common_LIBs += sscan
 #endif
 
@@ -112,6 +114,7 @@ Common_SRCs +=
 
 #ifneq ($(MCA),)
 #Common_DBDs += mca.dbd
+#Common_DBDs += mcaSupport.dbd
 #Common_LIBs += mca
 #endif
 
