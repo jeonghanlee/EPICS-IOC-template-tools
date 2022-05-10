@@ -22,7 +22,7 @@ Status:
 
 ### Scope and Purpose
 
-### Achronyms and Definitions
+### Acronyms and Definitions
 
 ### References
 
