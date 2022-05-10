@@ -7,9 +7,10 @@ cd "${TOP}"
 #-epicsEnvSet("EPICS_CA_ADDR_LIST","xxx.xxx.xxx.255")
 #-epicsEnvSet("EPICS_CA_AUTO_ADDR_LIST","YES")
 #-
-epicsEnvSet("DB_TOP",          "$(TOP)/db")
-#-epicsEnvSet("IOCSH_LOCAL_TOP", "$(TOP)/iocsh")
-epicsEnvSet("IOCSH_TOP",       "$(EPICS_BASE)/../modules/soft/iocsh")
+epicsEnvSet("DB_TOP",               "$(TOP)/db")
+epicsEnvSet("STREAM_PROTOCOL_PATH", "$(DB_TOP)")
+epicsEnvSet("IOCSH_LOCAL_TOP",      "$(TOP)/iocsh")
+epicsEnvSet("IOCSH_TOP",            "$(EPICS_BASE)/../modules/soft/iocsh")
 #-
 epicsEnvSet("ENGINEER",  "_USER_")
 epicsEnvSet("LOCATION",  "")
@@ -25,6 +26,15 @@ dbLoadDatabase "dbd/_APPNAME_.dbd"
 _CSAFEAPPNAME__registerRecordDeviceDriver pdbbase
 
 #-
+#- The following termination defintion should be in st.cmd or .iocsh. 
+#- Mostly, it should be .iocsh file. Please don't use them within .proto file
+#-
+#- <0x0d> \r
+#= <0x0a> \n
+#- asynOctetSetInputEos($(PORT), 0, "\r")
+#- asynOctetSetOutputEos($(PORT), 0, "\r")
+
+#-
 #- iocshLoad("$(IOCSH_TOP)/als_default.iocsh")
 #- iocshLoad("$(IOCSH_TOP)/iocLog.iocsh",    "IOCNAME=$(IOCNAME), LOG_INET=$(LOG_DEST), LOG_INET_PORT=$(LOG_PORT)")
 #-# Load record instances
@@ -34,13 +44,16 @@ _CSAFEAPPNAME__registerRecordDeviceDriver pdbbase
 #- iocshLoad("$(IOCSH_TOP)/autosave.iocsh", "AS_TOP=$(TOP),IOCNAME=$(IOCNAME),DATABASE_TOP=$(DB_TOP),SEQ_PERIOD=60")
 
 #- access control list
-#-asSetFilename("$(TOP)/access_security_IOCNAME_.acf")
+#-asSetFilename("$(DB_TOP)/access_security_IOCNAME_.acf")
 
 cd "${TOP}/iocBoot/${IOC}"
 
-#epicsEnvSet("PORT_1",    "$(IOCNAME)-1")
-#epicsEnvSet("TC32_IP_1", "xxx.xxx.xxx.xxx")
-#iocshLoad("$(IOCSH_LOCAL_TOP)/_APPNAME_.iocsh", "P=$(P),R=$(R),DATABASE_TOP=$(DB_TOP),PORT=$(PORT_1),IPADDR=$(TC32_IP_1)")
+#epicsEnvSet("PORT1",      "AABBCCDD")
+#epicsEnvSet("PORT1_IP",   "xxx.xxx.xxx.xxx")
+#epicsEnvSet("PORT1_PORT", "xxxx")
+#iocshLoad("$(IOCSH_LOCAL_TOP)/_APPNAME_.iocsh", "P=$(P),R=$(R),DATABASE_TOP=$(DB_TOP),PORT=$(PORT1),IPADDR=$(PORT1_IP),IPPORT=$(PORT1_PORT)")
+
+
 
 iocInit
 

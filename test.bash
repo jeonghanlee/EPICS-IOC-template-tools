@@ -21,33 +21,49 @@ function tree2
     tree -I '.ci|.git' --charset=ascii -a -L "${level}" "${path}";
 }
 
-APPNAME="temp"
-LOCATION="ALSU"
 
+# 
+function series_test
+{
 
-echo ">>> Test 1"
-pushd "${SC_TOP}/.." || exit;
-bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}"
-tree2 "${APPNAME}"
+    local APPNAME="$1"; shift;
+    local LOCATION="$1"; shift;
+    echo ""
+    echo ">>> Test"
+    echo ">>> APPNAME ${APPNAME}, LOCATION ${LOCATION}"
 
-echo ">>> Test 2"
-bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}" -c
-tree2 "${APPNAME}"
+    echo ">>> Test 1"
+    pushd "${SC_TOP}/.." || exit;
+    bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}" || exit
+    tree2 "${APPNAME}"
 
-rm -rf "${APPNAME}";
-popd || exit;
+    echo ">>> Test 2"
+    bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}" -c || exit
+    tree2 "${APPNAME}"
 
-echo ">>> Test 3" 
-pushd "${SC_TOP}/.." || exit;
-bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}"
-tree2 "${APPNAME}"
-popd || exit;
+    rm -rf "${APPNAME}";
+    popd || exit;
 
+    echo ">>> Test 3" 
+    pushd "${SC_TOP}/.." || exit;
+    bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}" || exit
+    tree2 "${APPNAME}"
+    popd || exit;
 
-echo ">>> Test 4" 
-pushd "${SC_TOP}/../${APPNAME}" || exit;
-bash "${SC_TOP}/generate_ioc_structure.bash" -c -a
-popd || exit;
-tree2 "${SC_TOP}/../${APPNAME}" "3"
+    echo ">>> Test 4" 
+    pushd "${SC_TOP}/../${APPNAME}" || exit;
+    bash "${SC_TOP}/generate_ioc_structure.bash" -c -a || exit
+    popd || exit;
+    tree2 "${SC_TOP}/../${APPNAME}" "3"
 
-echo ">>> Done"
+    echo ">>> Done"
+}
+
+# OK
+series_test "temp" "ALSU"
+# OK
+series_test "iocTest" "Lab"
+#
+# NOK (Location shall not contain ioc string"
+#series_test "WHAT" "iocname"
+
