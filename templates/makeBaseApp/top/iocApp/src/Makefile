@@ -43,7 +43,6 @@ Common_SRCs +=
 
 #ifneq ($(CALC),)
 #Common_DBDs += calcSupport.dbd
-#Common_DBDs += transformRecord.dbd
 #Common_LIBs += calc
 #endif
 
