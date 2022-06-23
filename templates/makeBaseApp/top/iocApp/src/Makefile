@@ -25,7 +25,6 @@ Common_SRCs +=
 #endif
 
 #ifneq ($(MODBUS),)
-#Common_DBDs += modbus.dbd
 #Common_DBDs += modbusSupport.dbd
 #Common_LIBs += modbus
 #endif
@@ -36,7 +35,6 @@ Common_SRCs +=
 #endif
 
 #ifneq ($(STD),)
-#Common_DBDs += std.dbd
 #Common_DBDs += stdSupport.dbd
 #Common_LIBs += std
 #endif
@@ -47,7 +45,6 @@ Common_SRCs +=
 #endif
 
 #ifneq ($(AUTOSAVE),)
-#Common_DBDs += as.dbd
 #Common_DBDs += asSupport.dbd
 #Common_LIBs += autosave
 #endif
@@ -68,8 +65,6 @@ Common_SRCs +=
 # A .stt sequence program is *not* pre-processed:
 #Common_SRCs += sncExample.stt
 #Common_LIBs += seq pv
-#endif
-
 #ifneq ($(STREAM),)
 #Common_DBDs += stream.dbd
 #Common_LIBs += stream
@@ -86,7 +81,6 @@ Common_SRCs +=
 #endif
 
 #ifneq ($(MEASCOMP),)
-#Common_DBDs += measCompApp.dbd
 #Common_DBDs += measCompSupport.dbd
 #Common_LIBs += measComp
 #_APPNAME__LIBS_Linux += cbw_linux
@@ -94,25 +88,21 @@ Common_SRCs +=
 #endif
 
 #ifneq ($(SSCAN),)
-#Common_DBDs += sscan.dbd
 #Common_DBDs += sscanSupport.dbd
 #Common_LIBs += sscan
 #endif
 
 #ifneq ($(BUSY),)
-#Common_DBDs += busyRecord.dbd
 #Common_DBDs += busySupport.dbd
 #Common_LIBs += busy
 #endif
 
 #ifneq ($(SCALER),)
-#Common_DBDs += scalerRecord.dbd
 #Common_DBDs += scalerSupport.dbd
 #Common_LIBs += scaler
 #endif
 
 #ifneq ($(MCA),)
-#Common_DBDs += mca.dbd
 #Common_DBDs += mcaSupport.dbd
 #Common_LIBs += mca
 #endif
