@@ -325,7 +325,7 @@ function sed_file
     local ioc="$1";     shift;
     local input="$1";   shift;
     local output="$1";  shift;
-    echo "$appname $iocname $ioc $input $output"
+#    echo "sed_file $appname $iocname $ioc $input $output"
     sed -e "s|_APPNAME_|${appname}|g" -e "s|_IOCNAME_|${iocname}|g" -e "s|_IOC_|${ioc}|g" < "${input}" > "${output}"
 }
 
