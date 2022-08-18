@@ -60,11 +60,14 @@ Common_SRCs +=
 #endif
 
 #ifneq ($(SNCSEQ),)
-#sncExample_SNCFLAGS += +r
-#Common_DBDs += sncExample.dbd
-# A .stt sequence program is *not* pre-processed:
-#Common_SRCs += sncExample.stt
-#Common_LIBs += seq pv
+## sncExample_SNCFLAGS += +r
+## Common_DBDs += sncExample.dbd
+## A .stt sequence program is *not* pre-processed:
+## Common_SRCs += sncExample.stt
+#
+# Common_LIBs += seq pv
+#endif
+
 #ifneq ($(STREAM),)
 #Common_DBDs += stream.dbd
 #Common_LIBs += stream
@@ -83,8 +86,7 @@ Common_SRCs +=
 #ifneq ($(MEASCOMP),)
 #Common_DBDs += measCompSupport.dbd
 #Common_LIBs += measComp
-#_APPNAME__LIBS_Linux += cbw_linux
-#_APPNAME__LIBS_Linux += measCompLinuxDrivers
+#_APPNAME__SYS_LIBS += uldaq
 #endif
 
 #ifneq ($(SSCAN),)
@@ -119,7 +121,8 @@ _APPNAME__SRCS += $(Common_SRCs)
 _APPNAME__SRCS += _APPNAME__registerRecordDeviceDriver.cpp
 
 # System Libraries
-_APPNAME_SYS_LIBS_Linux +=
+_APPNAME__SYS_LIBS +=
+_APPNAME__SYS_LIBS_Linux +=
 
 # Build the main IOC entry point on workstation OSs.
 _APPNAME__SRCS_DEFAULT += _APPNAME_Main.cpp
