@@ -18,7 +18,7 @@
 # Author  : Jeong Han Lee
 # email   : JeongLee@lbl.gov
 # Date    : Tue Dec 21 19:50:39 PST 2021
-# version : 0.0.7
+# version : 0.0.8
 #
 
 declare -g SC_RPATH;
@@ -182,7 +182,7 @@ function als_ci
 include:
   - project: accelerator-controls/environment/ci
     ref: master # a22f89f2e751508cad42734cecd04783e40b468f # (GIT SHA) # v1.0.0 (GIT TAG) # master (GIT BRANCH)
-    file: setEnv.yml
+    file: setEnvALSU.yml
   - project: accelerator-controls/environment/ci
     ref: master
     file: debian11-epics.yml
