@@ -179,10 +179,13 @@ function als_ci
 # https://git.als.lbl.gov/accelerator-controls/environment/ci/-/tree/master
 # 
 ---
+variables:
+  GIT_DEPTH: 1
+
 include:
   - project: accelerator-controls/environment/ci
     ref: master # a22f89f2e751508cad42734cecd04783e40b468f # (GIT SHA) # v1.0.0 (GIT TAG) # master (GIT BRANCH)
-    file: setEnv.yml
+    file: setEnvALSU.yml
   - project: accelerator-controls/environment/ci
     ref: master
     file: debian11-epics.yml
