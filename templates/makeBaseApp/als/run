@@ -1,3 +1,4 @@
 #!/bin/sh
 screen -m -S _IOCNAME_ -c ./screenrc -L ./st.screen
+sh ./logrotate.run
 

@@ -99,7 +99,8 @@ auto_positions.sav*
 # ALS-U IOC 
 /*App/Db/*#
 /*Boot/*/screenlog.*
-
+/*Boot/*/*.log
+/*Boot/*/*.states
 
 # General
 
@@ -454,7 +455,7 @@ function main
         printf ">> iocBoot IOC path ${IOCBOOT_IOC_PATH}\n";
         printf "\n";
         
-        file_list=( "attach" "run" "rund" "st.screen" "screenrc" );
+        file_list=( "attach" "run" "rund" "st.screen" "screenrc" "logrotate.conf" "logrotate.run" );
         if [[ "$APPTEMPLATE" == "YES" ]]; then
         #
         # We don't have APPNAME in a file in file_list, but leave there
@@ -470,6 +471,7 @@ function main
             done
 
             chmod -x "${IOCBOOT_IOC_PATH}/screenrc";
+            chmod -x "${IOCBOOT_IOC_PATH}/logrotate.conf";
 
             sed_file "${APPNAME}" "${IOCNAME}" "${IOC}" "${IOCBOOT_IOC_PATH}/st.cmd" "${IOCBOOT_IOC_PATH}/st.cmd~"
             mv "${IOCBOOT_IOC_PATH}/st.cmd~" "${IOCBOOT_IOC_PATH}/st.cmd"
