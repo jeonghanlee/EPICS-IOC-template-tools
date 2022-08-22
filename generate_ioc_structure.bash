@@ -18,7 +18,7 @@
 # Author  : Jeong Han Lee
 # email   : JeongLee@lbl.gov
 # Date    : Tue Dec 21 19:50:39 PST 2021
-# version : 0.0.7
+# version : 0.0.8
 #
 
 declare -g SC_RPATH;
