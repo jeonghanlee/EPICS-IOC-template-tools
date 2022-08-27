@@ -5,9 +5,9 @@ LOGROTATE1=/usr/sbin/logrotate
 LOGROTATE2=/sbin/logrotate
 
 if [ -e "$LOGROTATE1" ]; then
-    "$LOGROTATE1" --state _IOCNAME_.logrotate.states ./logrotate.conf
-elif [ -e "$LOGROT2" ]; then
-    "$LOGROTATE2" --state _IOCNAME_.logrotate.states ./logrotate.conf
+    "$LOGROTATE1" --state _IOCNAME_.logrotate.states ./logrotate.conf "$1"
+elif [ -e "$LOGROTATE2" ]; then
+    "$LOGROTATE2" --state _IOCNAME_.logrotate.states ./logrotate.conf "$1"
 else
     echo "We cannot find logrotate in this system"
 fi
