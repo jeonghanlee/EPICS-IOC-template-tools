@@ -17,9 +17,11 @@
 #
 # Author  : Jeong Han Lee
 # email   : JeongLee@lbl.gov
-# Date    : Tue Dec 21 19:50:39 PST 2021
-# version : 0.0.8
+# Date    : Thu 01 Sep 2022 02:57:36 PM PDT
+# version : 0.0.9
 #
+#
+# 0.0.9 : gitlab-ci Clone depth 2
 
 declare -g SC_RPATH;
 declare -g SC_TOP;
@@ -181,7 +183,7 @@ function als_ci
 # 
 ---
 variables:
-  GIT_DEPTH: 1
+  GIT_DEPTH: 2
 
 include:
   - project: accelerator-controls/environment/ci
@@ -450,9 +452,9 @@ function main
             IOCBOOT_IOC_PATH="${APPTOP}/iocBoot/${IOC}"
         fi
 
-        printf ">> IOCNAME : $IOCNAME\n";
-        printf ">> IOC     : $IOC\n";
-        printf ">> iocBoot IOC path ${IOCBOOT_IOC_PATH}\n";
+        printf ">> IOCNAME : %s\n", "$IOCNAME";
+        printf ">> IOC     : %s\n", "$IOC";
+        printf ">> iocBoot IOC path %s\n", "${IOCBOOT_IOC_PATH}";
         printf "\n";
         
         file_list=( "attach" "run" "rund" "st.screen" "screenrc" "logrotate.conf" "logrotate.run" );
