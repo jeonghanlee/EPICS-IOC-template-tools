@@ -4,7 +4,8 @@
 
 This is the SRS template MD file. 
 
-This document is based on the IEEE Recommended Practice for Software Requirements Specifications (IEEE Std 830-1998(R2009)). 
+This document is based on the IEEE Recommended Practice for Software Requirements Specifications (IEEE Std 830-1998(R2009)) and Systems and software engineering Life cycle processes - Requirements engineering (ISO/IEC/IEEE 29148:2018(E)).
+
 Not all contents are unnecessary to define due to the ALS-U Software Management Plan. However, please prepare this document first before writing an EPICS IOC.
 
 -------- snip snip ------
@@ -47,6 +48,8 @@ This subsection should provide the definitions of all terms, acronyms, and abbre
 ### References
 
 ### Overview
+
+
 
 <a name="overalldescription"/>
 
@@ -100,12 +103,28 @@ This should specify the various interfaces to communications such as local netwo
 
 #### Memory constraints
 
+Specify any applicable characteristics and limits on system memories
+
 #### Operations
+
+Specify the normal and special operations required by the user such as:
+
+1) the various modes of operations according to user types
+2) periods of interactive operations and periods of unattneded operations
+3) data processing support functions
+4) recovery operations
 
 #### Site adaptation requirements
 
 
+#### Interfaces with services
 
+Specify interactions with Controls Services
+
+* Channel Finder
+* Archiver Appliance
+* RecSync
+* .....
 
 ### Functional requirements
 
@@ -115,26 +134,28 @@ This should specify the various interfaces to communications such as local netwo
 * Functional requirement 2
 * Functional requirement 3
 
-
-
-
 #### User class 2 (Technical subsystem Engineer/Scientist)
 
 * Functional requirement 1
 * Functional requirement 2
-
 
 #### User class 3 (Accelerator operator)
 
 * Functional requirement 1
 * Functional requirement 2
 
-
 ### Performance requirements
 
 ### Design constraints
 
 ### Software system attributes
+
+Specify the required attributes of the software product.
+
+a) Reliability - specify the factors required to establish the required reliability level for the software system at teh time of production release
+b) Availability - specify the factors required to guarantee a defined availability level for the entire system
+c) Security - specify the requirements to protect the software from accidental or malicious access, use modification, destruction or disclosure.
+
 
 ### Other requirements
 
