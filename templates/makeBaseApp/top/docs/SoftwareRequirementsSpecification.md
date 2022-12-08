@@ -152,9 +152,9 @@ Specify interactions with Controls Services
 
 Specify the required attributes of the software product.
 
-a) Reliability - specify the factors required to establish the required reliability level for the software system at teh time of production release
-b) Availability - specify the factors required to guarantee a defined availability level for the entire system
-c) Security - specify the requirements to protect the software from accidental or malicious access, use modification, destruction or disclosure.
+* Reliability - specify the factors required to establish the required reliability level for the software system at teh time of production release
+* Availability - specify the factors required to guarantee a defined availability level for the entire system
+* Security - specify the requirements to protect the software from accidental or malicious access, use modification, destruction or disclosure.
 
 
 ### Other requirements
