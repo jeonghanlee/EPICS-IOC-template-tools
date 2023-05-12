@@ -53,11 +53,16 @@ cd "${TOP}/iocBoot/${IOC}"
 #--epicsEnvSet("PORT1_PORT", "xxxx")
 #--iocshLoad("$(IOCSH_LOCAL_TOP)/_APPNAME_.iocsh", "P=$(P),R=$(R),DATABASE_TOP=$(DB_TOP),PORT=$(PORT1),IPADDR=$(PORT1_IP),IPPORT=$(PORT1_PORT)")
 
+#>>>>>>>>>>>>>
 iocInit
-
-#-- epicsEnvShow > /vxboot/PVenv/${IOC}.softioc
-#-- dbl > /vxboot/PVnames/${IOC}
-#-- iocshLoad("$(IOCSH_TOP)/after_iocInit.iocsh", "IOC=$(IOC),TRAGET_TOP=/vxboot")
+#>>>>>>>>>>>>>
+##
+##-- epicsEnvShow > /vxboot/PVenv/${IOC}.softioc
+##-- dbl > /vxboot/PVnames/${IOC}
+##-- iocshLoad("$(IOCSH_TOP)/after_iocInit.iocsh", "IOC=$(IOC),TRAGET_TOP=/vxboot")
+##
+date
+##
 
 #--# Start any sequence programs
 #--seq sncxxx,"user=_USER_"
