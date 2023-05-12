@@ -457,7 +457,8 @@ function main
         printf ">> iocBoot IOC path %s\n", "${IOCBOOT_IOC_PATH}";
         printf "\n";
         
-        file_list=( "attach" "run" "rund" "st.screen" "screenrc" "logrotate.conf" "logrotate.run" );
+        #        file_list=( "attach" "run" "rund" "st.screen" "screenrc" "logrotate.conf" "logrotate.run" );
+        file_list=( "attach" "run" "st.screen" "screenrc" "logrotate.conf" "logrotate.run" );
         if [[ "$APPTEMPLATE" == "YES" ]]; then
         #
         # We don't have APPNAME in a file in file_list, but leave there
