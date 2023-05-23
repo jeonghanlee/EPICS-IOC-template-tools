@@ -197,13 +197,10 @@ include:
     file: debian11-analyzers.yml
   - project: accelerator-controls/environment/ci
     ref: master
-    file: centos7-epics.yml
-  - project: accelerator-controls/environment/ci
-    ref: master
     file: rocky8-epics.yml
   - project: accelerator-controls/environment/ci
     ref: master
-    file: sl7-epics.yml
+    file: rocky9-epics.yml
 
 stages:
   - build
