@@ -42,7 +42,6 @@ CHECK_RELEASE = NO
 # USR_CFLAGS += -DNETSNMP_NO_INLINE
 # 
 # USR_LDFLAGS += `net-snmp-config --libs`
-# PROD_LDLIBS += `net-snmp-config --libs`
 
 
 # These allow developers to override the CONFIG_SITE variable
