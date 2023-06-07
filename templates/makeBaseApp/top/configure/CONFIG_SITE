@@ -35,6 +35,16 @@ CHECK_RELEASE = NO
 #HOST_OPT = NO
 #CROSS_OPT = NO
 
+# USR_CPPFLAGS += -fPIC
+# USR_CPPFLAGS += -DUSE_TYPED_RSET
+# 
+# USR_CFLAGS += `net-snmp-config --cflags`
+# USR_CFLAGS += -DNETSNMP_NO_INLINE
+# 
+# USR_LDFLAGS += `net-snmp-config --libs`
+# PROD_LDLIBS += `net-snmp-config --libs`
+
+
 # These allow developers to override the CONFIG_SITE variable
 # settings without having to modify the configure/CONFIG_SITE
 # file itself.
