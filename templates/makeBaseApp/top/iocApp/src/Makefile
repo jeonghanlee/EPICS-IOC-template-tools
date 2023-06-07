@@ -9,8 +9,6 @@ include $(TOP)/configure/CONFIG
 # Build the IOC application
 
 PROD_IOC = _APPNAME_
-
-# PROD_LDLIBS += `net-snmp-config --libs`
 # _APPNAME_.dbd will be created and installed
 DBD += _APPNAME_.dbd
 
@@ -34,6 +32,7 @@ Common_SRCs +=
 #ifneq ($(SNMP),)
 #Common_DBDs += devSnmp.dbd
 #Common_LIBs += devSnmp
+#SYS_PROD_LIBS += netsnmp
 #endif
 
 #ifneq ($(STD),)
