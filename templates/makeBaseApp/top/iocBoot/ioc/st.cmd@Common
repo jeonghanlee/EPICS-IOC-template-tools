@@ -1,11 +1,14 @@
-#!../../bin/_ARCH_/_APPNAME_
+#!../../bin/_ARCH_/_APPNAME_c
 #--
 < envPaths
 #--
 cd "${TOP}"
-#-- allow connections between IOCs on one host
+#--
+#--https://epics-controls.org/resources-and-support/documents/howto-documents/channel-access-reach-multiple-soft-iocs-linux/
+#--if one needs connections between IOCs on one host
+#--add the broadcast address of the lookback interface to each IOC setting
 epicsEnvSet("EPICS_CA_ADDR_LIST","127.255.255.255")
-#--epicsEnvSet("EPICS_CA_AUTO_ADDR_LIST","")
+#--epicsEnvSet("EPICS_CA_AUTO_ADDR_LIST","YES")
 #--
 epicsEnvSet("DB_TOP",               "$(TOP)/db")
 epicsEnvSet("STREAM_PROTOCOL_PATH", "$(DB_TOP)")
