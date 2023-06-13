@@ -3,9 +3,9 @@
 < envPaths
 #--
 cd "${TOP}"
-#--
-#--epicsEnvSet("EPICS_CA_ADDR_LIST","xxx.xxx.xxx.255")
-#--epicsEnvSet("EPICS_CA_AUTO_ADDR_LIST","YES")
+#-- allow connections between IOCs on one host
+epicsEnvSet("EPICS_CA_ADDR_LIST","127.255.255.255")
+#--epicsEnvSet("EPICS_CA_AUTO_ADDR_LIST","")
 #--
 epicsEnvSet("DB_TOP",               "$(TOP)/db")
 epicsEnvSet("STREAM_PROTOCOL_PATH", "$(DB_TOP)")
