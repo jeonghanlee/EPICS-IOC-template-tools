@@ -14,15 +14,6 @@ stages:
   - build
   - test
   
-centos7-builder:
-    script:
-        - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found! or shellcheck error"
-
-centos7-tester:
-    script:
-        - export USERNAME="gitlab"
-        - bash ${CI_PROJECT_DIR}/test.bash
-
 debian11-builder:
     script:
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found! or shellcheck error"
@@ -32,20 +23,17 @@ debian11-tester:
         - export USERNAME="gitlab"
         - bash ${CI_PROJECT_DIR}/test.bash
 
-rocky8-builder:
+rocky9-builder:
     script:
         - git ls-files --exclude='*.bash' --ignored | xargs shellcheck  || echo "No script found! or shellcheck error"
 
-rocky8-tester:
+rocky9-tester:
     script:
         - export USERNAME="gitlab"
         - bash ${CI_PROJECT_DIR}/test.bash
         
-sl7-builder:
-    script:
-        - git ls-files --exclude='*.bash' --ignored | xargs shellcheck || echo "No script found! or shellcheck error"
-
-sl7-tester:
+rocky9-tester:
     script:
         - export USERNAME="gitlab"
         - bash ${CI_PROJECT_DIR}/test.bash
+        
