@@ -36,11 +36,11 @@ function usage
 {
     {
         echo "";
-        echo "Usage    : $0 [-p APPNAME] [-l LOCATION] <-c> <-a>"
+        echo "Usage    : $0 [-p APPNAME] [-l LOCATION] <-a>"
         echo "";
         echo "              -p : APPNAME"
         echo "              -l : LOCATION"
-        echo "              -c : Optional : Add git, and gitlab ci"
+        echo "              -c : Default optionl : Add git, and gitlab ci"
         echo "              -a : Optional : WITHIN an existing a , add git, and gitlab ci"
         echo "";
         echo " bash $0 -p APPNAME -l LOCATION"
@@ -336,31 +336,22 @@ function sed_file
 function main
 {
     local filter="ioc"
-    local options="p:l:cat"
+    local options="p:l:"
     local APPNAME=""
     local LOCATION=""
-#    local EPICS_CI="NO"
     local ALS_CI="YES"
     local APPNAME_EXIST="FALSE"
     ADDONLYCONFIG="NO"
     APPTEMPLATE="YES"
-
+    
 
 
     while getopts "${options}" opt; do
         case "${opt}" in
-            p) APPNAME=${OPTARG}   ;;
-            l) LOCATION=${OPTARG}  ;;
-            c) 
-#                EPICS_CI="NO";
-                ALS_CI="YES";
-            ;;
-#            e)
-#                EPICS_CI="YES";
-#                ALS_CI="NO";
-#            ;;
-            a) ADDONLYCONFIG="YES" ;;
-            t) APPTEMPLATE="NO"    ;;
+            # At least we protect APPNAME and LOCATION should not have "/" aka "directory path"
+            #
+            p) APPNAME="${OPTARG//\/}"   ;;
+            l) LOCATION="${OPTARG//\/}"  ;;
             :)
                 echo "Option -$OPTARG requires an argument." >&2
                 usage ;;
@@ -381,14 +372,18 @@ function main
         echo "Please set EPICS_BASE, and other EPICS environment variables first."
         echo "Here is the example for them.";
         echo "  export EPICS_BASE=/somewhere/your_base";
-        echo "  export EPICS_HOST_ARCH=darwin-aarch64";
+        echo "  export EPICS_HOST_ARCH=linux-x86_64";
         echo "  export PATH=\${EPICS_BASE}/bin/\${EPICS_HOST_ARCH}:\${PATH}";
         echo "  export LD_LIBRARY_PATH=\${EPICS_BASE}/lib/\${EPICS_HOST_ARCH}:\${LD_LIBRARY_PATH}";
         echo "";
         exit;
     fi
 
+    # echo "APPNAME  ${APPNAME}"
+    # echo "LOCATION ${LOCATION}"
 
+
+    # Always NO!
     if [[ "$ADDONLYCONFIG" == "NO" ]]; then
 
         if [ -z "$APPNAME" ]; then
@@ -407,15 +402,21 @@ function main
         fi
 
         TOP=${PWD};
+
         if [[ "${TOP}" == "$SC_TOP" ]]; then
             echo "Please call $0 outside ${SC_TOP}"
             exit;
         fi
 
         APPTOP="${TOP}/${APPNAME}"
+  
+        printf "\n";
+        printf ">> We are now creating a folder with >>> %s <<<\n" "${APPNAME}";
+        printf ">> in the >>> %s <<<\n" "${TOP}";
 
         mkdir -p "${APPTOP}"
         pushd "${APPTOP}" || exit
+        printf ">> Entering into %s\n" "${APPTOP}"
 
         for folder in *
             do
@@ -424,6 +425,7 @@ function main
             fi
         done
 
+        # Always YES   
         if [[ "$APPTEMPLATE" == "YES" ]]; then
             export EPICS_MBA_TEMPLATE_TOP="${SC_TOP}"/templates/makeBaseApp/top
             if [[ "$APPNAME_EXIST" == "FALSE" ]]; then
@@ -434,12 +436,14 @@ function main
         IOCNAME="${LOCATION}-${APPNAME}"
         IOC="ioc${IOCNAME}"
 
+        printf ">>> Making IOC application with IOCNAME %s and IOC %s\n" "${IOCNAME}" "${IOC}"
+        printf ">>> \n";
         makeBaseApp.pl -i -t ioc -p "${APPNAME}" "${IOCNAME}"
-       
+        printf ">>> \n";
         # makeBasApp.pl strange behaviour, it could be an intension
         # if IOCNAME contains "ioc" string, the prefix "ioc" will not be in the iocBoot path
         # Thus, copying all files into a specific directory will not work.
-        # If IOCNAMe contains "ioc" string in anywhere, makeBaseApp will create the path without
+        # If IOCNAME contains "ioc" string in anywhere, makeBaseApp will create the path without
         # ioc prefix. So we need a logic to change their path properly.
         # 2022-03-21 JeongLee@lbl.gov
 
@@ -449,13 +453,15 @@ function main
             IOCBOOT_IOC_PATH="${APPTOP}/iocBoot/${IOC}"
         fi
 
-        printf ">> IOCNAME : %s\n", "$IOCNAME";
-        printf ">> IOC     : %s\n", "$IOC";
-        printf ">> iocBoot IOC path %s\n", "${IOCBOOT_IOC_PATH}";
+        printf "\n";
+        printf ">>> IOCNAME : %s\n" "$IOCNAME";
+        printf ">>> IOC     : %s\n" "$IOC";
+        printf ">>> iocBoot IOC path %s\n" "${IOCBOOT_IOC_PATH}";
         printf "\n";
         
         #        file_list=( "attach" "run" "rund" "st.screen" "screenrc" "logrotate.conf" "logrotate.run" );
         file_list=( "attach" "run" "st.screen" "screenrc" "logrotate.conf" "logrotate.run" );
+        # Always YES
         if [[ "$APPTEMPLATE" == "YES" ]]; then
         #
         # We don't have APPNAME in a file in file_list, but leave there
@@ -466,7 +472,7 @@ function main
                     sed_file "${APPNAME}"  "${IOCNAME}" "${IOC}" "$EPICS_MBA_TEMPLATE_TOP/../als/${afile}" "${IOCBOOT_IOC_PATH}/${afile}"
                     chmod +x "${IOCBOOT_IOC_PATH}/${afile}"
                 else
-                    printf "Exist : %s\n" "${IOCBOOT_IOC_PATH}/${afile}";
+                    printf ">> Exist : %s\n" "${IOCBOOT_IOC_PATH}/${afile}";
                 fi
             done
 
@@ -490,17 +496,7 @@ function main
 
     fi
 
-#    if [[ "$EPICS_CI" == "YES" ]]; then
-#       if [ ! -d .git ]; then
-#        git init;
-#       fi
-#       epics_ci;
-#       add_gitignore;
-#       add_gitattributes;
-#       git add . -u;
-#       git add --renormalize .
-#    fi
-
+    # Always YES!
     if [[ "$ALS_CI" == "YES" ]]; then
        if [ ! -d .git ]; then
         git init;
@@ -511,6 +507,9 @@ function main
        git add . -u;
     fi
 
+    printf ">> leaving from %s\n" "${APPTOP}";
+    popd
+    printf ">> We are in %s\n" "${TOP}";
 }
 
 main "$@"
