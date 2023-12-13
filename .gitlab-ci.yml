@@ -31,8 +31,3 @@ rocky9-tester:
         - export USERNAME="gitlab"
         - bash ${CI_PROJECT_DIR}/test.bash
         
-rocky9-tester:
-    script:
-        - export USERNAME="gitlab"
-        - bash ${CI_PROJECT_DIR}/test.bash
-        
