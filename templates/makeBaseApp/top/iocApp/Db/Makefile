@@ -16,7 +16,10 @@ endif
 
 ifneq ($(devIocStats),)
 DB_INSTALLS += $(devIocStats)/db/iocAdminSoft.db
-#DB_INSTALLS += $(devIocStats)/db/ioc_stats.db
+endif
+
+ifneq ($(IOCSTATS),)
+DB_INSTALLS += $(IOCSTATS)/db/ioc_stats.db
 endif
 
 ifneq ($(RECCASTER),)

@@ -55,6 +55,11 @@ Common_SRCs +=
 #Common_LIBs += devIocStats
 #endif
 
+#ifneq ($(IOCSTATS),)
+#Common_DBDs += devIocStats.dbd
+#Common_LIBs += devIocStats
+#endif
+
 #ifneq ($(RECCASTER),)
 #Common_DBDs += reccaster.dbd
 #Common_LIBs += reccaster

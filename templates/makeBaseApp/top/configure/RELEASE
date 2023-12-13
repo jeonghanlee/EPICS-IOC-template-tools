@@ -38,11 +38,15 @@ MODULES = $(EPICS_BASE)/../modules
 #CALC = $(MODULES)/calc
 #AUTOSAVE = $(MODULES)/autosave
 #RECCASTER = $(MODULES)/recsync
-#STREAM = $(MODULES)/stream
-#STREAM = $(MODULES)/StreamDevice
+#### STREAM = $(MODULES)/stream
+# ALS-U use "StreamDevice" as a directory name
+# STREAM = $(MODULES)/StreamDevice
 #RETOOLS = $(MODULES)/retools
 #CAPUTLOG = $(MODULES)/caPutLog
+#### devIocStats : EPICS community iocStats
 #devIocStats = $(MODULES)/iocStats
+#### IOCSTATS : ALS specific iocStats
+#IOCSTATS = $(MODULES)/iocStatsALS
 #MEASCOMP = $(MODULES)/measComp
 #SSCAN=$(MODULES)/sscan
 #BUSY=$(MODULES)/busy

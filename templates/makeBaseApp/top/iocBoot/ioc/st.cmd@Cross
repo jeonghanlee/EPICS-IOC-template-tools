@@ -60,8 +60,8 @@ cd "${TOP}/iocBoot/${IOC}"
 iocInit
 #>>>>>>>>>>>>>
 ##
-##-- epicsEnvShow > /vxboot/PVenv/${IOC}.softioc
-##-- dbl > /vxboot/PVnames/${IOC}
+##-- epicsEnvShow > /vxboot/PVenv/${IOCNAME}.softioc
+##-- dbl > /vxboot/PVnames/${IOCNAME}
 ##-- iocshLoad("$(IOCSH_TOP)/after_iocInit.iocsh", "IOC=$(IOC),TRAGET_TOP=/vxboot")
 ##
 date
