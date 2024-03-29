@@ -13,7 +13,7 @@ epicsEnvSet("EPICS_CA_ADDR_LIST","127.255.255.255")
 epicsEnvSet("DB_TOP",               "$(TOP)/db")
 epicsEnvSet("STREAM_PROTOCOL_PATH", "$(DB_TOP)")
 epicsEnvSet("IOCSH_LOCAL_TOP",      "$(TOP)/iocsh")
-epicsEnvSet("IOCSH_TOP",            "$(EPICS_BASE)/../modules/iocsh/iocsh")
+epicsEnvSet("IOCSH_TOP",            "$(EPICS_BASE)/../modules/soft/iocsh/iocsh")
 #--
 epicsEnvSet("ENGINEER",  "_USER_")
 epicsEnvSet("LOCATION",  "")
@@ -65,9 +65,11 @@ iocInit
 ##-- dbl > /vxboot/PVnames/${IOCNAME}
 ##-- iocshLoad("$(IOCSH_TOP)/after_iocInit.iocsh", "IOC=$(IOC),TRAGET_TOP=/vxboot")
 ##
-date
+# pvasr
+ClockTime_Report
 ##
-
+##
+##
 #--# Start any sequence programs
 #--seq sncxxx,"user=_USER_"
 #--asynReport(1)
