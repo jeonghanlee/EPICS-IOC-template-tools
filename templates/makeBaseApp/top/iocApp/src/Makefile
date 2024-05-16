@@ -45,25 +45,12 @@ Common_SRCs +=
 #Common_LIBs += calc
 #endif
 
-#ifneq ($(AUTOSAVE),)
-#Common_DBDs += asSupport.dbd
-#Common_LIBs += autosave
-#endif
-
-#ifneq ($(devIocStats),)
-#Common_DBDs += devIocStats.dbd
-#Common_LIBs += devIocStats
-#endif
 
 #ifneq ($(IOCSTATS),)
 #Common_DBDs += devIocStats.dbd
 #Common_LIBs += devIocStats
 #endif
 
-#ifneq ($(RECCASTER),)
-#Common_DBDs += reccaster.dbd
-#Common_LIBs += reccaster
-#endif
 
 #ifneq ($(SNCSEQ),)
 ## sncExample_SNCFLAGS += +r
@@ -82,11 +69,6 @@ Common_SRCs +=
 #ifneq ($(RETOOLS),)
 #Common_DBDs += retools.dbd
 #Common_LIBs += retools
-#endif
-
-#ifneq ($(CAPUTLOG),)
-#Common_DBDs += caPutLog.dbd
-#Common_LIBs += caPutLog
 #endif
 
 #ifneq ($(MEASCOMP),)
@@ -121,9 +103,36 @@ Common_SRCs +=
 #endif
 
 
-Common_DBDs += PVAServerRegister.dbd
-Common_DBDs += qsrv.dbd
-Common_LIBs += qsrv
+ifneq ($(AUTOSAVE),)
+Common_DBDs += asSupport.dbd
+Common_LIBs += autosave
+endif
+
+ifneq ($(devIocStats),)
+Common_DBDs += devIocStats.dbd
+Common_LIBs += devIocStats
+endif
+
+ifneq ($(RECCASTER),)
+Common_DBDs += reccaster.dbd
+Common_LIBs += reccaster
+endif
+
+ifneq ($(CAPUTLOG),)
+Common_DBDs += caPutLog.dbd
+Common_LIBs += caPutLog
+endif
+
+ifneq ($(PVXS),)
+Common_DBDs += pvxsIoc.dbd
+Common_LIBs += pvxsIoc
+endif
+
+#ifneq ($(QSRV1),)
+#Common_DBDs += PVAServerRegister.dbd
+#Common_DBDs += qsrv.dbd
+#Common_LIBs += qsrv
+#endif
 
 
 # Include dbd files from all support applications:
@@ -142,9 +151,10 @@ _APPNAME__SRCS_vxWorks += -nil-
 
 _APPNAME__OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 _APPNAME__LIBS += $(EPICS_BASE_IOC_LIBS)
-
-_APPNAME__LIBS += $(EPICS_BASE_PVA_CORE_LIBS)
-
+# QSRV1
+#ifneq ($(QSRV1),)
+#_APPNAME__LIBS += $(EPICS_BASE_PVA_CORE_LIBS)
+#endif
 #===========================
 
 include $(TOP)/configure/RULES
