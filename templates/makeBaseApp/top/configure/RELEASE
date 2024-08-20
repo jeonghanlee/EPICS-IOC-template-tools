@@ -25,6 +25,8 @@
 MODULES = $(EPICS_BASE)/../modules
 #MYMODULE = $(MODULES)/my-module
 
+
+
 # If using the sequencer, point SNCSEQ at its top directory:
 
 
@@ -53,6 +55,7 @@ MODULES = $(EPICS_BASE)/../modules
 #SCALER=$(MODULES)/scaler
 #MCA=$(MODULES)/mca
 #ETHER_IP=$(MODULES)/ether_ip
+PVXS=$(MODULES)/pvxs
 
 # EPICS_BASE should appear last so earlier modules can override stuff:
 EPICS_BASE = _EPICS_BASE_
@@ -61,8 +64,10 @@ EPICS_BASE = _EPICS_BASE_
 # other than EPICS_BASE:
 #RULES = $(MODULES)/build-rules
 
-# These lines allow developers to override these RELEASE settings
-# without having to modify this file directly.
+#--
+-include $(PVXS)/configure/CONFIG_PVXS_VERSION
+#-- These lines allow developers to override these RELEASE settings
+#-- without having to modify this file directly.
 -include $(TOP)/../RELEASE.local
 -include $(TOP)/../RELEASE.$(EPICS_HOST_ARCH).local
 -include $(TOP)/configure/RELEASE.local

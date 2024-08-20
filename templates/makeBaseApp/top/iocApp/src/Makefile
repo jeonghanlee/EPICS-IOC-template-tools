@@ -121,10 +121,23 @@ Common_SRCs +=
 #endif
 
 
+# QSRV1
+#Common_DBDs += PVAServerRegister.dbd
+#Common_DBDs += qsrv.dbd
+#Common_LIBs += qsrv
+
+# QSRV2
+ifdef PVXS_MAJOR_VERSION # prefer QSRV2 :)
+Common_DBDs += pvxsIoc.dbd
+Common_LIBs += pvxsIoc pvxs
+else
+ifdef EPICS_QSRV_MAJOR_VERSION # fallback to QSRV1
+Common_LIBs += qsrv
+Common_LIBs += $(EPICS_BASE_PVA_CORE_LIBS)
 Common_DBDs += PVAServerRegister.dbd
 Common_DBDs += qsrv.dbd
-Common_LIBs += qsrv
-
+endif
+endif
 
 # Include dbd files from all support applications:
 _APPNAME__DBD  += $(Common_DBDs)
@@ -143,7 +156,6 @@ _APPNAME__SRCS_vxWorks += -nil-
 _APPNAME__OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 _APPNAME__LIBS += $(EPICS_BASE_IOC_LIBS)
 
-_APPNAME__LIBS += $(EPICS_BASE_PVA_CORE_LIBS)
 
 #===========================
 
