@@ -64,7 +64,9 @@ EPICS_BASE = _EPICS_BASE_
 # other than EPICS_BASE:
 #RULES = $(MODULES)/build-rules
 
-#--
+#-- https://epics.anl.gov/tech-talk/2024/msg00460.php
+#-- When PVXS is included in RELEASE, then PVXS_MAJOR_VERSION will be defined
+#-- Here, we use the installed ALS-U EPICS Environment PVXS Version
 -include $(PVXS)/configure/CONFIG_PVXS_VERSION
 #-- These lines allow developers to override these RELEASE settings
 #-- without having to modify this file directly.
