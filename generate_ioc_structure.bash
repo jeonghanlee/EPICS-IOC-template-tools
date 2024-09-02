@@ -191,10 +191,10 @@ include:
     file: setEnvALSU.yml
   - project: accelerator-controls/environment/ci
     ref: master
-    file: debian11-epics.yml
+    file: debian12-epics.yml
   - project: accelerator-controls/environment/ci
     ref: master
-    file: debian11-analyzers.yml
+    file: debian12-analyzers.yml
   - project: accelerator-controls/environment/ci
     ref: master
     file: rocky8-epics.yml
