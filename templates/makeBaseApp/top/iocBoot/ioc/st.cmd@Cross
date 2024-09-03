@@ -26,7 +26,7 @@ epicsEnvSet("EPICS_CA_ADDR_LIST","127.255.255.255")
 epicsEnvSet("DB_TOP",               "$(TOP)/db")
 epicsEnvSet("STREAM_PROTOCOL_PATH", "$(DB_TOP)")
 epicsEnvSet("IOCSH_LOCAL_TOP",      "$(TOP)/iocsh")
-epicsEnvSet("IOCSH_TOP",            "$(EPICS_BASE)/../modules/soft/iocsh/iocsh")
+#--epicsEnvSet("IOCSH_TOP",            "$(EPICS_BASE)/../modules/soft/iocsh/iocsh")
 #--
 epicsEnvSet("ENGINEER",  "_USER_")
 epicsEnvSet("LOCATION",  "")
@@ -35,8 +35,8 @@ epicsEnvSet("WIKI", "")
 epicsEnvSet("IOCNAME", "_IOCNAME_")
 epicsEnvSet("IOC", "_IOC_")
 #--
-epicsEnvSet("P", "AAAA:")
-epicsEnvSet("R", "BBBB:")
+epicsEnvSet("PRE", "AAAA:")
+epicsEnvSet("REC", "BBBB:")
 
 dbLoadDatabase "dbd/_APPNAME_.dbd"
 _CSAFEAPPNAME__registerRecordDeviceDriver pdbbase
@@ -68,7 +68,7 @@ cd "${TOP}/iocBoot/${IOC}"
 #--epicsEnvSet("PORT1",      "AABBCCDD")
 #--epicsEnvSet("PORT1_IP",   "xxx.xxx.xxx.xxx")
 #--epicsEnvSet("PORT1_PORT", "xxxx")
-#--iocshLoad("$(IOCSH_LOCAL_TOP)/_APPNAME_.iocsh", "P=$(P),R=$(R),DATABASE_TOP=$(DB_TOP),PORT=$(PORT1),IPADDR=$(PORT1_IP),IPPORT=$(PORT1_PORT)")
+#--iocshLoad("$(IOCSH_LOCAL_TOP)/_APPNAME_.iocsh", "P=$(PRE),R=$(REC),DATABASE_TOP=$(DB_TOP),PORT=$(PORT1),IPADDR=$(PORT1_IP),IPPORT=$(PORT1_PORT)")
 
 #>>>>>>>>>>>>>
 iocInit
