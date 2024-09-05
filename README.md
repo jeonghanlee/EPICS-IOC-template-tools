@@ -6,6 +6,7 @@
 
 * For setup : git, tree, bash, and EPICS BASE
 * For IOC running : screen
+* Test
 
 ## `generate_ioc_structure.bash`
 
