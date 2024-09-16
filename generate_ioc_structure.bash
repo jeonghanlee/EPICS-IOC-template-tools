@@ -36,10 +36,11 @@ function usage
 {
     {
         echo "";
-        echo "Usage    : $0 [-p APPNAME] [-l LOCATION] <-a>"
+        echo "Usage    : $0 [-p APPNAME] [-l LOCATION] [-f FOLDER] <-a>"
         echo "";
         echo "              -p : APPNAME"
         echo "              -l : LOCATION"
+        echo "              -f : FOLDER - repository, If not defined, APPNAME will be used"
         echo "              -c : Default optionl : Add git, and gitlab ci"
         echo "              -a : Optional : WITHIN an existing a , add git, and gitlab ci"
         echo "";
@@ -333,14 +334,32 @@ function sed_file
 }
 
 
+function yes_or_no_to_go
+{
+
+    read -p ">> Do you want to continue (y/N)? " answer
+    case ${answer:0:1} in
+	y|Y )
+	    printf ">> We are moving forward ...... ";
+	    ;;
+	* )
+        printf ">> Please make sure your location. Stop here.\n";
+	    exit;
+    ;;
+    esac
+}
+
+
 function main
 {
     local filter="ioc"
-    local options="p:l:"
+    local options="p:l:f:"
     local APPNAME=""
+    local FOLDERNAME="";
     local LOCATION=""
     local ALS_CI="YES"
     local APPNAME_EXIST="FALSE"
+    local LOCATION_LIST=( GTL LN LTB INJ BR BTS LNRF BRRF SRRF ARRF BL ACC ALS CR ARXX SRXX ALSU TESTLAB ) 
     ADDONLYCONFIG="NO"
     APPTEMPLATE="YES"
     
@@ -350,8 +369,9 @@ function main
         case "${opt}" in
             # At least we protect APPNAME and LOCATION should not have "/" aka "directory path"
             #
-            p) APPNAME="${OPTARG//\/}"   ;;
-            l) LOCATION="${OPTARG//\/}"  ;;
+            p) APPNAME="${OPTARG//\/}"    ;;
+            l) LOCATION="${OPTARG//\/}"   ;;
+            f) FOLDERNAME="${OPTARG//\/}" ;;
             :)
                 echo "Option -$OPTARG requires an argument." >&2
                 usage ;;
@@ -393,6 +413,10 @@ function main
         if [ -z "$LOCATION" ]; then
             usage;
         fi
+        
+        if [ -z "$FOLDERNAME" ]; then
+            FOLDERNAME=${APPNAME}
+        fi
 
         if test "${LOCATION#*$filter}" != "$LOCATION"; then
             printf "\n";
@@ -401,6 +425,21 @@ function main
             usage;
         fi
 
+        for loc in "${LOCATION_LIST[@]}"
+        do
+            if [ "$loc" -eq "$LOCATION" ]; then
+                echo "The following ALS / ALS-U locations are defined."
+                echo "${LOCATION_LIST[@]}";
+                echo "Your Location ---${LOCATION}--- was defined in the predefined ALS/ALS-U locations"
+            else
+                echo "Your Location ---${LOCATION}--- was NOT defined in the predefined ALS/ALS-U locations"
+                echo "--- ${LOCATION_LIST[@]}";
+                yes_or_no_to_go
+            fi
+        done
+       
+        exit
+
         TOP=${PWD};
 
         if [[ "${TOP}" == "$SC_TOP" ]]; then
@@ -408,20 +447,31 @@ function main
             exit;
         fi
 
-        APPTOP="${TOP}/${APPNAME}"
-  
+        APPTOP="${TOP}/${FOLDERNAME}"
+
         printf "\n";
-        printf ">> We are now creating a folder with >>> %s <<<\n" "${APPNAME}";
+        printf ">> We are now creating a folder with >>> %s <<<\n" "${FOLDERNAME}";
+        printf ">> If the folder is exist, we can go into %s \n" "${FOLDERNAME}";
         printf ">> in the >>> %s <<<\n" "${TOP}";
 
         mkdir -p "${APPTOP}"
         pushd "${APPTOP}" || exit
         printf ">> Entering into %s\n" "${APPTOP}"
 
-        for folder in *
+        for infolderApp in *
             do
-            if test "${folder#*"$APPNAME"}" != "$folder"; then
+            infolder=${infolderApp%"App"}
+            echo "infolder ${infolder} APPNAME ${APPNAME}";
+            if test "${infolder#*"$APPNAME"}" != "$infolder"; then
                 APPNAME_EXIST="TRUE";
+                printf "APPNAME exist\n"
+            elif [ "${infolder,,}" = "${APPNAME,,}" ]; then
+                printf ">> We detected you use the same name, but different lower-and uppercases name.\n";
+                printf ">> APPNAME : %s should use the same as the existing one %s.\n" "${APPNAME}" "${inforlder}";
+                printf ">> Please use the correct upper and lowercase of your %s to match the application name\n" "${APPNAME}";
+                usage;
+            else
+                APPNAME_EXIST="FALSE";
             fi
         done
 
@@ -459,8 +509,8 @@ function main
         printf ">>> iocBoot IOC path %s\n" "${IOCBOOT_IOC_PATH}";
         printf "\n";
         
-        #        file_list=( "attach" "run" "rund" "st.screen" "screenrc" "logrotate.conf" "logrotate.run" );
-        file_list=( "attach" "run" "st.screen" "screenrc" "logrotate.conf" "logrotate.run" );
+        file_list=( "attach" "run" "rund" "st.screen" "screenrc" "logrotate.conf" "logrotate.run" );
+        #file_list=( "attach" "run" "st.screen" "screenrc" "logrotate.conf" "logrotate.run" );
         # Always YES
         if [[ "$APPTEMPLATE" == "YES" ]]; then
         #
