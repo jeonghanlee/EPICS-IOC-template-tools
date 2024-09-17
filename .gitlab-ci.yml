@@ -29,7 +29,7 @@ rock8-builder:
     - echo "Running tests... "
     - bash test.bash
 
-rock8-builder:
+rock9-builder:
   script:
     - echo "Running tests... "
     - bash test.bash
