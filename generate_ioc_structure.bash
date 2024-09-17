@@ -341,13 +341,13 @@ function yes_or_no_to_go
 
     read -p ">> Do you want to continue (Y/n)? " answer
     case ${answer:0:1} in
-    * )
-        printf ">> We are moving forward ...... ";
-        ;;
     n|N )
         printf ">> Stop here.\n";
         exit;
-    ;;
+        ;;
+    * )
+        printf ">> We are moving forward .\n";
+        ;;
     esac
 }
 
@@ -366,7 +366,7 @@ function main
     local APPNAME=""
     local FOLDERNAME="";
     local LOCATION=""
-    lcal ALS_CI="YES"
+    local ALS_CI="YES"
     local APPNAME_EXIST="FALSE"
     local LOCATION_LIST=( GTL LN LTB INJ BR BTS LNRF BRRF SRRF ARRF BL ACC ALS CR ALSU TESTLAB AR01 AR02 AR03 AR04 AR05 AR06 AR07 AR08 AR09 AR10 AR11 AR12 SR01 SR02 SR03 SR04 SR05 SR06 SR07 SR08 SR09 SR10 SR11 SR12 ) 
     ADDONLYCONFIG="NO"
@@ -521,7 +521,7 @@ function main
         printf ">>> iocBoot IOC path %s\n" "${IOCBOOT_IOC_PATH}";
         printf "\n";
 
-        file_list=( "attach" "run" "rund" "st.screen" "screenrc" );
+        file_list=( "attach" "run" "st.screen" "screenrc" );
         #file_list=( "attach" "run" "st.screen" "screenrc" "logrotate.conf" "logrotate.run" );
         # Always YES
         if [[ "$APPTEMPLATE" == "YES" ]]; then
@@ -538,8 +538,8 @@ function main
                 fi
             done
 
-            chmod -x "${IOCBOOT_IOC_PATH}/screenrc";
-            chmod -x "${IOCBOOT_IOC_PATH}/logrotate.conf";
+#            chmod -x "${IOCBOOT_IOC_PATH}/screenrc";
+#            chmod -x "${IOCBOOT_IOC_PATH}/logrotate.conf";
 
             sed_file "${APPNAME}" "${IOCNAME}" "${IOC}" "${IOCBOOT_IOC_PATH}/st.cmd" "${IOCBOOT_IOC_PATH}/st.cmd~"
             mv "${IOCBOOT_IOC_PATH}/st.cmd~" "${IOCBOOT_IOC_PATH}/st.cmd"
@@ -564,7 +564,7 @@ function main
        als_ci;
        add_gitignore;
        add_gitattributes;
-       git add . -u;
+       git add *;
     fi
 
     printf ">> leaving from %s\n" "${APPTOP}";
