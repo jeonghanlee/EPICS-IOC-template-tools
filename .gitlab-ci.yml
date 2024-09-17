@@ -23,7 +23,7 @@ stages:
 debian12-builder:
   script:
     - echo "Running tests... "
-    - bash test.bash > Debian12.test.txt
+    - export USER=test && bash test.bash > Debian12.test.txt
 
 rocky8-builder:
   tags:
@@ -31,7 +31,7 @@ rocky8-builder:
   stage: build
   script:
     - echo "Running tests..."
-    - bash test.bash
+    - export USER=test && bash test.bash > Rocky8.text.txt
 
 rocky9-builder:
   tags:
@@ -39,4 +39,4 @@ rocky9-builder:
   stage: build
   script:
     - echo "Running tests..."
-    - bash test.bash
+    - export USER=test && bash test.bash > Rocky9.test.txt
