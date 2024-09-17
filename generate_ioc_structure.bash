@@ -43,8 +43,6 @@ function usage
         echo "              -l : LOCATION"
         echo "              -p : APPNAME - Case-Sensitivity "
         echo "              -f : FOLDER - repository, If not defined, APPNAME will be used"
-        echo "              -c : Default optionl : Add git, and gitlab ci"
-        echo "              -a : Optional : WITHIN an existing a , add git, and gitlab ci"
         echo "";
         echo " bash $0 -p APPNAME -l Location"
         echo " bash $0 -p APPNAME -l Location -f Folder"
