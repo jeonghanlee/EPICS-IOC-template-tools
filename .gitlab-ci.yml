@@ -18,6 +18,7 @@ include:
 
 stages:
   - build
+  - test
 
 debian12-builder:
   script:
