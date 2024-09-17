@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-#  Copyright (c) 2021           Jeong Han Lee
+#  Copyright (c) 2021   -           Jeong Han Lee
 #
 #  The program is free software: you can redistribute
 #  it and/or modify it under the terms of the GNU General Public License
@@ -17,11 +17,13 @@
 #
 # Author  : Jeong Han Lee
 # email   : JeongLee@lbl.gov
-# Date    : Thu 01 Sep 2022 02:57:36 PM PDT
-# version : 0.0.9
+# version : 0.1.0
 #
 #
 # 0.0.9 : gitlab-ci Clone depth 2
+# 0.1.0 : introduce a folder name 
+
+set +e
 
 declare -g SC_RPATH;
 declare -g SC_TOP;
@@ -36,14 +38,14 @@ function usage
 {
     {
         echo "";
-        echo "Usage    : $0 [-p APPNAME] [-l LOCATION] <-a>"
+        echo "Usage    : $0 [-l LOCATION] [-p APPNAME] [-f FOLDER] <-a>"
         echo "";
-        echo "              -p : APPNAME"
         echo "              -l : LOCATION"
-        echo "              -c : Default optionl : Add git, and gitlab ci"
-        echo "              -a : Optional : WITHIN an existing a , add git, and gitlab ci"
+        echo "              -p : APPNAME - Case-Sensitivity "
+        echo "              -f : FOLDER - repository, If not defined, APPNAME will be used"
         echo "";
-        echo " bash $0 -p APPNAME -l LOCATION"
+        echo " bash $0 -p APPNAME -l Location"
+        echo " bash $0 -p APPNAME -l Location -f Folder"
         echo ""
     } 1>&2;
     exit 1;
@@ -332,26 +334,51 @@ function sed_file
     sed -e "s|_APPNAME_|${appname}|g" -e "s|_IOCNAME_|${iocname}|g" -e "s|_IOC_|${ioc}|g" < "${input}" > "${output}"
 }
 
+function yes_or_no_to_go
+{
+
+    read -p ">> Do you want to continue (Y/n)? " answer
+    case ${answer:0:1} in
+    n|N )
+        printf ">> Stop here.\n";
+        exit;
+        ;;
+    * )
+        printf ">> We are moving forward .\n";
+        ;;
+    esac
+}
+
+function IsIn 
+{
+    local i;
+    local element="$1"; shift;
+    for i; do [[ "$i" == "$element" ]] && return 0; done
+    return 1;
+}
 
 function main
 {
     local filter="ioc"
-    local options="p:l:"
+    local options="p:l:f:"
     local APPNAME=""
+    local FOLDERNAME="";
     local LOCATION=""
     local ALS_CI="YES"
     local APPNAME_EXIST="FALSE"
+    local LOCATION_LIST=( GTL LN LTB INJ BR BTS LNRF BRRF SRRF ARRF BL ACC ALS CR AR01 AR02 AR03 AR04 AR05 AR06 AR07 AR08 AR09 AR10 AR11 AR12 SR01 SR02 SR03 SR04 SR05 SR06 SR07 SR08 SR09 SR10 SR11 SR12 ALSU BTA ATS STA LAB TESTLAB ) 
     ADDONLYCONFIG="NO"
     APPTEMPLATE="YES"
-    
+
 
 
     while getopts "${options}" opt; do
         case "${opt}" in
             # At least we protect APPNAME and LOCATION should not have "/" aka "directory path"
             #
-            p) APPNAME="${OPTARG//\/}"   ;;
-            l) LOCATION="${OPTARG//\/}"  ;;
+            p) APPNAME="${OPTARG//\/}"    ;;
+            l) LOCATION="${OPTARG//\/}"   ;;
+            f) FOLDERNAME="${OPTARG//\/}" ;;
             :)
                 echo "Option -$OPTARG requires an argument." >&2
                 usage ;;
@@ -365,7 +392,6 @@ function main
     shift $((OPTIND-1))
 
     #: "${EPICS_BASE:?}"
-
 
     if [ -z "$EPICS_BASE" ]; then
         echo ""
@@ -382,7 +408,6 @@ function main
     # echo "APPNAME  ${APPNAME}"
     # echo "LOCATION ${LOCATION}"
 
-
     # Always NO!
     if [[ "$ADDONLYCONFIG" == "NO" ]]; then
 
@@ -393,12 +418,28 @@ function main
         if [ -z "$LOCATION" ]; then
             usage;
         fi
+        
+        if [ -z "$FOLDERNAME" ]; then
+            FOLDERNAME=${APPNAME}
+        fi
 
         if test "${LOCATION#*$filter}" != "$LOCATION"; then
             printf "\n";
             printf ">> Location argument SHALL NOT contain an ioc string\n";
             printf ">> Please NOT use an ioc string\n";
             usage;
+        fi
+
+        if IsIn "${LOCATION}" "${LOCATION_LIST[@]}"; then
+            echo "The following ALS / ALS-U locations are defined."
+            echo "----> ${LOCATION_LIST[@]}";
+            echo "Your Location ---${LOCATION}--- was defined within the predefined list."
+        else
+            echo "Your Location ---${LOCATION}--- was NOT defined in the predefined ALS/ALS-U locations"
+            echo "----> ${LOCATION_LIST[@]}";
+            echo ">>"
+            echo ">> "
+            yes_or_no_to_go
         fi
 
         TOP=${PWD};
@@ -408,20 +449,41 @@ function main
             exit;
         fi
 
-        APPTOP="${TOP}/${APPNAME}"
-  
+        APPTOP="${TOP}/${FOLDERNAME}"
+
         printf "\n";
-        printf ">> We are now creating a folder with >>> %s <<<\n" "${APPNAME}";
+        printf ">> We are now creating a folder with >>> %s <<<\n" "${FOLDERNAME}";
+        printf ">> If the folder is exist, we can go into %s \n" "${FOLDERNAME}";
         printf ">> in the >>> %s <<<\n" "${TOP}";
 
-        mkdir -p "${APPTOP}"
+
+        if test "${OSTYPE#darwin*}" != "$OSTYPE"; then
+            printf "\n";
+            printf ">> MacOS filesystem is a case insensitive by default.\n";
+            printf ">> Please carefully use your folder and application name.\n";
+            yes_or_no_to_go;
+        fi
+        
+        if [ ! -d "${APPTOP}" ]; then
+            mkdir -p "${APPTOP}"
+        fi
         pushd "${APPTOP}" || exit
         printf ">> Entering into %s\n" "${APPTOP}"
 
-        for folder in *
+        for infolderApp in *
             do
-            if test "${folder#*"$APPNAME"}" != "$folder"; then
+            infolder=${infolderApp%"App"}
+#            echo "infolder ${infolder} APPNAME ${APPNAME}";
+            if test "${infolder#*"$APPNAME"}" != "$infolder"; then
                 APPNAME_EXIST="TRUE";
+            elif [ "${infolder,,}" = "${APPNAME,,}" ]; then
+                echo ""
+                printf ">> We detected the APPNAME is the different lower-and uppercases APPNAME.\n";
+                printf ">> APPNAME : %s should use the same as the existing one : %s.\n" "${APPNAME}" "${infolder}";
+                printf ">> Please use the CASE-SENSITIVITY APPNAME to match the existing APPNAME \n" ;
+                usage;
+            else
+                APPNAME_EXIST="FALSE";
             fi
         done
 
@@ -429,6 +491,7 @@ function main
         if [[ "$APPTEMPLATE" == "YES" ]]; then
             export EPICS_MBA_TEMPLATE_TOP="${SC_TOP}"/templates/makeBaseApp/top
             if [[ "$APPNAME_EXIST" == "FALSE" ]]; then
+                printf ">> makeBaseApp.pl -t ioc\n"
                 makeBaseApp.pl -t ioc "${APPNAME}"
             fi
         fi
@@ -438,6 +501,7 @@ function main
 
         printf ">>> Making IOC application with IOCNAME %s and IOC %s\n" "${IOCNAME}" "${IOC}"
         printf ">>> \n";
+        printf ">> makeBaseApp.pl -i -t ioc -p %s $s\n" "${APPNAME}" "${IOCNAME}"
         makeBaseApp.pl -i -t ioc -p "${APPNAME}" "${IOCNAME}"
         printf ">>> \n";
         # makeBasApp.pl strange behaviour, it could be an intension
@@ -458,9 +522,9 @@ function main
         printf ">>> IOC     : %s\n" "$IOC";
         printf ">>> iocBoot IOC path %s\n" "${IOCBOOT_IOC_PATH}";
         printf "\n";
-        
-        #        file_list=( "attach" "run" "rund" "st.screen" "screenrc" "logrotate.conf" "logrotate.run" );
-        file_list=( "attach" "run" "st.screen" "screenrc" "logrotate.conf" "logrotate.run" );
+
+        file_list=( "attach" "run" "st.screen" "screenrc" );
+        #file_list=( "attach" "run" "st.screen" "screenrc" "logrotate.conf" "logrotate.run" );
         # Always YES
         if [[ "$APPTEMPLATE" == "YES" ]]; then
         #
@@ -476,16 +540,14 @@ function main
                 fi
             done
 
-            chmod -x "${IOCBOOT_IOC_PATH}/screenrc";
-            chmod -x "${IOCBOOT_IOC_PATH}/logrotate.conf";
+#            chmod -x "${IOCBOOT_IOC_PATH}/screenrc";
+#            chmod -x "${IOCBOOT_IOC_PATH}/logrotate.conf";
 
             sed_file "${APPNAME}" "${IOCNAME}" "${IOC}" "${IOCBOOT_IOC_PATH}/st.cmd" "${IOCBOOT_IOC_PATH}/st.cmd~"
             mv "${IOCBOOT_IOC_PATH}/st.cmd~" "${IOCBOOT_IOC_PATH}/st.cmd"
             chmod +x "${IOCBOOT_IOC_PATH}/st.cmd"
+        fi
 
-        fi    
-
-        
         README=README.md
 
         if [[ ! -f "${README}" ]]; then
@@ -504,7 +566,7 @@ function main
        als_ci;
        add_gitignore;
        add_gitattributes;
-       git add . -u;
+       git add *;
     fi
 
     printf ">> leaving from %s\n" "${APPTOP}";
