@@ -23,11 +23,19 @@ stages:
 debian12-builder:
   script:
     - echo "Running tests... "
-    - bash test.bash
+    - bash test.bash > Debian12.test.txt
 
 rocky8-builder:
   tags:
     - rocky8-epics
+  stage: build
+  script:
+    - echo "Running tests..."
+    - bash test.bash
+
+rocky9-builder:
+  tags:
+    - rocky9-epics
   stage: build
   script:
     - echo "Running tests..."
