@@ -18,10 +18,13 @@ include:
 
 stages:
   - build
-  - test
 
 debian12-builder:
   script:
     - echo "Running tests... "
     - bash test.bash
 
+rocky8-builder:
+  script:
+    - echo "Running tests... "
+    - bash test.bash
