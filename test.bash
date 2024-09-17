@@ -22,6 +22,26 @@ function tree2
 }
 
 
+function a_test
+{
+    local MESSAGE="$1"; shift;
+    local APPNAME="$1"; shift;
+    local LOCATION="$1"; shift;
+    local FOLDER="$1"; shift;
+    
+    echo ">>> ${MESSAGE}"
+    pushd "${SC_TOP}/.." || exit;
+    if [ -z $FOLDER ]; then
+        echo "Y" | bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}" || exit
+        tree2 "${APPNAME}"
+    else
+        echo "Y" | bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}" -f "${FOLDER}"
+        tree2 "${FOLDER}" "3"
+    fi
+
+    popd || exit;
+}
+
 # 
 function series_test
 {
@@ -31,33 +51,29 @@ function series_test
     echo ""
     echo ">>> Test"
     echo ">>> APPNAME ${APPNAME}, LOCATION ${LOCATION}"
-
-    echo ">>> Test 1"
+    
+    a_test "Test 1" "${APPNAME}" "${LOCATION}"
+    a_test "Test 2" "${APPNAME}" "${LOCATION}"
     pushd "${SC_TOP}/.." || exit;
-    bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}" || exit
-    tree2 "${APPNAME}"
-
-    echo ">>> Test 2"
-    bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}" || exit
-    tree2 "${APPNAME}"
-
-    rm -rf "${APPNAME}";
+    rm -rf ${APPNAME}
     popd || exit;
-
-    echo ">>> Test 3" 
+    
+    a_test "Test 3" "${APPNAME}" "${LOCATION}"
+    # Test 4, we use the different case sensitive APPNAME with the limitation
+    # We revers the case of all characters in APPNAME to generate IOC
+    # within the same folder name as APPNAME
+    a_test "Test 4" "${APPNAME~~}" "${LOCATION}" "${APPNAME}"
     pushd "${SC_TOP}/.." || exit;
-    bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}" || exit
-    tree2 "${APPNAME}"
+    rm -rf ${APPNAME}
     popd || exit;
-
     echo ">>> Done"
 }
 
 # OK
-series_test "temp" "SR09"
-# OK
-series_test "iocTest" "Lab"
+series_test "mouse" "home"
+# Different APPNAME with the predefined LOCATION
+series_test "Mouse" "SR12"
 #
 # NOK (Location shall not contain ioc string"
-series_test "WHAT" "iocname"
+series_test "iocName" "BTA"
 

@@ -366,7 +366,7 @@ function main
     local LOCATION=""
     local ALS_CI="YES"
     local APPNAME_EXIST="FALSE"
-    local LOCATION_LIST=( GTL LN LTB INJ BR BTS LNRF BRRF SRRF ARRF BL ACC ALS CR ALSU TESTLAB AR01 AR02 AR03 AR04 AR05 AR06 AR07 AR08 AR09 AR10 AR11 AR12 SR01 SR02 SR03 SR04 SR05 SR06 SR07 SR08 SR09 SR10 SR11 SR12 ) 
+    local LOCATION_LIST=( GTL LN LTB INJ BR BTS LNRF BRRF SRRF ARRF BL ACC ALS CR AR01 AR02 AR03 AR04 AR05 AR06 AR07 AR08 AR09 AR10 AR11 AR12 SR01 SR02 SR03 SR04 SR05 SR06 SR07 SR08 SR09 SR10 SR11 SR12 ALSU BTA ATS STA LAB TESTLAB ) 
     ADDONLYCONFIG="NO"
     APPTEMPLATE="YES"
 
@@ -456,6 +456,7 @@ function main
         printf ">> If the folder is exist, we can go into %s \n" "${FOLDERNAME}";
         printf ">> in the >>> %s <<<\n" "${TOP}";
 
+
         if test "${OSTYPE#darwin*}" != "$OSTYPE"; then
             printf "\n";
             printf ">> MacOS filesystem is a case insensitive by default.\n";
@@ -463,7 +464,9 @@ function main
             yes_or_no_to_go;
         fi
         
-        mkdir -p "${APPTOP}"
+        if [ ! -d "${APPTOP}" ]; then
+            mkdir -p "${APPTOP}"
+        fi
         pushd "${APPTOP}" || exit
         printf ">> Entering into %s\n" "${APPTOP}"
 
@@ -473,7 +476,6 @@ function main
 #            echo "infolder ${infolder} APPNAME ${APPNAME}";
             if test "${infolder#*"$APPNAME"}" != "$infolder"; then
                 APPNAME_EXIST="TRUE";
-                printf "APPNAME exist\n"
             elif [ "${infolder,,}" = "${APPNAME,,}" ]; then
                 echo ""
                 printf ">> We detected the APPNAME is the different lower-and uppercases APPNAME.\n";
@@ -489,6 +491,7 @@ function main
         if [[ "$APPTEMPLATE" == "YES" ]]; then
             export EPICS_MBA_TEMPLATE_TOP="${SC_TOP}"/templates/makeBaseApp/top
             if [[ "$APPNAME_EXIST" == "FALSE" ]]; then
+                printf ">> makeBaseApp.pl -t ioc\n"
                 makeBaseApp.pl -t ioc "${APPNAME}"
             fi
         fi
@@ -498,6 +501,7 @@ function main
 
         printf ">>> Making IOC application with IOCNAME %s and IOC %s\n" "${IOCNAME}" "${IOC}"
         printf ">>> \n";
+        printf ">> makeBaseApp.pl -i -t ioc -p %s $s\n" "${APPNAME}" "${IOCNAME}"
         makeBaseApp.pl -i -t ioc -p "${APPNAME}" "${IOCNAME}"
         printf ">>> \n";
         # makeBasApp.pl strange behaviour, it could be an intension
