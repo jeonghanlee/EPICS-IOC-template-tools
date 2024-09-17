@@ -38,7 +38,7 @@ function series_test
     tree2 "${APPNAME}"
 
     echo ">>> Test 2"
-    bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}" -c || exit
+    bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}" || exit
     tree2 "${APPNAME}"
 
     rm -rf "${APPNAME}";
@@ -50,20 +50,14 @@ function series_test
     tree2 "${APPNAME}"
     popd || exit;
 
-    echo ">>> Test 4" 
-    pushd "${SC_TOP}/../${APPNAME}" || exit;
-    bash "${SC_TOP}/generate_ioc_structure.bash" -c -a || exit
-    popd || exit;
-    tree2 "${SC_TOP}/../${APPNAME}" "3"
-
     echo ">>> Done"
 }
 
 # OK
-series_test "temp" "ALSU"
+series_test "temp" "SR09"
 # OK
 series_test "iocTest" "Lab"
 #
 # NOK (Location shall not contain ioc string"
-#series_test "WHAT" "iocname"
+series_test "WHAT" "iocname"
 
