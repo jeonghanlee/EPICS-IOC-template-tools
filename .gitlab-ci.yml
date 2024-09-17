@@ -25,13 +25,3 @@ debian12-builder:
     - echo "Running tests... "
     - bash test.bash
 
-rock8-builder:
-  script:
-    - echo "Running tests... "
-    - bash test.bash
-
-rock9-builder:
-  script:
-    - echo "Running tests... "
-    - bash test.bash
-
