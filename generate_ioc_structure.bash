@@ -360,8 +360,9 @@ function IsIn
 function main
 {
     local filter="ioc"
-    local options="p:l:f:"
+    local options="p:l:f:n:"
     local APPNAME=""
+    local IOCNAME=""
     local FOLDERNAME="";
     local LOCATION=""
     local ALS_CI="YES"
@@ -379,6 +380,7 @@ function main
             p) APPNAME="${OPTARG//\/}"    ;;
             l) LOCATION="${OPTARG//\/}"   ;;
             f) FOLDERNAME="${OPTARG//\/}" ;;
+            n) IOCNAME="${OPTARG//\/}" ;;
             :)
                 echo "Option -$OPTARG requires an argument." >&2
                 usage ;;
@@ -421,6 +423,10 @@ function main
         
         if [ -z "$FOLDERNAME" ]; then
             FOLDERNAME=${APPNAME}
+        fi
+        
+        if [ -z "$IOCNAME" ]; then
+            IOCNAME="${LOCATION}-${APPNAME}"
         fi
 
         if test "${LOCATION#*$filter}" != "$LOCATION"; then
@@ -496,7 +502,7 @@ function main
             fi
         fi
 
-        IOCNAME="${LOCATION}-${APPNAME}"
+        #IOCNAME="${LOCATION}-${APPNAME}"
         IOC="ioc${IOCNAME}"
 
         printf ">>> Making IOC application with IOCNAME %s and IOC %s\n" "${IOCNAME}" "${IOC}"
