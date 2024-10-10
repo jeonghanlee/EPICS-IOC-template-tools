@@ -564,9 +564,9 @@ function main
         README=README.md
 
         if [[ ! -f "${README}" ]]; then
-            echo "# EPICS IOC for ${IOC}"  > "${README}"
-            echo ""                       >> "${README}"
-            echo ""                       >> "${README}"
+            echo "# EPICS IOCs for ${APPNAME}"  > "${README}"
+            echo ""                             >> "${README}"
+            echo ""                             >> "${README}"
         fi
 
     fi
