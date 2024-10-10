@@ -367,7 +367,14 @@ function main
     local LOCATION=""
     local ALS_CI="YES"
     local APPNAME_EXIST="FALSE"
-    local LOCATION_LIST=( GTL LN LTB INJ BR BTS LNRF BRRF SRRF ARRF BL ACC ALS CR AR01 AR02 AR03 AR04 AR05 AR06 AR07 AR08 AR09 AR10 AR11 AR12 SR01 SR02 SR03 SR04 SR05 SR06 SR07 SR08 SR09 SR10 SR11 SR12 ALSU BTA ATS STA LAB TESTLAB ) 
+    local LOCATION_LIST=(
+      gtl ln ltb inj br bts lnrf brrf srrf arrf bl acc als cr
+      ar01 ar02 ar03 ar04 ar05 ar06 ar07 ar08 ar09 ar10 ar11 ar12
+      sr01 sr02 sr03 sr04 sr05 sr06 sr07 sr08 sr09 sr10 sr11 sr12
+      bl01 bl02 bl03 bl04 bl05 bl06 bl07 bl08 bl09 bl10 bl11 bl12
+      fe01 fe02 fe03 fe04 fe05 fe06 fe07 fe08 fe09 fe10 fe11 fe12
+      alsu bta ats sta lab testlab
+    )
     ADDONLYCONFIG="NO"
     APPTEMPLATE="YES"
 
