@@ -190,16 +190,16 @@ Your Location ---park--- was NOT defined in the predefined ALS/ALS-U locations
 >> Entering into /home/jeonglee/gitsrc/mouse
 >> makeBaseApp.pl -t ioc
 mouse exists, not modified.
->>> Making IOC application with IOCNAME park-mouse and IOC iocpark-mouse
+>>> Making IOC application with IOCNAME park-woodmouse and IOC iocpark-woodmouse
 >>>
 >> makeBaseApp.pl -i -t ioc -p mouse
->> makeBaseApp.pl -i -t ioc -p park-mouse
+>> makeBaseApp.pl -i -t ioc -p park-woodmouse
 Using target architecture linux-x86_64 (only one available)
 >>>
 
->>> IOCNAME : park-mouse
->>> IOC     : iocpark-mouse
->>> iocBoot IOC path /home/jeonglee/gitsrc/mouse/iocBoot/iocpark-mouse
+>>> IOCNAME : park-woodmouse
+>>> IOC     : iocpark-woodmouse
+>>> iocBoot IOC path /home/jeonglee/gitsrc/mouse/iocBoot/iocpark-woodmouse
 
 Exist : .gitlab-ci.yml
 Exist : .gitignore
