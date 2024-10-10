@@ -29,7 +29,7 @@ epicsEnvSet("IOCSH_LOCAL_TOP",      "$(TOP)/iocsh")
 #--epicsEnvSet("IOCSH_TOP",            "$(EPICS_BASE)/../modules/soft/iocsh/iocsh")
 #--
 epicsEnvSet("ENGINEER",  "_USER_")
-epicsEnvSet("LOCATION",  "")
+epicsEnvSet("LOCATION",  "SoftIOC")
 epicsEnvSet("WIKI", "")
 #-- 
 epicsEnvSet("IOCNAME", "_IOCNAME_")
