@@ -1,6 +1,6 @@
 # tools
 
-[![pipeline status](https://git.als.lbl.gov/alsu/tools/badges/master/pipeline.svg)](https://git.als.lbl.gov/alsu/tools/-/commits/master) 
+[![pipeline status](https://git.als.lbl.gov/alsu/tools/badges/master/pipeline.svg)](https://git.als.lbl.gov/alsu/tools/-/commits/master)
 
 ## Requirements
 
@@ -10,7 +10,7 @@
 
 ## `generate_ioc_structure.bash`
 
-This script is developed to reduce the manual workflow in EPICS IOC Development Guide (AL-1451-7926). 
+This script is developed to reduce the manual workflow in EPICS IOC Development Guide (AL-1451-7926).
 
 There are two mandatory options, such as **Device Name (APPNAME)** and **LOCATION**. Two options should be defined according to the IOC Name Naming Convention documents [1].
 
@@ -19,7 +19,7 @@ There are two mandatory options, such as **Device Name (APPNAME)** and **LOCATIO
 ### New Repository
 
 ```bash
-bash tools/generate_ioc_structure.bash -p APPNAME -l LOCATION
+bash tools/generate_ioc_structure.bash -p APPNAME -l LOCATION [-d DEVICE] [-f FOLDER]
 ```
 
 * Example
@@ -27,23 +27,23 @@ bash tools/generate_ioc_structure.bash -p APPNAME -l LOCATION
 ```bash
 $ bash tools/generate_ioc_structure.bash -l home -p mouse
 Your Location ---home--- was NOT defined in the predefined ALS/ALS-U locations
-----> GTL LN LTB INJ BR BTS LNRF BRRF SRRF ARRF BL ACC ALS CR AR01 AR02 AR03 AR04 AR05 AR06 AR07 AR08 AR09 AR10 AR11 AR12 SR01 SR02 SR03 SR04 SR05 SR06 SR07 SR08 SR09 SR10 SR11 SR12 ALSU BTA ATS STA LAB TESTLAB
+----> gtl ln ltb inj br bts lnrf brrf srrf arrf bl acc als cr ar01 ar02 ar03 ar04 ar05 ar06 ar07 ar08 ar09 ar10 ar11 ar12 sr01 sr02 sr03 sr04 sr05 sr06 sr07 sr08 sr09 sr10 sr11 sr12 bl01 bl02 bl03 bl04 bl05 bl06 bl07 bl08 bl09 bl10 bl11 bl12 fe01 fe02 fe03 fe04 fe05 fe06 fe07 fe08 fe09 fe10 fe11 fe12 alsu bta ats sta lab testlab
 >>
->> 
->> Do you want to continue (Y/n)? 
+>>
+>> Do you want to continue (Y/n)?
 >> We are moving forward .
 
 >> We are now creating a folder with >>> mouse <<<
->> If the folder is exist, we can go into mouse 
+>> If the folder is exist, we can go into mouse
 >> in the >>> /home/jeonglee/gitsrc <<<
 >> Entering into /home/jeonglee/gitsrc/mouse
 >> makeBaseApp.pl -t ioc
 >>> Making IOC application with IOCNAME home-mouse and IOC iochome-mouse
->>> 
->> makeBaseApp.pl -i -t ioc -p mouse 
->> makeBaseApp.pl -i -t ioc -p home-mouse 
+>>>
+>> makeBaseApp.pl -i -t ioc -p mouse
+>> makeBaseApp.pl -i -t ioc -p home-mouse
 Using target architecture linux-x86_64 (only one available)
->>> 
+>>>
 
 >>> IOCNAME : home-mouse
 >>> IOC     : iochome-mouse
@@ -52,12 +52,12 @@ Using target architecture linux-x86_64 (only one available)
 hint: Using 'master' as the name for the initial branch. This default branch name
 hint: is subject to change. To configure the initial branch name to use in all
 hint: of your new repositories, which will suppress this warning, call:
-hint: 
+hint:
 hint: 	git config --global init.defaultBranch <name>
-hint: 
+hint:
 hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
 hint: 'development'. The just-created branch can be renamed via this command:
-hint: 
+hint:
 hint: 	git branch -m <name>
 Initialized empty Git repository in /home/jeonglee/gitsrc/mouse/.git/
 >> leaving from /home/jeonglee/gitsrc/mouse
@@ -110,7 +110,7 @@ $ tree --charset=ascii -L 3 mouse/
 ### Add new iocBoot Application
 
 ```bash
-bash tools/generated_ioc_structure.bash -p APPNAME -l LOCATION2
+bash tools/generate_ioc_structure.bash -p APPNAME -l LOCATION2 [-d DEVICE]
 ```
 
 * Example 1 : Your clone folder name is the same as your application name
@@ -121,24 +121,24 @@ $ git clone ssh://git@git-local.als.lbl.gov:8022/alsu/mouse.git
 
 $ bash tools/generate_ioc_structure.bash -l park -p mouse
 Your Location ---park--- was NOT defined in the predefined ALS/ALS-U locations
-----> GTL LN LTB INJ BR BTS LNRF BRRF SRRF ARRF BL ACC ALS CR AR01 AR02 AR03 AR04 AR05 AR06 AR07 AR08 AR09 AR10 AR11 AR12 SR01 SR02 SR03 SR04 SR05 SR06 SR07 SR08 SR09 SR10 SR11 SR12 ALSU BTA ATS STA LAB TESTLAB
+----> gtl ln ltb inj br bts lnrf brrf srrf arrf bl acc als cr ar01 ar02 ar03 ar04 ar05 ar06 ar07 ar08 ar09 ar10 ar11 ar12 sr01 sr02 sr03 sr04 sr05 sr06 sr07 sr08 sr09 sr10 sr11 sr12 bl01 bl02 bl03 bl04 bl05 bl06 bl07 bl08 bl09 bl10 bl11 bl12 fe01 fe02 fe03 fe04 fe05 fe06 fe07 fe08 fe09 fe10 fe11 fe12 alsu bta ats sta lab testlab
 >>
->> 
->> Do you want to continue (Y/n)? 
+>>
+>> Do you want to continue (Y/n)?
 >> We are moving forward .
 
 >> We are now creating a folder with >>> mouse <<<
->> If the folder is exist, we can go into mouse 
+>> If the folder is exist, we can go into mouse
 >> in the >>> /home/jeonglee/gitsrc <<<
 >> Entering into /home/jeonglee/gitsrc/mouse
 >> makeBaseApp.pl -t ioc
 mouse exists, not modified.
 >>> Making IOC application with IOCNAME park-mouse and IOC iocpark-mouse
->>> 
->> makeBaseApp.pl -i -t ioc -p mouse 
->> makeBaseApp.pl -i -t ioc -p park-mouse 
+>>>
+>> makeBaseApp.pl -i -t ioc -p mouse
+>> makeBaseApp.pl -i -t ioc -p park-mouse
 Using target architecture linux-x86_64 (only one available)
->>> 
+>>>
 
 >>> IOCNAME : park-mouse
 >>> IOC     : iocpark-mouse
@@ -170,7 +170,71 @@ $ tree --charset=ascii -L 2 mouse/iocBoot/
 
 ```
 
-* Example 2 : Your clone folder name is not the same as your application name
+* Example 2 : Your application name does not match the device name for this IOC
+
+```bash
+$ git clone ssh://git@git-local.als.lbl.gov:8022/alsu/tools.git
+$ git clone ssh://git@git-local.als.lbl.gov:8022/alsu/mouse.git
+
+$ bash tools/generate_ioc_structure.bash -l park -p mouse -d woodmouse
+Your Location ---park--- was NOT defined in the predefined ALS/ALS-U locations
+----> gtl ln ltb inj br bts lnrf brrf srrf arrf bl acc als cr ar01 ar02 ar03 ar04 ar05 ar06 ar07 ar08 ar09 ar10 ar11 ar12 sr01 sr02 sr03 sr04 sr05 sr06 sr07 sr08 sr09 sr10 sr11 sr12 bl01 bl02 bl03 bl04 bl05 bl06 bl07 bl08 bl09 bl10 bl11 bl12 fe01 fe02 fe03 fe04 fe05 fe06 fe07 fe08 fe09 fe10 fe11 fe12 alsu bta ats sta lab testlab
+>>
+>>
+>> Do you want to continue (Y/n)?
+>> We are moving forward .
+
+>> We are now creating a folder with >>> mouse <<<
+>> If the folder is exist, we can go into mouse
+>> in the >>> /home/jeonglee/gitsrc <<<
+>> Entering into /home/jeonglee/gitsrc/mouse
+>> makeBaseApp.pl -t ioc
+mouse exists, not modified.
+>>> Making IOC application with IOCNAME park-woodmouse and IOC iocpark-woodmouse
+>>>
+>> makeBaseApp.pl -i -t ioc -p mouse
+>> makeBaseApp.pl -i -t ioc -p park-woodmouse
+Using target architecture linux-x86_64 (only one available)
+>>>
+
+>>> IOCNAME : park-woodmouse
+>>> IOC     : iocpark-woodmouse
+>>> iocBoot IOC path /home/jeonglee/gitsrc/mouse/iocBoot/iocpark-woodmouse
+
+Exist : .gitlab-ci.yml
+Exist : .gitignore
+Exist : .gitattributes
+>> leaving from /home/jeonglee/gitsrc/mouse
+>> We are in /home/jeonglee/gitsrc
+
+$ tree --charset=ascii -L 2 mouse/iocBoot/
+[jeonglee 4.0K]  mouse/iocBoot/
+|-- [jeonglee 4.0K]  iochome-mouse
+|   |-- [jeonglee   83]  attach
+|   |-- [jeonglee  124]  Makefile
+|   |-- [jeonglee   73]  run
+|   |-- [jeonglee  214]  screenrc
+|   |-- [jeonglee 3.1K]  st.cmd
+|   `-- [jeonglee   73]  st.screen
+|-- [jeonglee 4.0K]  iocpark-mouse
+|   |-- [jeonglee   83]  attach
+|   |-- [jeonglee  124]  Makefile
+|   |-- [jeonglee   73]  run
+|   |-- [jeonglee  214]  screenrc
+|   |-- [jeonglee 3.1K]  st.cmd
+|   `-- [jeonglee   73]  st.screen
+|-- [jeonglee 4.0K]  iocpark-woodmouse
+|   |-- [jeonglee   83]  attach
+|   |-- [jeonglee  124]  Makefile
+|   |-- [jeonglee   73]  run
+|   |-- [jeonglee  214]  screenrc
+|   |-- [jeonglee 3.1K]  st.cmd
+|   `-- [jeonglee   73]  st.screen
+`-- [jeonglee  121]  Makefile
+
+```
+
+* Example 3 : Your clone folder name is not the same as your application name
 
 ```bash
 $ git clone ssh://git@git-local.als.lbl.gov:8022/alsu/tools.git
@@ -178,21 +242,21 @@ $ git clone ssh://git@git-local.als.lbl.gov:8022/alsu/mouse.git iocmouse
 
 $ bash tools/generate_ioc_structure.bash -l BTA -p mouse -f iocmouse
 The following ALS / ALS-U locations are defined.
-----> GTL LN LTB INJ BR BTS LNRF BRRF SRRF ARRF BL ACC ALS CR AR01 AR02 AR03 AR04 AR05 AR06 AR07 AR08 AR09 AR10 AR11 AR12 SR01 SR02 SR03 SR04 SR05 SR06 SR07 SR08 SR09 SR10 SR11 SR12 ALSU BTA ATS STA LAB TESTLAB
+----> gtl ln ltb inj br bts lnrf brrf srrf arrf bl acc als cr ar01 ar02 ar03 ar04 ar05 ar06 ar07 ar08 ar09 ar10 ar11 ar12 sr01 sr02 sr03 sr04 sr05 sr06 sr07 sr08 sr09 sr10 sr11 sr12 bl01 bl02 bl03 bl04 bl05 bl06 bl07 bl08 bl09 bl10 bl11 bl12 fe01 fe02 fe03 fe04 fe05 fe06 fe07 fe08 fe09 fe10 fe11 fe12 alsu bta ats sta lab testlab
 Your Location ---BTA--- was defined within the predefined list.
 
 >> We are now creating a folder with >>> iocmouse <<<
->> If the folder is exist, we can go into iocmouse 
+>> If the folder is exist, we can go into iocmouse
 >> in the >>> /home/jeonglee/gitsrc <<<
 >> Entering into /home/jeonglee/gitsrc/iocmouse
 >> makeBaseApp.pl -t ioc
 mouse exists, not modified.
 >>> Making IOC application with IOCNAME BTA-mouse and IOC iocBTA-mouse
->>> 
->> makeBaseApp.pl -i -t ioc -p mouse 
->> makeBaseApp.pl -i -t ioc -p BTA-mouse 
+>>>
+>> makeBaseApp.pl -i -t ioc -p mouse
+>> makeBaseApp.pl -i -t ioc -p BTA-mouse
 Using target architecture linux-x86_64 (only one available)
->>> 
+>>>
 
 >>> IOCNAME : BTA-mouse
 >>> IOC     : iocBTA-mouse
@@ -227,31 +291,38 @@ $  tree --charset=ascii -L 2 iocmouse/iocBoot/
 |   |-- [jeonglee  214]  screenrc
 |   |-- [jeonglee 3.1K]  st.cmd
 |   `-- [jeonglee   73]  st.screen
+|-- [jeonglee 4.0K]  iocpark-woodmouse
+|   |-- [jeonglee   83]  attach
+|   |-- [jeonglee  124]  Makefile
+|   |-- [jeonglee   73]  run
+|   |-- [jeonglee  214]  screenrc
+|   |-- [jeonglee 3.1K]  st.cmd
+|   `-- [jeonglee   73]  st.screen
 `-- [jeonglee  121]  Makefile
 
 ```
 
-* Example 3 : Your clone folder name is not the same as your application name, and you use the wrong application name
+* Example 4 : Your clone folder name is not the same as your application name, and you use the wrong application name
 
 ```bash
 $ bash tools/generate_ioc_structure.bash -l BTA -p mOuse -f iocmouse
 The following ALS / ALS-U locations are defined.
-----> GTL LN LTB INJ BR BTS LNRF BRRF SRRF ARRF BL ACC ALS CR AR01 AR02 AR03 AR04 AR05 AR06 AR07 AR08 AR09 AR10 AR11 AR12 SR01 SR02 SR03 SR04 SR05 SR06 SR07 SR08 SR09 SR10 SR11 SR12 ALSU BTA ATS STA LAB TESTLAB
+----> gtl ln ltb inj br bts lnrf brrf srrf arrf bl acc als cr ar01 ar02 ar03 ar04 ar05 ar06 ar07 ar08 ar09 ar10 ar11 ar12 sr01 sr02 sr03 sr04 sr05 sr06 sr07 sr08 sr09 sr10 sr11 sr12 bl01 bl02 bl03 bl04 bl05 bl06 bl07 bl08 bl09 bl10 bl11 bl12 fe01 fe02 fe03 fe04 fe05 fe06 fe07 fe08 fe09 fe10 fe11 fe12 alsu bta ats sta lab testlab
 Your Location ---BTA--- was defined within the predefined list.
 
 >> We are now creating a folder with >>> iocmouse <<<
->> If the folder is exist, we can go into iocmouse 
+>> If the folder is exist, we can go into iocmouse
 >> in the >>> /home/jeonglee/gitsrc <<<
 >> Entering into /home/jeonglee/gitsrc/iocmouse
 
 >> We detected the APPNAME is the different lower-and uppercases APPNAME.
 >> APPNAME : mOuse should use the same as the existing one : mouse.
->> Please use the CASE-SENSITIVITY APPNAME to match the existing APPNAME 
+>> Please use the CASE-SENSITIVITY APPNAME to match the existing APPNAME
 
 Usage    : tools/generate_ioc_structure.bash [-l LOCATION] [-p APPNAME] [-f FOLDER] <-a>
 
               -l : LOCATION
-              -p : APPNAME - Case-Sensitivity 
+              -p : APPNAME - Case-Sensitivity
               -f : FOLDER - repository, If not defined, APPNAME will be used
 
  bash tools/generate_ioc_structure.bash -p APPNAME -l Location
@@ -269,7 +340,7 @@ git clone ssh://git....../tools tools
 cd tools
 mkdir -p testing
 cd testing
-bash ../generate_ioc_structure.bash -p NAME -l LOCATION 
+bash ../generate_ioc_structure.bash -p NAME -l LOCATION
 cd NAME/iocBoot/iocLOCATION-NAME/
 make -C ../../
 ./run

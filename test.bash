@@ -21,21 +21,29 @@ function tree2
     tree -I '.ci|.git' --charset=ascii -a -L "${level}" "${path}";
 }
 
-
 function a_test
 {
     local MESSAGE="$1"; shift;
     local APPNAME="$1"; shift;
     local LOCATION="$1"; shift;
     local FOLDER="$1"; shift;
+    local DEVICE="$1"; shift;
     
     echo ">>> ${MESSAGE}"
     pushd "${SC_TOP}/.." || exit;
     if [ -z $FOLDER ]; then
-        echo "Y" | bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}" || exit
+        if [ -z $DEVICE ]; then
+            echo "Y" | bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}" || exit
+        else
+            echo "Y" | bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}" -d "${DEVICE}" || exit
+        fi
         tree2 "${APPNAME}"
     else
-        echo "Y" | bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}" -f "${FOLDER}"
+        if [ -z $DEVICE ]; then
+            echo "Y" | bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}" -f "${FOLDER}"
+        else
+            echo "Y" | bash "${SC_TOP}/generate_ioc_structure.bash" -l "${LOCATION}" -p "${APPNAME}" -f "${FOLDER}" -d "${DEVICE}"
+        fi
         tree2 "${FOLDER}" "3"
     fi
 
@@ -48,6 +56,7 @@ function series_test
 
     local APPNAME="$1"; shift;
     local LOCATION="$1"; shift;
+    local DEVICE="$1"; shift;
     echo ""
     echo ">>> Test"
     echo ">>> APPNAME ${APPNAME}, LOCATION ${LOCATION}"
@@ -63,6 +72,8 @@ function series_test
     # We revers the case of all characters in APPNAME to generate IOC
     # within the same folder name as APPNAME
     a_test "Test 4" "${APPNAME~~}" "${LOCATION}" "${APPNAME}"
+    # Test 5, we use the DEVICE option to make IOCNAME=LOCATION-DEVICE
+    a_test "Test 5" "${APPNAME}" "${LOCATION}" "${APPNAME}" "${DEVICE}"
     pushd "${SC_TOP}/.." || exit;
     rm -rf ${APPNAME}
     popd || exit;
@@ -70,9 +81,9 @@ function series_test
 }
 
 # OK
-series_test "mouse" "home"
+series_test "mouse" "home" "deermouse"
 # Different APPNAME with the predefined LOCATION
-series_test "Mouse" "SR12"
+series_test "Mouse" "SR12" "housemouse"
 #
 # NOK (Location shall not contain ioc string"
 series_test "iocName" "BTA"
