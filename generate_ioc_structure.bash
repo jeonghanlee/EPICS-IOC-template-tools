@@ -38,14 +38,15 @@ function usage
 {
     {
         echo "";
-        echo "Usage    : $0 [-l LOCATION] [-p APPNAME] [-f FOLDER] <-a>"
+        echo "Usage    : $0 [-l LOCATION] [-d DEVICE] [-p APPNAME] [-f FOLDER] <-a>"
         echo "";
-        echo "              -l : LOCATION"
+        echo "              -l : LOCATION - Standard ALS IOC location name with a strict list. Beware if you ignore the standard list!"
         echo "              -p : APPNAME - Case-Sensitivity "
+        echo "              -d : DEVICE - Optional device name for the IOC. If specified, IOCNAME=LOCATION-DEVICE. Otherwise, IOCNAME=LOCATION-APPNAME"
         echo "              -f : FOLDER - repository, If not defined, APPNAME will be used"
         echo "";
-        echo " bash $0 -p APPNAME -l Location"
-        echo " bash $0 -p APPNAME -l Location -f Folder"
+        echo " bash $0 -p APPNAME -l Location -d Device"
+        echo " bash $0 -p APPNAME -l Location -d Device -f Folder"
         echo ""
     } 1>&2;
     exit 1;
@@ -360,7 +361,7 @@ function IsIn
 function main
 {
     local filter="ioc"
-    local options="p:l:f:n:"
+    local options="p:l:f:n:d:"
     local APPNAME=""
     local IOCNAME=""
     local FOLDERNAME="";
@@ -386,6 +387,7 @@ function main
             #
             p) APPNAME="${OPTARG//\/}"    ;;
             l) LOCATION="${OPTARG//\/}"   ;;
+            d) DEVICE="${OPTARG//\/}"   ;;
             f) FOLDERNAME="${OPTARG//\/}" ;;
             n) IOCNAME="${OPTARG//\/}" ;;
             :)
@@ -421,19 +423,25 @@ function main
     if [[ "$ADDONLYCONFIG" == "NO" ]]; then
 
         if [ -z "$APPNAME" ]; then
+            echo "Option -p is required." >&2
             usage;
         fi
 
         if [ -z "$LOCATION" ]; then
+            echo "Option -l is required." >&2
             usage;
         fi
-        
+
         if [ -z "$FOLDERNAME" ]; then
             FOLDERNAME=${APPNAME}
         fi
         
         if [ -z "$IOCNAME" ]; then
-            IOCNAME="${LOCATION}-${APPNAME}"
+            if [ -z "$DEVICE" ]; then
+                IOCNAME="${LOCATION}-${APPNAME}"
+            else
+                IOCNAME="${LOCATION}-${DEVICE}"
+            fi
         fi
 
         if test "${LOCATION#*$filter}" != "$LOCATION"; then
