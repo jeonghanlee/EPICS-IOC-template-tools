@@ -38,11 +38,11 @@ function usage
 {
     {
         echo "";
-        echo "Usage    : $0 [-l LOCATION] [-d DEVICENAME] [-p APPNAME] [-f FOLDER] <-a>"
+        echo "Usage    : $0 [-l LOCATION] [-d DEVICE] [-p APPNAME] [-f FOLDER] <-a>"
         echo "";
         echo "              -l : LOCATION - Standard ALS IOC location name with a strict list. Beware if you ignore the standard list!"
-        echo "              -d : DEVICENAME - Device name for the IOC, could be same as APPNAME if there is only one IOC in this repository"
         echo "              -p : APPNAME - Case-Sensitivity "
+        echo "              -d : DEVICE - Optional device name for the IOC. If specified, IOCNAME=LOCATION-DEVICE. Otherwise, IOCNAME=LOCATION-APPNAME"
         echo "              -f : FOLDER - repository, If not defined, APPNAME will be used"
         echo "";
         echo " bash $0 -p APPNAME -l Location -d Device"
@@ -432,20 +432,16 @@ function main
             usage;
         fi
 
-        if [ -z "$DEVICE" ]; then
-            echo "Option -d is required." >&2
-            usage
-        fi
-        
         if [ -z "$FOLDERNAME" ]; then
             FOLDERNAME=${APPNAME}
         fi
         
         if [ -z "$IOCNAME" ]; then
-            IOCNAME="${LOCATION}-${DEVICE}"
-        else
-            # IOCNAME is already set by the -n option
-            :
+            if [ -z "$DEVICE" ]; then
+                IOCNAME="${LOCATION}-${APPNAME}"
+            else
+                IOCNAME="${LOCATION}-${DEVICE}"
+            fi
         fi
 
         if test "${LOCATION#*$filter}" != "$LOCATION"; then
