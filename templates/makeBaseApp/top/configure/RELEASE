@@ -55,6 +55,8 @@ MODULES = $(EPICS_BASE)/../modules
 #SCALER=$(MODULES)/scaler
 #MCA=$(MODULES)/mca
 #ETHER_IP=$(MODULES)/ether_ip
+#RGAMV2=$(MODULES)/rgamv2
+#UNIDRV=$(MODULES)/unidrv
 PVXS=$(MODULES)/pvxs
 
 # EPICS_BASE should appear last so earlier modules can override stuff:
