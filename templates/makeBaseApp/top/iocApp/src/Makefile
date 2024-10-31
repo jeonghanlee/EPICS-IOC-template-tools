@@ -122,6 +122,17 @@ Common_DBDs += caPutLog.dbd
 Common_LIBs += caPutLog
 endif
 
+ifneq ($(RGAMV2),)
+Common_DBDs += rgamv2Include.dbd
+Common_LIBs += rgamv2
+endif
+
+ifneq ($(UNIDRV),)
+Common_DBDs += unidrv.dbd mks.dbd
+Common_LIBs += unidrv mks re2
+endif
+
+
 # https://epics.anl.gov/tech-talk/2024/msg00460.php
 # QSRV2
 ifdef PVXS_MAJOR_VERSION # prefer QSRV2 :)
