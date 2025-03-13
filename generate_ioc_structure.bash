@@ -513,7 +513,7 @@ function main
             export EPICS_MBA_TEMPLATE_TOP="${SC_TOP}"/templates/makeBaseApp/top
             if [[ "$APPNAME_EXIST" == "FALSE" ]]; then
                 printf ">> makeBaseApp.pl -t ioc\n"
-                makeBaseApp.pl -t ioc "${APPNAME}"
+                makeBaseApp.pl -t ioc "${APPNAME}" || exit
             fi
         fi
 
@@ -523,7 +523,7 @@ function main
         printf ">>> Making IOC application with IOCNAME %s and IOC %s\n" "${IOCNAME}" "${IOC}"
         printf ">>> \n";
         printf ">> makeBaseApp.pl -i -t ioc -p %s $s\n" "${APPNAME}" "${IOCNAME}"
-        makeBaseApp.pl -i -t ioc -p "${APPNAME}" "${IOCNAME}"
+        makeBaseApp.pl -i -t ioc -p "${APPNAME}" "${IOCNAME}" || exit
         printf ">>> \n";
         # makeBasApp.pl strange behaviour, it could be an intension
         # if IOCNAME contains "ioc" string, the prefix "ioc" will not be in the iocBoot path
