@@ -157,6 +157,12 @@ Common_DBDs += feed.dbd
 Common_LIBs += feed
 endif
 
+## PSC
+ifneq ($(PSCDRV),)
+Common_DBDs += pscCore.dbd
+Common_LIBs += pscCore
+endif
+
 
 ## Motion
 ifneq ($(PMAC),)
