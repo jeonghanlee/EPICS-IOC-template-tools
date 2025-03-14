@@ -67,8 +67,11 @@ MODULES = $(EPICS_BASE)/../modules
 ### FEED for LLRF
 #FEED=$(MODULES)/feed
 ### PSC Modules
+#PSCDRV=$(MODULES)/pscdrv
+### MOTION Modules
 #PMAC=$(MODULES)/pmac
 #
+
 ### ALS-U Default Module
 PVXS=$(MODULES)/pvxs
 
