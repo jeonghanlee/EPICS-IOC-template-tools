@@ -122,6 +122,7 @@ Common_DBDs += caPutLog.dbd
 Common_LIBs += caPutLog
 endif
 
+## VACUUM
 ifneq ($(RGAMV2),)
 Common_DBDs += rgamv2Include.dbd
 Common_LIBs += rgamv2
@@ -132,6 +133,40 @@ Common_DBDs += unidrv.dbd mks.dbd
 Common_LIBs += unidrv mks re2
 endif
 
+# QPC doesn't have any libs and dbd files
+ifneq ($(QPC),)
+Common_DBDs +=
+Common_LIBs +=
+endif
+
+
+## Instrumentation
+ifneq ($(EVENTGENERATORSUP),)
+Common_DBDs += eventGeneratorSup.dbd
+Common_LIBs += eventGeneratorSup
+endif
+
+ifneq ($(BPMSUP),)
+Common_DBDs += bpmSup.dbd
+Common_LIBs += bpmSup
+endif
+
+## LLRF 
+ifneq ($(FEED),)
+Common_DBDs += feed.dbd
+Common_LIBs += feed
+endif
+
+
+## Motion
+ifneq ($(PMAC),)
+Common_DBDs += drvAsynPowerPMACPort.dbd
+Common_DBDs += pmacAsynIPPort.dbd
+Common_DBDs += pmacAsynMotorPort.dbd
+Common_LIBs += pmacAsynIPPort
+Common_LIBs += pmacAsynMotorPort
+Common_LIBs += powerPmacAsynPort
+endif
 
 # https://epics.anl.gov/tech-talk/2024/msg00460.php
 # QSRV2

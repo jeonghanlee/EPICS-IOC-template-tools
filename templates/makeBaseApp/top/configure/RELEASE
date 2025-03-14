@@ -55,8 +55,21 @@ MODULES = $(EPICS_BASE)/../modules
 #SCALER=$(MODULES)/scaler
 #MCA=$(MODULES)/mca
 #ETHER_IP=$(MODULES)/ether_ip
+#
+### ALS-U Site Specific Modules
+### VACUUM Modules
 #RGAMV2=$(MODULES)/rgamv2
 #UNIDRV=$(MODULES)/unidrv
+#QPC=$(MODULES)/qpc
+### Instrumentation
+#EVENTGENERATORSUP=$(MODULES)/eventGeneratorSup
+#BPMSUP=$(MODULES)/bpmSup
+### FEED for LLRF
+#FEED=$(MODULES)/feed
+### PSC Modules
+#PMAC=$(MODULES)/pmac
+#
+### ALS-U Default Module
 PVXS=$(MODULES)/pvxs
 
 # EPICS_BASE should appear last so earlier modules can override stuff:
