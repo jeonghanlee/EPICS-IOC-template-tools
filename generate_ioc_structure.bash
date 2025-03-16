@@ -189,6 +189,7 @@ include:
   - project: alsu/ci
     ref: master
     file:
+      - 'workflow.yml'
       - 'alsu-vars.yml'
       - 'setEnvALSU.yml'
       - 'debian12-epics.yml'
