@@ -191,17 +191,13 @@ include:
     file:
       - 'workflow.yml'
       - 'alsu-vars.yml'
-      - 'setEnvALSU.yml'
+      - 'env-sitemodules.yml'
       - 'debian12-epics.yml'
       - 'rocky8-epics.yml'
-      - 'rocky9-epics.yml'
-      #- 'site-modules.yml'
-      #- 'debian12-epics-site.yml'
-      #- 'rocky8-epics-site.yml'
-      #- 'rocky9-epics-site.yml'
-      - 'debian12-analyzers.yml'
-      - 'rocky8-analyzers.yml'
-      - 'rocky9-analyzers.yml'
+      #- 'rocky9-epics.yml'
+      #- 'debian12-analyzers.yml'
+      #- 'rocky8-analyzers.yml'
+      #- 'rocky9-analyzers.yml'
 
 stages:
   - build
