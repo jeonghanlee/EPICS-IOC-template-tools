@@ -181,57 +181,32 @@ function als_ci
 
     if [ ! -f "${cifile}" ]; then
         cat > "${cifile}" <<"EOF"
-# Please check the following repository:
-# https://git.als.lbl.gov/accelerator-controls/environment/ci/-/tree/master
-# 
 ---
-variables:
-  GIT_DEPTH: 2
-
+# Please check the site https://git.als.lbl.gov/alsu/ci
+# If IOC does need the site modules. replace setEnvALSU with site-modules, and debian12/rocky8,9-epics with -epics-site files
+#
 include:
-  - project: accelerator-controls/environment/ci
-    ref: master # a22f89f2e751508cad42734cecd04783e40b468f # (GIT SHA) # v1.0.0 (GIT TAG) # master (GIT BRANCH)
-    file: setEnvALSU.yml
-  - project: accelerator-controls/environment/ci
+  - project: alsu/ci
     ref: master
-    file: debian12-epics.yml
-  - project: accelerator-controls/environment/ci
-    ref: master
-    file: debian12-analyzers.yml
-  - project: accelerator-controls/environment/ci
-    ref: master
-    file: rocky8-epics.yml
-  - project: accelerator-controls/environment/ci
-    ref: master
-    file: rocky9-epics.yml
+    file:
+      - 'alsu-vars.yml'
+      - 'setEnvALSU.yml'
+      - 'debian12-epics.yml'
+      - 'rocky8-epics.yml'
+      - 'rocky9-epics.yml'
+      #- 'site-modules.yml'
+      #- 'debian12-epics-site.yml'
+      #- 'rocky8-epics-site.yml'
+      #- 'rocky9-epics-site.yml'
+      - 'debian12-analyzers.yml'
+      - 'rocky8-analyzers.yml'
+      - 'rocky9-analyzers.yml'
 
 stages:
   - build
   - test
   - analyzers
   - deploy
-
-# One can override the debian10-builder in order to custumize ones 
-# builder configuration
-#
-#debian10-builder:
-#  script:
-#    - echo "This is the debian-builder override examples"
-#    - echo "User can set the different environment....."
-#    - echo "EPICS_BASE:=${EPICS_BASE}" > configure/RELEASE.local
-#    - make
-
-# Or override the setEnv module and base setup
-#
-#default:
-#  before_script:
-#    - echo "EPICS_BASE:=..."
-
-# In addtion, one can do other in the same way...
-#
-#rocky8-tester:
-#  script:
-#    - splint
 EOF
     else
         printf "Exist : %s\n" "${cifile}";
