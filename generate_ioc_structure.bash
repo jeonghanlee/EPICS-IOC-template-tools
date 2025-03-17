@@ -183,18 +183,18 @@ function als_ci
         cat > "${cifile}" <<"EOF"
 ---
 # Please check the site https://git.als.lbl.gov/alsu/ci
-# If IOC does need the site modules. replace setEnvALSU with site-modules, and debian12/rocky8,9-epics with -epics-site files
+# If IOC does need the site modules. create .sitmodules in $TOP folder
 #
 include:
   - project: alsu/ci
-    ref: master
+    ref: master          # branch name, tag name, Commit SHA 
     file:
       - 'workflow.yml'
       - 'alsu-vars.yml'
       - 'env-sitemodules.yml'
       - 'debian12-epics.yml'
       - 'rocky8-epics.yml'
-      #- 'rocky9-epics.yml'
+      - 'rocky9-epics.yml'
       #- 'debian12-analyzers.yml'
       #- 'rocky8-analyzers.yml'
       #- 'rocky9-analyzers.yml'
@@ -202,8 +202,8 @@ include:
 stages:
   - build
   - test
-  - analyzers
-  - deploy
+  #- analyzers
+  #- deploy
 EOF
     else
         printf "Exist : %s\n" "${cifile}";
