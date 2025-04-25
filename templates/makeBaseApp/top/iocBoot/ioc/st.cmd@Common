@@ -23,9 +23,10 @@ epicsEnvSet("EPICS_CA_ADDR_LIST","127.255.255.255")
 #-- epicsEnvSet("EPICS_PVAS_IGNORE_ADDR_LIST","")
 #-- epicsEnvSet("EPICS_PVA_CONN_TMO","")
 #--
-epicsEnvSet("DB_TOP",               "$(TOP)/db")
-epicsEnvSet("STREAM_PROTOCOL_PATH", "$(DB_TOP)")
-epicsEnvSet("IOCSH_LOCAL_TOP",      "$(TOP)/iocsh")
+epicsEnvSet("DB_TOP",                "$(TOP)/db")
+epicsEnvSet("EPICS_DB_INCLUDE_PATH", "$(DB_TOP)")
+epicsEnvSet("STREAM_PROTOCOL_PATH",  "$(DB_TOP)")
+epicsEnvSet("IOCSH_LOCAL_TOP",       "$(TOP)/iocsh")
 #--epicsEnvSet("IOCSH_TOP",            "$(EPICS_BASE)/../modules/soft/iocsh/iocsh")
 #--
 epicsEnvSet("ENGINEER",  "_USER_")
