@@ -30,6 +30,12 @@ ifneq ($(AUTOSAVE),)
 DB_INSTALLS += $(AUTOSAVE)/db/save_restoreStatus.db
 endif
 
+ifneq ($(PMAC),)
+DB_INSTALLS += $(PMAC)/db/pmacController.template
+DB_INSTALLS += $(PMAC)/db/pmacStatusAxis.template
+DB_INSTALLS += $(PMAC)/db/powerPmacStatus.template
+endif
+
 DB += $(patsubst ../%, %, $(wildcard ../*.template))
 DB += $(patsubst ../%, %, $(wildcard ../*.db))
 DB += $(patsubst ../%, %, $(wildcard ../*.vdb))

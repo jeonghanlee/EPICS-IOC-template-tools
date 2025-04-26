@@ -25,54 +25,54 @@
 MODULES = $(EPICS_BASE)/../modules
 #MYMODULE = $(MODULES)/my-module
 
-
-
-# If using the sequencer, point SNCSEQ at its top directory:
-
-
 #ALS_IOCSH = $(MODULES)/iocsh
-
+#SNMP = $(MODULES)/snmp
+#
+###--- ASYN Family
 #ASYN = $(MODULES)/asyn
 #SNCSEQ = $(MODULES)/seq
-#MODBUS = $(MODULES)/modbus
-#SNMP = $(MODULES)/snmp
-#STD = $(MODULES)/std
-#CALC = $(MODULES)/calc
-#AUTOSAVE = $(MODULES)/autosave
-#RECCASTER = $(MODULES)/recsync
-#### STREAM = $(MODULES)/stream
-# ALS-U use "StreamDevice" as a directory name
-# STREAM = $(MODULES)/StreamDevice
-#RETOOLS = $(MODULES)/retools
-#CAPUTLOG = $(MODULES)/caPutLog
-#### devIocStats : EPICS community iocStats
-#devIocStats = $(MODULES)/iocStats
-#### IOCSTATS : ALS specific iocStats
-#IOCSTATS = $(MODULES)/iocStatsALS
-#MEASCOMP = $(MODULES)/measComp
-#SSCAN=$(MODULES)/sscan
-#BUSY=$(MODULES)/busy
-#SCALER=$(MODULES)/scaler
-#MCA=$(MODULES)/mca
+#MODBUS = $(MODULES)/modbus            ## Please enable ASYN
+#STD = $(MODULES)/std                  ## Please enable ASYN and SNCSEQ
+#CALC = $(MODULES)/calc                ## Please enable SSCAN and SNCSEQ
+#MEASCOMP = $(MODULES)/measComp        ## Please enable ASYN and SNCSEQ
+#SSCAN=$(MODULES)/sscan                ## Please enable SNCSEQ
+#BUSY=$(MODULES)/busy                  ## Please enable ASYN
+#SCALER=$(MODULES)/scaler              ## Please enable ASYN
+#MCA=$(MODULES)/mca                    ## Please enable ASYN
+###--- ALS-U use "StreamDevice" as a directory name
+#STREAM = $(MODULES)/StreamDevice     ## Please enable ASYN
+#
+###--- AB PLC
 #ETHER_IP=$(MODULES)/ether_ip
 #
-### ALS-U Site Specific Modules
-### VACUUM Modules
+#
+###--- IOCSTATS : ALS specific iocStats
+#IOCSTATS = $(MODULES)/iocStatsALS
+#
+###--- ALS-U Site Specific Modules
+###---------------- VACUUM Modules
 #RGAMV2=$(MODULES)/rgamv2
 #UNIDRV=$(MODULES)/unidrv
 #QPC=$(MODULES)/qpc
-### Instrumentation
+###---------------- Instrumentation
 #EVENTGENERATORSUP=$(MODULES)/eventGeneratorSup
 #BPMSUP=$(MODULES)/bpmSup
-### FEED for LLRF
+###----------------- FEED for LLRF
 #FEED=$(MODULES)/feed
-### PSC Modules
+###----------------- PSC Modules
 #PSCDRV=$(MODULES)/pscdrv
-### MOTION Modules
+###----------------- MOTION Modules
+#MOTOR=$(MODULES)/motor                ## Please enable ASYN
 #PMAC=$(MODULES)/pmac
 #
-
-### ALS-U Default Module
+#
+### --- ALS-U Default Modules : All IOC should have them all
+AUTOSAVE = $(MODULES)/autosave
+RECCASTER = $(MODULES)/recsync
+RETOOLS = $(MODULES)/retools
+CAPUTLOG = $(MODULES)/caPutLog
+#### devIocStats : EPICS community iocStats
+devIocStats = $(MODULES)/iocStats
 PVXS=$(MODULES)/pvxs
 
 # EPICS_BASE should appear last so earlier modules can override stuff:
