@@ -165,6 +165,13 @@ endif
 
 
 ## Motion
+ifneq ($(MOTOR),)
+Common_DBDs += motorSupport.dbd
+Common_DBDs += devSoftMotor.dbd
+Common_LIBs += motor
+Common_LIBs += softMotor
+endif
+
 ifneq ($(PMAC),)
 Common_DBDs += drvAsynPowerPMACPort.dbd
 Common_DBDs += pmacAsynIPPort.dbd
