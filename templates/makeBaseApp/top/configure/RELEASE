@@ -31,16 +31,25 @@ MODULES = $(EPICS_BASE)/../modules
 ###--- ASYN Family
 #ASYN = $(MODULES)/asyn
 #SNCSEQ = $(MODULES)/seq
-#MODBUS = $(MODULES)/modbus            ## Please enable ASYN
-#STD = $(MODULES)/std                  ## Please enable ASYN and SNCSEQ
-#CALC = $(MODULES)/calc                ## Please enable SSCAN and SNCSEQ
-#MEASCOMP = $(MODULES)/measComp        ## Please enable ASYN and SNCSEQ
-#SSCAN=$(MODULES)/sscan                ## Please enable SNCSEQ
-#BUSY=$(MODULES)/busy                  ## Please enable ASYN
-#SCALER=$(MODULES)/scaler              ## Please enable ASYN
-#MCA=$(MODULES)/mca                    ## Please enable ASYN
+#MODBUS = $(MODULES)/modbus
+### MODBUS : Please enable ASYN
+#STD = $(MODULES)/std
+### STD : Please enable ASYN and SNCSEQ
+#CALC = $(MODULES)/calc
+### CALC : Please enable SSCAN and SNCSEQ
+#MEASCOMP = $(MODULES)/measComp
+### MEASCOMP : Please enable ASYN and SNCSEQ
+#SSCAN=$(MODULES)/sscan
+### SSCAN : Please enable SNCSEQ
+#BUSY=$(MODULES)/busy
+### BUSY : Please enable ASYN
+#SCALER=$(MODULES)/scaler
+### SCALER : Please enable ASYN
+#MCA=$(MODULES)/mca
+### MCA : Please enable ASYN
 ###--- ALS-U use "StreamDevice" as a directory name
-#STREAM = $(MODULES)/StreamDevice     ## Please enable ASYN
+#STREAM = $(MODULES)/StreamDevice
+### STREAM : Please enable ASYN and CALC
 #
 ###--- AB PLC
 #ETHER_IP=$(MODULES)/ether_ip
@@ -62,7 +71,8 @@ MODULES = $(EPICS_BASE)/../modules
 ###----------------- PSC Modules
 #PSCDRV=$(MODULES)/pscdrv
 ###----------------- MOTION Modules
-#MOTOR=$(MODULES)/motor                ## Please enable ASYN
+#MOTOR=$(MODULES)/motor
+### Please enable ASYN
 #PMAC=$(MODULES)/pmac
 #
 #
