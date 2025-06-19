@@ -17,11 +17,12 @@
 #
 # Author  : Jeong Han Lee
 # email   : JeongLee@lbl.gov
-# version : 0.1.0
+# version : 0.1.1
 #
 #
 # 0.0.9 : gitlab-ci Clone depth 2
-# 0.1.0 : introduce a folder name 
+# 0.1.0 : introduce a folder name
+# 0.1.1 : add mdbook support, use master as the default branch name
 
 set +e
 
@@ -60,7 +61,7 @@ function add_gitignore
         cat > "${ignorefile}" <<"EOF"
 # EPICS site : https://epics-controls.org/
 # References : epics-base / epics-modules / @ralphlange / @jeonghanlee
-# Directories built by EPICS building system 
+# Directories built by EPICS building system
 /cfg/
 /bin/
 /lib/
@@ -101,7 +102,7 @@ auto_settings.sav*
 auto_positions.sav*
 
 
-# ALS-U IOC 
+# ALS-U IOC
 /*App/Db/*#
 /*Boot/*/screenlog.*
 /*Boot/*/*.log
@@ -173,7 +174,7 @@ function add_submodule
     else
         printf "Exist : %s\n" "${tgt_name}";
     fi
-}  
+}
 
 function als_ci
 {
@@ -187,7 +188,7 @@ function als_ci
 #
 include:
   - project: alsu/ci
-    ref: master          # branch name, tag name, Commit SHA 
+    ref: master          # branch name, tag name, Commit SHA
     file:
       - 'workflow.yml'
       - 'alsu-vars.yml'
@@ -195,6 +196,7 @@ include:
       - 'debian12-epics.yml'
       - 'rocky8-epics.yml'
       - 'rocky9-epics.yml'
+      - 'mdbook.yml'
       #- 'debian12-analyzers.yml'
       #- 'rocky8-analyzers.yml'
       #- 'rocky9-analyzers.yml'
@@ -203,7 +205,7 @@ stages:
   - build
   - test
   #- analyzers
-  #- deploy
+  - deploy
 EOF
     else
         printf "Exist : %s\n" "${cifile}";
@@ -303,7 +305,7 @@ function sed_file
     local ioc="$1";     shift;
     local input="$1";   shift;
     local output="$1";  shift;
-#    echo "sed_file $appname $iocname $ioc $input $output"
+    #    echo "sed_file $appname $iocname $ioc $input $output"
     sed -e "s|_APPNAME_|${appname}|g" -e "s|_IOCNAME_|${iocname}|g" -e "s|_IOC_|${ioc}|g" < "${input}" > "${output}"
 }
 
@@ -322,7 +324,7 @@ function yes_or_no_to_go
     esac
 }
 
-function IsIn 
+function IsIn
 {
     local i;
     local element="$1"; shift;
@@ -407,7 +409,7 @@ function main
         if [ -z "$FOLDERNAME" ]; then
             FOLDERNAME=${APPNAME}
         fi
-        
+
         if [ -z "$IOCNAME" ]; then
             if [ -z "$DEVICE" ]; then
                 IOCNAME="${LOCATION}-${APPNAME}"
@@ -456,7 +458,7 @@ function main
             printf ">> Please carefully use your folder and application name.\n";
             yes_or_no_to_go;
         fi
-        
+
         if [ ! -d "${APPTOP}" ]; then
             mkdir -p "${APPTOP}"
         fi
@@ -480,7 +482,7 @@ function main
             fi
         done
 
-        # Always YES   
+        # Always YES
         if [[ "$APPTEMPLATE" == "YES" ]]; then
             export EPICS_MBA_TEMPLATE_TOP="${SC_TOP}"/templates/makeBaseApp/top
             if [[ "$APPNAME_EXIST" == "FALSE" ]]; then
@@ -524,7 +526,7 @@ function main
         # We don't have APPNAME in a file in file_list, but leave there
         #
             for afile in "${file_list[@]}"; do
-                
+
                 if [ ! -f "${IOCBOOT_IOC_PATH}/${afile}" ]; then
                     sed_file "${APPNAME}"  "${IOCNAME}" "${IOC}" "$EPICS_MBA_TEMPLATE_TOP/../als/${afile}" "${IOCBOOT_IOC_PATH}/${afile}"
                     chmod +x "${IOCBOOT_IOC_PATH}/${afile}"
@@ -532,13 +534,14 @@ function main
                     printf ">> Exist : %s\n" "${IOCBOOT_IOC_PATH}/${afile}";
                 fi
             done
-
 #            chmod -x "${IOCBOOT_IOC_PATH}/screenrc";
 #            chmod -x "${IOCBOOT_IOC_PATH}/logrotate.conf";
-
             sed_file "${APPNAME}" "${IOCNAME}" "${IOC}" "${IOCBOOT_IOC_PATH}/st.cmd" "${IOCBOOT_IOC_PATH}/st.cmd~"
             mv "${IOCBOOT_IOC_PATH}/st.cmd~" "${IOCBOOT_IOC_PATH}/st.cmd"
             chmod +x "${IOCBOOT_IOC_PATH}/st.cmd"
+#
+            sed -e "s|@APPNAME@|${APPNAME}|g"  < "${APPTOP}/book.toml" > "${APPTOP}/book.toml~"
+            mv  "${APPTOP}/book.toml~" "${APPTOP}/book.toml"
         fi
 
         README=README.md
@@ -554,12 +557,12 @@ function main
     # Always YES!
     if [[ "$ALS_CI" == "YES" ]]; then
        if [ ! -d .git ]; then
-        git init;
+        git init --initial-branch=master
        fi
        als_ci;
        add_gitignore;
        add_gitattributes;
-       git add *;
+       git add .;
     fi
 
     printf ">> leaving from %s\n" "${APPTOP}";
