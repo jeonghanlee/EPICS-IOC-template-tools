@@ -54,6 +54,9 @@ MODULES = $(EPICS_BASE)/../modules
 ###--- AB PLC
 #ETHER_IP=$(MODULES)/ether_ip
 #
+###--- OPCUA
+#OPCUA=$(MODULES)/opcua
+#
 #
 ###--- IOCSTATS : ALS specific iocStats
 #IOCSTATS = $(MODULES)/iocStatsALS
