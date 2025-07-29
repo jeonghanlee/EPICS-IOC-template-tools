@@ -122,6 +122,12 @@ Common_DBDs += caPutLog.dbd
 Common_LIBs += caPutLog
 endif
 
+
+ifneq ($(OPCUA),)
+Common_DBDs += opcua.dbd
+Common_LIBs += opcua
+endif
+
 ## VACUUM
 ifneq ($(RGAMV2),)
 Common_DBDs += rgamv2Include.dbd
@@ -151,7 +157,7 @@ Common_DBDs += bpmSup.dbd
 Common_LIBs += bpmSup
 endif
 
-## LLRF 
+## LLRF
 ifneq ($(FEED),)
 Common_DBDs += feed.dbd
 Common_LIBs += feed
@@ -209,7 +215,7 @@ _APPNAME__SYS_LIBS_Linux +=
 _APPNAME__SRCS_DEFAULT += _APPNAME_Main.cpp
 _APPNAME__SRCS_vxWorks += -nil-
 
-_APPNAME__OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
+# _APPNAME__OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 _APPNAME__LIBS += $(EPICS_BASE_IOC_LIBS)
 
 #===========================
