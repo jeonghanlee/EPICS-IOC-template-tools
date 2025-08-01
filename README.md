@@ -10,9 +10,14 @@
 
 ## `generate_ioc_structure.bash`
 
-This script is developed to reduce the manual workflow in EPICS IOC Development Guide (AL-1451-7926).
+This script automates the manual process described in the EPICS IOC Development Guide (AL-1451-7926).
 
-There are two mandatory options, such as **Device Name (APPNAME)** and **LOCATION**. Two options should be defined according to the IOC Name Naming Convention documents [1].
+The script requires two mandatory options: **APPNAME** (Device Name) and **LOCATION**. These options must be defined according to the IOC Naming Convention document [1]. Please adhere to the following rules:
+
+* The **APPNAME** and **LOCATION** must not contain the string ioc (in any case combination).
+* For the **APPNAME** and **LOCATION**, do not use the plus (`+`) and hyphens (`-`) characters. If a separator is needed, use an underscore (_) instead.
+
+Warning: It is critical to follow these naming rules. Failure to do so will cause the script to generate incorrect files, such as st.cmd and the Makefile. You will then be required to manually correct the generated files and folders before your IOC application can be compiled or run.
 
 ## Command Examples
 

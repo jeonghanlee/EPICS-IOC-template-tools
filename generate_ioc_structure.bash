@@ -17,12 +17,13 @@
 #
 # Author  : Jeong Han Lee
 # email   : JeongLee@lbl.gov
-# version : 0.1.1
+# version : 0.1.2
 #
 #
 # 0.0.9 : gitlab-ci Clone depth 2
 # 0.1.0 : introduce a folder name
 # 0.1.1 : add mdbook support, use master as the default branch name
+# 0.1.2 : add the string limitation such as ioc, Ioc, IOC, -, and +
 
 set +e
 
@@ -334,7 +335,12 @@ function IsIn
 
 function main
 {
+    # cannot protect ioC, iOc, ioC, and so on...
     local filter="ioc"
+    local filter2="Ioc"
+    local filter3="IOC"
+    local filter4="-"
+    local filter5="+"
     local options="p:l:f:n:d:"
     local APPNAME=""
     local IOCNAME=""
@@ -410,6 +416,42 @@ function main
             FOLDERNAME=${APPNAME}
         fi
 
+        # Is there any way to make this better?
+        if test "${APPNAME#*$filter}" != "$APPNAME"; then
+            printf "\n";
+            printf ">> Location argument SHALL NOT contain an ioc string\n";
+            printf ">> Please NOT use an ioc string\n";
+            usage;
+        fi
+
+        if test "${APPNAME#*$filter2}" != "$APPNAME"; then
+            printf "\n";
+            printf ">> Location argument SHALL NOT contain an ioc string\n";
+            printf ">> Please NOT use an ioc string\n";
+            usage;
+        fi
+
+        if test "${APPNAME#*$filter3}" != "$APPNAME"; then
+            printf "\n";
+            printf ">> Location argument SHALL NOT contain an ioc string\n";
+            printf ">> Please NOT use an ioc string\n";
+            usage;
+        fi
+
+        if test "${APPNAME#*$filter4}" != "$APPNAME"; then
+            printf "\n";
+            printf ">> The %s is not recommended to use\n", "$filter4";
+            printf ">> Please use the '_' instead.\n";
+            usage;
+        fi
+
+       if test "${APPNAME#*$filter5}" != "$APPNAME"; then
+            printf "\n";
+            printf ">> The %s is not recommended to use\n", "$filter5";
+            printf ">> Please use the '_' instead.\n";
+            usage;
+        fi
+
         if [ -z "$IOCNAME" ]; then
             if [ -z "$DEVICE" ]; then
                 IOCNAME="${LOCATION}-${APPNAME}"
@@ -424,6 +466,35 @@ function main
             printf ">> Please NOT use an ioc string\n";
             usage;
         fi
+
+        if test "${LOCATION#*$filter2}" != "$LOCATION"; then
+            printf "\n";
+            printf ">> Location argument SHALL NOT contain an ioc string\n";
+            printf ">> Please NOT use an ioc string\n";
+            usage;
+        fi
+
+        if test "${LOCATION#*$filter3}" != "$LOCATION"; then
+            printf "\n";
+            printf ">> Location argument SHALL NOT contain an ioc string\n";
+            printf ">> Please NOT use an ioc string\n";
+            usage;
+        fi
+
+        if test "${LOCATION#*$filter4}" != "$LOCATION"; then
+            printf "\n";
+            printf ">> The %s is not recommended to use\n", "$filter4";
+            printf ">> Please use the '_' instead.\n";
+            usage;
+        fi
+
+       if test "${LOCATION#*$filter5}" != "$LOCATION"; then
+            printf "\n";
+            printf ">> The %s is not recommended to use\n", "$filter5";
+            printf ">> Please use the '_' instead.\n";
+            usage;
+        fi
+
 
         if IsIn "${LOCATION}" "${LOCATION_LIST[@]}"; then
             echo "The following ALS / ALS-U locations are defined."
