@@ -1,6 +1,5 @@
 # tools
 
-[![pipeline status](https://git.example.com/alsu/tools/badges/master/pipeline.svg)](https://git.example.com/alsu/tools/-/commits/master)
 
 ## Requirements
 
