@@ -1,6 +1,5 @@
 # tools
 
-[![pipeline status](https://git.als.lbl.gov/alsu/tools/badges/master/pipeline.svg)](https://git.als.lbl.gov/alsu/tools/-/commits/master)
 
 ## Requirements
 
