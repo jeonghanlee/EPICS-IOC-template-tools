@@ -419,21 +419,21 @@ function main
         # Is there any way to make this better?
         if test "${APPNAME#*$filter}" != "$APPNAME"; then
             printf "\n";
-            printf ">> Location argument SHALL NOT contain an ioc string\n";
+            printf ">> APPNAME argument SHALL NOT contain an ioc string\n";
             printf ">> Please NOT use an ioc string\n";
             usage;
         fi
 
         if test "${APPNAME#*$filter2}" != "$APPNAME"; then
             printf "\n";
-            printf ">> Location argument SHALL NOT contain an ioc string\n";
+            printf ">> APPNAME argument SHALL NOT contain an ioc string\n";
             printf ">> Please NOT use an ioc string\n";
             usage;
         fi
 
         if test "${APPNAME#*$filter3}" != "$APPNAME"; then
             printf "\n";
-            printf ">> Location argument SHALL NOT contain an ioc string\n";
+            printf ">> APPNAME argument SHALL NOT contain an ioc string\n";
             printf ">> Please NOT use an ioc string\n";
             usage;
         fi
