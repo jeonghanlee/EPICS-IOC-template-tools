@@ -135,6 +135,29 @@ EOF
     fi
 }
 
+function add_editorconfig
+{
+    local attrfile=".editorconfig";
+
+    if [ ! -f "${attrfile}" ]; then
+        cat > "${attrfile}" <<"EOF"
+# EditorConfig is awesome: https://editorconfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+insert_final_newline = true
+trim_trailing_whitespace = true
+[*.md]
+trim_trailing_whitespace = false
+EOF
+    else
+        printf "Exist : %s\n" "${attrfile}";
+    fi
+}
+
 function add_gitattributes
 {
     local attrfile=".gitattributes";
@@ -194,11 +217,11 @@ include:
       - 'workflow.yml'
       - 'alsu-vars.yml'
       - 'env-sitemodules.yml'
-      - 'debian12-epics.yml'
+      - 'debian13-epics.yml'
       - 'rocky8-epics.yml'
       - 'rocky9-epics.yml'
       - 'mdbook.yml'
-      #- 'debian12-analyzers.yml'
+      #- 'debian13-analyzers.yml'
       #- 'rocky8-analyzers.yml'
       #- 'rocky9-analyzers.yml'
 
@@ -633,6 +656,7 @@ function main
        als_ci;
        add_gitignore;
        add_gitattributes;
+       add_editorconfig;
        git add .;
     fi
 
