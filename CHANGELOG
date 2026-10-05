@@ -1,4 +1,12 @@
 
 * Tue Jun 29 15:49:46 PDT 2021
   - replace the epics ci to the ALS GitLab CI
-* 2025-10-10: Add .editorconfig
+* 2025-12-10: Add .editorconfig
+* 2026-07-17: Retire the screen runtime assets; generated IOCs run under epics-ioc-runner
+* 2026-07-18: Add the epics-ioc-runner runtime smoke gate (test-runtime.bash)
+* 2026-07-18: Add a PVA group JSON skeleton; substitute LOCATION into the generated st.cmd
+* 2026-08-16: Generated .gitlab-ci.yml follows alsu/ci master (rocky10, build and deploy stages)
+* 2026-08-17: Survive a missing EPICS_BASE in the generated tree and offer an installed environment; add the make conf write policy and make site-help
+* 2026-09-11: Template st.cmd names the ioc-runner IOC_META keys as the metadata source, pins the network defaults, and exports PV info under epics-pvinfo
+* 2026-10-02: A failing startup command makes the IOC exit nonzero (on error break in the startup scripts, result check in the IOC main); IOCSH_TOP points at the commonIocsh layer
+* 2026-10-04: Smoke suite runs in two phases with shared helpers (test-lib.bash) and checks the generated repository files and an example-template application

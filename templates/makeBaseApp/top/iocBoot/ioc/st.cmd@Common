@@ -1,4 +1,6 @@
 #!../../bin/_ARCH_/_APPNAME_
+#-- A failing command stops this script and the IOC exits with a nonzero status.
+on error break
 #--
 < envPaths
 #--
@@ -10,7 +12,7 @@ cd "${TOP}"
 epicsEnvSet("EPICS_CA_ADDR_LIST","127.255.255.255")
 #--epicsEnvSet("EPICS_CA_AUTO_ADDR_LIST","YES")
 
-#-- PVXA Environment Variables
+#-- PVA Environment Variables
 #-- epicsEnvSet("EPICS_PVA_ADDR_LIST","")
 #-- epicsEnvSet("EPICS_PVAS_BEACON_ADDR_LIST","")
 #-- epicsEnvSet("EPICS_PVA_AUTO_ADDR_LIST","")
@@ -27,10 +29,13 @@ epicsEnvSet("DB_TOP",                "$(TOP)/db")
 epicsEnvSet("EPICS_DB_INCLUDE_PATH", "$(DB_TOP)")
 epicsEnvSet("STREAM_PROTOCOL_PATH",  "$(DB_TOP)")
 epicsEnvSet("IOCSH_LOCAL_TOP",       "$(TOP)/iocsh")
-#--epicsEnvSet("IOCSH_TOP",            "$(EPICS_BASE)/../modules/soft/iocsh/iocsh")
+#-- IOCSH_TOP is the commonIocsh layer; a fragment loads as $(IOCSH_TOP)/iocsh/<fragment>.iocsh.
+epicsEnvSet("IOCSH_TOP",            "$(EPICS_BASE)/../modules/commonIocsh")
 #--
+#-- Operational metadata: the ioc-runner .conf IOC_META_* keys are the
+#-- source of truth; the three values below are a startup-visible mirror.
 epicsEnvSet("ENGINEER",  "_USER_")
-epicsEnvSet("LOCATION",  "SoftIOC")
+epicsEnvSet("LOCATION",  "_LOCATION_")
 epicsEnvSet("WIKI", "")
 #-- 
 epicsEnvSet("IOCNAME", "_IOCNAME_")
@@ -52,17 +57,10 @@ _CSAFEAPPNAME__registerRecordDeviceDriver pdbbase
 #-- asynOctetSetOutputEos($(PORT), 0, "\r")
 
 #--
-#-- iocshLoad("$(IOCSH_TOP)/als_default.iocsh")
-#-- iocshLoad("$(IOCSH_TOP)/iocLog.iocsh",    "IOCNAME=$(IOCNAME), LOG_INET=$(LOG_DEST), LOG_INET_PORT=$(LOG_PORT)")
-#--# Load record instances
-#-- iocshLoad("$(IOCSH_TOP)/iocStats.iocsh",  "IOCNAME=$(IOCNAME), DATABASE_TOP=$(DB_TOP)")
-#-- iocshLoad("$(IOCSH_TOP)/iocStatsAdmin.iocsh",  "IOCNAME=$(IOCNAME), DATABASE_TOP=$(DB_TOP)")
-#-- iocshLoad("$(IOCSH_TOP)/reccaster.iocsh", "IOCNAME=$(IOCNAME), DATABASE_TOP=$(DB_TOP)")
-#-- iocshLoad("$(IOCSH_TOP)/caPutLog.iocsh",  "IOCNAME=$(IOCNAME), LOG_INET=$(LOG_DEST), LOG_INET_PORT=$(LOG_PORT)")
-#-- iocshLoad("$(IOCSH_TOP)/autosave.iocsh", "AS_TOP=$(TOP),IOCNAME=$(IOCNAME),DATABASE_TOP=$(DB_TOP),SEQ_PERIOD=60")
-
-#-- access control list
-#--asSetFilename("$(DB_TOP)/access_security_IOCNAME_.acf")
+#-- Common iocsh fragment example. The commonIocsh layer comes with EPICS-env 1.4.0
+#-- and later; a missing fragment stops this script. linStat.iocsh also needs LINSTAT
+#-- in configure/RELEASE, and linStat.dbd with the linStat library in src/Makefile.
+#-- iocshLoad("$(IOCSH_TOP)/iocsh/linStat.iocsh", "IOC=$(IOCNAME)")
 
 cd "${TOP}/iocBoot/${IOC}"
 
@@ -74,10 +72,11 @@ cd "${TOP}/iocBoot/${IOC}"
 #>>>>>>>>>>>>>
 iocInit
 #>>>>>>>>>>>>>
+#-- Enable the next line to keep a running IOC alive when a command below fails.
+#-- on error continue
 ##
-##-- epicsEnvShow > /vxboot/PVenv/${IOCNAME}.softioc
-##-- dbl > /vxboot/PVnames/${IOCNAME}
-##-- iocshLoad("$(IOCSH_TOP)/after_iocInit.iocsh", "IOC=$(IOC),TRAGET_TOP=/vxboot")
+epicsEnvShow > $(TARGET_TOP=/opt)/epics-pvinfo/env/$(IOCNAME).softioc
+dbl > $(TARGET_TOP=/opt)/epics-pvinfo/names/$(IOCNAME)
 ##
 # pvasr
 ClockTime_Report

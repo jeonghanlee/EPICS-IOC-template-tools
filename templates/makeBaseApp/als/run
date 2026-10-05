@@ -1,3 +1,0 @@
-#!/bin/sh
-screen -q -m -D -R -S _IOCNAME_ -c ./screenrc -L ./st.screen
-

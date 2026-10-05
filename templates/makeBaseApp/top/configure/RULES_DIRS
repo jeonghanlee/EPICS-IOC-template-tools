@@ -1,2 +1,4 @@
 #RULES_DIRS
+ifneq ($(ALSU_BASE_FOUND),)
 include $(CONFIG)/RULES_DIRS
+endif

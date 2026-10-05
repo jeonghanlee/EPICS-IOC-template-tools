@@ -1,6 +1,5 @@
 *~
 *.swp
-*.swp
-test*
 testing*/
+work/
 .DS_Store

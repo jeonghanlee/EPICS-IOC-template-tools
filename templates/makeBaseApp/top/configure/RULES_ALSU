@@ -1,6 +1,41 @@
-.PHONY: conf
+# RULES_ALSU - site targets, always included (both build and recovery mode).
+#
+# conf captures the sourced environment into configure/RELEASE.local so a tree
+# whose configure/RELEASE names a gone base can be pointed at the live base.
+# It writes ALSU_ENV_BASE -- the EPICS_BASE captured in configure/CONFIG before
+# the RELEASE include overrides it -- not make's live $(EPICS_BASE), which the
+# RELEASE assignment has already set to the recorded (possibly dead) path.
+#
+# RELEASE.local write policy: never overwrite silently. Show the current value
+# and stop; FORCE=1 is the one documented way to replace it. The recovery target
+# in configure/CONFIG_ALSU carries the same policy as a separate copy -- keep the
+# two in sync. They are not shared code: conf's value is a make variable and the
+# recovery target's is a shell variable, so one canned recipe cannot serve both.
 
-conf:
-	@echo ">>> Please source setEpicsEnv.bash, if one wants to use this"
-	@echo ">>> EPICS_BASE=${EPICS_BASE} > $(TOP)/configure/RELEASE.local"
-	@echo "EPICS_BASE=${EPICS_BASE}" > $(TOP)/configure/RELEASE.local
+RELEASE_LOCAL = $(TOP)/configure/RELEASE.local
+
+# Recipe verbosity: silent by default, echo the shell commands when VERBOSE is
+# set (make VERBOSE=1 conf). Site recipes prefix their commands with $(QUIET).
+QUIET := $(if $(VERBOSE),,@)
+
+.PHONY: conf
+conf: ## Record the sourced EPICS_BASE into configure/RELEASE.local (FORCE=1 to overwrite)
+	$(QUIET)if [ -z "$(ALSU_ENV_BASE)" ]; then \
+		echo "conf: EPICS_BASE is not set; source setEpicsEnv.bash first" >&2; \
+		exit 1; \
+	fi
+	$(QUIET)if [ -f "$(RELEASE_LOCAL)" ] && [ -z "$(FORCE)" ]; then \
+		echo "conf: $(RELEASE_LOCAL) already exists:" >&2; \
+		cat "$(RELEASE_LOCAL)" >&2; \
+		echo "conf: refusing to overwrite; re-run with FORCE=1 to replace" >&2; \
+		exit 1; \
+	fi
+	$(QUIET)echo "EPICS_BASE=$(ALSU_ENV_BASE)" > "$(RELEASE_LOCAL)"
+	$(QUIET)echo "conf: wrote EPICS_BASE=$(ALSU_ENV_BASE) to $(RELEASE_LOCAL)"
+
+# Named site-help, not help: EPICS base's RULES_TOP already owns the "help"
+# target in build mode, and overriding it warns on every make invocation.
+.PHONY: site-help
+site-help: ## List the ALS-U site targets and what they do
+	$(QUIET)echo "ALS-U site targets:"
+	$(QUIET)grep -hE '^[a-zA-Z_-]+:.*## ' $(MAKEFILE_LIST) | sort -u | awk 'BEGIN{FS=":.*## "}{printf "  %-18s %s\n", $$1, $$2}'

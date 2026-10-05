@@ -1,0 +1,91 @@
+# CONFIG_ALSU - recovery mode
+#
+# Included by configure/CONFIG only when the recorded EPICS base is absent,
+# i.e. when $(wildcard $(CONFIG)/CONFIG) is empty. In this mode the parse
+# survives but no build can run: no EPICS build variables are defined and no
+# build target is reachable. Only the site targets in configure/RULES_ALSU
+# remain; any other requested goal is routed to guidance instead of a bare
+# make "No rule to make target" error.
+#
+# The recovery target discovers installed environments in the same scope as the
+# recorded path, recommends one, asks, and writes configure/RELEASE.local. It
+# reads the answer from stdin: "y" proceeds, EOF or anything else declines and
+# exits non-zero, so an unattended build fails loudly instead of choosing.
+# Its RELEASE.local write below duplicates conf's write policy in RULES_ALSU
+# (refuse-unless-FORCE, show the current value) -- keep the two in sync.
+
+ALSU_RECORDED_BASE := $(EPICS_BASE)
+# Own copy of the RELEASE.local path (RULES_ALSU also defines RELEASE_LOCAL):
+# CONFIG_ALSU stays self-contained because a subdirectory recovery
+# (make -C configure) does not include RULES_ALSU.
+ALSU_REL_LOCAL := $(TOP)/configure/RELEASE.local
+
+# Discovery: peel the recorded path to its environment root and OS tag, but only
+# when it has the site shape (at least five components, ending in "base"), so an
+# off-layout value leaves the root empty instead of globbing the tree from "/".
+ALSU_PEEL = $(patsubst %/,%,$(dir $(1)))
+ALSU_PARTS := $(subst /, ,$(ALSU_RECORDED_BASE))
+ifeq ($(notdir $(ALSU_RECORDED_BASE)),base)
+ifneq ($(word 5,$(ALSU_PARTS)),)
+ALSU_R1 := $(call ALSU_PEEL,$(ALSU_RECORDED_BASE))
+ALSU_R2 := $(call ALSU_PEEL,$(ALSU_R1))
+ALSU_R3 := $(call ALSU_PEEL,$(ALSU_R2))
+ALSU_ENV_ROOT := $(call ALSU_PEEL,$(ALSU_R3))
+ALSU_OS_TAG   := $(notdir $(ALSU_R2))
+ALSU_ENV_REC  := $(notdir $(ALSU_R3))
+endif
+endif
+# Candidates: every environment version under the same root with the same OS
+# tag. The search never leaves that one scope (no other root, no sibling tag).
+ALSU_CANDS := $(if $(ALSU_ENV_ROOT),$(sort $(wildcard $(ALSU_ENV_ROOT)/*/$(ALSU_OS_TAG)/*/base)))
+
+.DEFAULT_GOAL := alsu-base-missing
+
+.PHONY: alsu-base-missing
+alsu-base-missing: ## (recovery mode) Offer an installed base and write configure/RELEASE.local
+	@base='$(ALSU_RECORDED_BASE)'; root='$(ALSU_ENV_ROOT)'; rec='$(ALSU_ENV_REC)'; \
+	cands='$(ALSU_CANDS)'; rel='$(ALSU_REL_LOCAL)'; force='$(FORCE)'; \
+	echo "recover: EPICS base not found: $$base"; \
+	if [ -z "$$cands" ]; then \
+		echo "recover: No installed EPICS environment was found in the recorded scope."; \
+		echo "recover: Correct configure/RELEASE (or configure/RELEASE.local) and rebuild."; \
+		exit 1; \
+	fi; \
+	recline=$${rec%.*}; \
+	same=''; for c in $$cands; do rest=$${c#$$root/}; v=$${rest%%/*}; case "$$v" in "$$recline".*) same="$$same$$v ";; esac; done; \
+	if [ -n "$$same" ]; then \
+		chosen_ver=$$(printf '%s\n' $$same | sort -V | tail -1); \
+	else \
+		allv=''; for c in $$cands; do rest=$${c#$$root/}; allv="$$allv$${rest%%/*} "; done; \
+		chosen_ver=$$(printf '%s\n' $$allv | sort -V | tail -1); \
+	fi; \
+	chosen=''; for c in $$cands; do rest=$${c#$$root/}; v=$${rest%%/*}; if [ "$$v" = "$$chosen_ver" ]; then chosen="$$chosen$$c "; fi; done; \
+	chosen=$$(printf '%s\n' $$chosen | sort -V | tail -1); \
+	t=$${chosen%/base}; basever=$${t##*/}; \
+	others=''; for c in $$cands; do rest=$${c#$$root/}; v=$${rest%%/*}; if [ "$$v" != "$$chosen_ver" ]; then case " $$others " in *" $$v "*) ;; *) others="$$others$$v ";; esac; fi; done; \
+	echo "recover: Recorded environment $$rec is not installed on this host."; \
+	echo "recover: Found in the same scope: $$chosen_ver (base $$basever)"; \
+	if [ -n "$$others" ]; then echo "recover: Other versions in scope: $${others% }"; fi; \
+	printf 'recover: Proceed with %s? [y/N] ' "$$chosen_ver"; \
+	if read ans && { [ "$$ans" = y ] || [ "$$ans" = Y ]; }; then :; else echo; echo "recover: No change written; correct configure/RELEASE and rebuild."; exit 1; fi; \
+	if [ -f "$$rel" ] && [ -z "$$force" ]; then \
+		echo "recover: $$rel already exists:"; cat "$$rel"; \
+		echo "recover: refusing to overwrite; re-run with FORCE=1 to replace"; exit 1; \
+	fi; \
+	echo "EPICS_BASE=$$chosen" > "$$rel"; \
+	echo "recover: wrote EPICS_BASE=$$chosen to $$rel"; \
+	echo "recover: This override is local; correct configure/RELEASE and rebuild for a permanent fix."
+
+# Route any explicitly requested goal that is not a site target to the recovery
+# target above. Filtering MAKECMDGOALS (rather than defining .DEFAULT) keeps
+# make's optional -include remake attempts -- RELEASE.local, CONFIG_SITE.*,
+# module includes under the missing base -- from matching this rule and running
+# the recovery target once per missing file.
+# Keep this list in sync with the ##-annotated site targets (conf, site-help in
+# RULES_ALSU): a new site target needs both a ## description and an entry here,
+# or in recovery mode it gets routed to the recovery target instead of running.
+ALSU_SITE_GOALS := conf site-help
+ALSU_STRAY_GOALS := $(filter-out $(ALSU_SITE_GOALS),$(MAKECMDGOALS))
+ifneq ($(ALSU_STRAY_GOALS),)
+$(ALSU_STRAY_GOALS): alsu-base-missing ;
+endif

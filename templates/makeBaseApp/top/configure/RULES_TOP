@@ -1,5 +1,7 @@
 #RULES_TOP
+ifneq ($(ALSU_BASE_FOUND),)
 include $(CONFIG)/RULES_TOP
+endif
 
 include $(TOP)/configure/RULES_ALSU
 

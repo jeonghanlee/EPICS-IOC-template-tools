@@ -58,9 +58,6 @@ MODULES = $(EPICS_BASE)/../modules
 #OPCUA=$(MODULES)/opcua
 #
 #
-###--- IOCSTATS : ALS specific iocStats
-#IOCSTATS = $(MODULES)/iocStatsALS
-#
 ###--- ALS-U Site Specific Modules
 ###---------------- VACUUM Modules
 #RGAMV2=$(MODULES)/rgamv2
