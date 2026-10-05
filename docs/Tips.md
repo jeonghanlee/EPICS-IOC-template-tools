@@ -10,14 +10,52 @@ $ source ~/epics/debian-12/7.0.7/setEpicsEnv.bash
 $ make conf
 ```
 
-It will generate one's default `EPICS_BASE` into `configure/RELEASE.local`. It definitely saves time to build IOC quickly.
+It records the sourced `EPICS_BASE` into `configure/RELEASE.local`. It definitely saves time to build IOC quickly.
 
 ```bash
 $ make conf
->>> Please source setEpicsEnv.bash, if one wants to use this
->>> EPICS_BASE=/home/jeonglee/epics/debian-12/7.0.7/base > ./configure/RELEASE.local
+conf: wrote EPICS_BASE=/home/jeonglee/epics/debian-12/7.0.7/base to ./configure/RELEASE.local
 
 $ cat configure/RELEASE.local
 EPICS_BASE=/home/jeonglee/epics/debian-12/7.0.7/base
 ```
 
+`conf` never overwrites an existing `configure/RELEASE.local` silently. Re-running shows the current value and stops; pass `FORCE=1` to replace it.
+
+```bash
+$ make conf
+conf: ./configure/RELEASE.local already exists:
+EPICS_BASE=/home/jeonglee/epics/debian-12/7.0.7/base
+conf: refusing to overwrite; re-run with FORCE=1 to replace
+
+$ make conf FORCE=1
+conf: wrote EPICS_BASE=/home/jeonglee/epics/debian-12/7.0.7/base to ./configure/RELEASE.local
+```
+
+
+* `make site-help`
+Lists the ALS-U site targets of a generated IOC with a one-line description each. The base `help` target stays untouched.
+
+```bash
+$ make site-help
+ALS-U site targets:
+  conf               Record the sourced EPICS_BASE into configure/RELEASE.local (FORCE=1 to overwrite)
+  site-help          List the ALS-U site targets and what they do
+```
+
+## When the recorded EPICS base is gone
+
+When `configure/RELEASE` names an `EPICS_BASE` that is not installed on the host, `make` does not stop at the missing base include. It runs in recovery mode: only the site targets remain, and any other goal prints the recovery guidance and exits non-zero. `make site-help` then also lists the recovery target `alsu-base-missing`.
+
+The recovery looks only in the environment root and OS tag that the recorded path implies, never elsewhere. It recommends one installed environment version, preferring the same version line and otherwise the highest installed one, and asks yes or no. Only `y` on standard input writes `configure/RELEASE.local`; any other answer, no terminal, an off-layout path, or an environment root that is gone writes nothing and exits non-zero.
+
+```bash
+$ make
+recover: EPICS base not found: /opt/epics/1.3.0.1/debian-13/7.0.10/base
+recover: Recorded environment 1.3.0.1 is not installed on this host.
+recover: Found in the same scope: 1.3.0 (base 7.0.10)
+recover: Other versions in scope: 1.1.2 1.2.2
+recover: Proceed with 1.3.0? [y/N]
+```
+
+The override in `configure/RELEASE.local` is a local stopgap. Correct `configure/RELEASE` and rebuild.

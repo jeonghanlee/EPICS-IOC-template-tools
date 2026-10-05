@@ -1,2 +1,4 @@
 #RULES.ioc
+ifneq ($(ALSU_BASE_FOUND),)
 include $(CONFIG)/RULES.ioc
+endif

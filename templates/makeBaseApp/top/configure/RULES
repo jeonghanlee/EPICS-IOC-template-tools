@@ -1,6 +1,8 @@
 # RULES
 
+ifneq ($(ALSU_BASE_FOUND),)
 include $(CONFIG)/RULES
+endif
 
 # Library should be rebuilt because LIBOBJS may have changed.
 $(LIBNAME): ../Makefile

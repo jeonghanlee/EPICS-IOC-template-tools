@@ -1,5 +1,5 @@
-####################################################################################################
-############ START of _APPNAME_.iocsh ##############################################################
+#--#################################################################################################
+#--######### START of _APPNAME_.iocsh ##############################################################
 #-- P         : PREFIX
 #-- PORT      :
 #-- IPADDR    :
@@ -15,14 +15,19 @@
 #--#           we separated the variable names in DATABASE_TOP from .... i
 #--# Please make sure you use the proper variable name to match st.cmd, and your DB file.
 #--#
+#--# A failing command stops this file and marks the calling script as failed.
+on error break
 #--# Configure port driver
 #-- MultiFunctionConfig((portName,        # The name to give to this asyn port driver
 #--                      uniqueID,        # For USB the serial number.  For Ethernet the MAC address or IP address.
 #--                      maxInputPoints,  # Maximum number of input points for waveform digitizer
 #--                      maxOutputPoints) # Maximum number of output points for waveform generator
 #MultiFunctionConfig("$(PORT)", "$(IPADDR=128.3.130.203)", 1, 1)
-#$(SHOWDEV=#--) measCompShowDevices()
-#$(ASYNTRACE=#--) asynSetTraceMask($(PORT), -1, ERROR|FLOW|DRIVER)
-#dbLoadRecords("$(DATABASE_TOP)/TC32.db", "P=$(P),PORT=$(PORT),SCAN=$(SCAN=1 second),PREC=$(PREC=3)")
-############ END of _APPNAME_.iocsh ################################################################
-####################################################################################################
+$(SHOWDEV=#--) measCompShowDevices()
+$(ASYNTRACE=#--) asynSetTraceMask($(PORT), -1, ERROR|FLOW|DRIVER)
+#dbLoadRecords("$(DATABASE_TOP)/_APPNAME_.db", "P=$(P),PORT=$(PORT),SCAN=$(SCAN=1 second),PREC=$(PREC=3)")
+$(CAOFF=#--)epicsEnvSet("EPICS_CAS_INTF_ADDR_LIST", "127.0.0.1")
+$(CAOFF=#--)epicsEnvSet("EPICS_CA_AUTO_ADDR_LIST",  "NO")
+$(PVX=#--)dbLoadGroup("$(DATABASE_TOP)/$(PVXSJSON_NAME=_APPNAME_.json)", "P=$(P),OBJ=$(OBJ=group)")
+#--######### END of _APPNAME_.iocsh ################################################################
+#--#################################################################################################

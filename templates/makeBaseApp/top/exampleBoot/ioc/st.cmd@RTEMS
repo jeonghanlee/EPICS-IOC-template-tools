@@ -1,4 +1,6 @@
 #- Example RTEMS startup script
+#- A failing command stops this script.
+on error break
 
 #- You may have to change _APPNAME_ to something else
 #- everywhere it appears in this file

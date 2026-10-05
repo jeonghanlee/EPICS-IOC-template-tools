@@ -1,0 +1,14 @@
+{
+    "$(P)$(OBJ)": {
+        "+id": "alsu:nt/_APPNAME_:1.0",
+
+        "device.serial":   {"+type": "const",  "+const": ""},
+        "device.model":    {"+type": "plain",  "+channel": "$(P)ModelName.VAL"},
+        "device.firmware": {"+type": "plain",  "+channel": "$(P)FirmwareVersion.VAL"},
+        "device.error":    {"+type": "scalar", "+channel": "$(P)LastErrorMessage.VAL", "+trigger": "*"},
+
+        "ch00.desc":  {"+type": "plain",  "+channel": "$(P)Ch0.DESC"},
+        "ch00.value": {"+type": "scalar", "+channel": "$(P)Ch0.VAL", "+trigger": "*"},
+        "ch00.egu":   {"+type": "scalar", "+channel": "$(P)Ch0.EGU", "+trigger": "*"}
+    }
+}

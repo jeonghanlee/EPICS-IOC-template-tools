@@ -25,40 +25,68 @@
 # 0.1.1 : add mdbook support, use master as the default branch name
 # 0.1.2 : add the string limitation such as ioc, Ioc, IOC, -, and +
 
-set +e
+set -euo pipefail
 
-declare -g SC_RPATH;
-declare -g SC_TOP;
-
-SC_RPATH="$(realpath "$0")";
+SC_RPATH="$(realpath "$0")"
 SC_TOP="${SC_RPATH%/*}"
 
-function pushd { builtin pushd "$@" > /dev/null || exit; }
-function popd  { builtin popd  > /dev/null || exit; }
+# Reserved substrings rejected in APPNAME and LOCATION. Mixed-case forms
+# such as ioC or iOc cannot be caught. makeBaseApp.pl mangles iocBoot
+# paths when "ioc" appears in the name.
+readonly RESERVED_SUBSTRINGS=(ioc Ioc IOC)
+# Template placeholder tokens. A value embedding one of these survives into
+# the sed substitution pass in sed_file and is re-expanded by a later -e
+# expression, corrupting the generated tree; reject it at the contract
+# boundary in every input.
+readonly TEMPLATE_TOKENS=(_APPNAME_ _IOCNAME_ _IOC_ _LOCATION_)
+# Separator characters discouraged in names; use underscore instead.
+readonly DISCOURAGED_CHARS=("-" "+")
+readonly DEFAULT_GIT_BRANCH="master"
+readonly NAME_COMPONENT_PATTERN='^[A-Za-z0-9_]+$'
+readonly IOC_NAME_PATTERN='^[A-Za-z0-9_-]+$'
+readonly NAME_COMPONENT_ALLOWED="ASCII letters, digits, and underscore"
+readonly IOC_NAME_ALLOWED="ASCII letters, digits, underscore, and hyphen"
 
+function pushd_q { builtin pushd "$@" > /dev/null || exit 1; }
+function popd_q  { builtin popd  > /dev/null || exit 1; }
+
+function die {
+    printf "ERROR: %s\n" "$*" >&2
+    exit 1
+}
+
+# Print usage and exit with the given code. A help request (rc 0) goes
+# to stdout; an error usage (rc non-zero, the default) goes to stderr.
 function usage
 {
+    local rc="${1:-1}"
+    local stream=2
+    if [[ "${rc}" -eq 0 ]]; then
+        stream=1
+    fi
     {
-        echo "";
-        echo "Usage    : $0 [-l LOCATION] [-d DEVICE] [-p APPNAME] [-f FOLDER] <-a>"
-        echo "";
-        echo "              -l : LOCATION - Standard ALS IOC location name with a strict list. Beware if you ignore the standard list!"
-        echo "              -p : APPNAME - Case-Sensitivity "
-        echo "              -d : DEVICE - Optional device name for the IOC. If specified, IOCNAME=LOCATION-DEVICE. Otherwise, IOCNAME=LOCATION-APPNAME"
-        echo "              -f : FOLDER - repository, If not defined, APPNAME will be used"
-        echo "";
-        echo " bash $0 -p APPNAME -l Location -d Device"
-        echo " bash $0 -p APPNAME -l Location -d Device -f Folder"
-        echo ""
-    } 1>&2;
-    exit 1;
+        printf "\n"
+        printf "Usage    : %s [-l LOCATION] [-d DEVICE] [-p APPNAME] [-f FOLDER] [-n IOCNAME] [-h]\n" "$0"
+        printf "\n"
+        printf "              -l : LOCATION - Standard ALS IOC location name with a strict list. Beware if you ignore the standard list!\n"
+        printf "              -p : APPNAME - Case-Sensitivity\n"
+        printf "              -d : DEVICE - Optional device name for the IOC. If specified, IOCNAME=LOCATION-DEVICE. Otherwise, IOCNAME=LOCATION-APPNAME\n"
+        printf "              -f : FOLDER - repository, If not defined, APPNAME will be used\n"
+        printf "              -n : IOCNAME - Optional explicit IOC name, overrides the LOCATION-based default\n"
+        printf "              -h : Show this help message\n"
+        printf "\n"
+        printf " bash %s -p APPNAME -l Location -d Device\n" "$0"
+        printf " bash %s -p APPNAME -l Location -d Device -f Folder\n" "$0"
+        printf "\n"
+    } >&"${stream}"
+    exit "${rc}"
 }
 
 # Must call within git repo path
 function add_gitignore
 {
-    local ignorefile=".gitignore";
-    if [ ! -f "$ignorefile" ]; then
+    local ignorefile=".gitignore"
+    if [[ ! -f "${ignorefile}" ]]; then
         cat > "${ignorefile}" <<"EOF"
 # EPICS site : https://epics-controls.org/
 # References : epics-base / epics-modules / @ralphlange / @jeonghanlee
@@ -105,7 +133,6 @@ auto_positions.sav*
 
 # ALS-U IOC
 /*App/Db/*#
-/*Boot/*/screenlog.*
 /*Boot/*/*.log
 /*Boot/*/*.states
 
@@ -131,15 +158,15 @@ auto_positions.sav*
 .DS_Store
 EOF
     else
-        printf "Exist : %s\n" "${ignorefile}";
+        printf "Exist : %s\n" "${ignorefile}"
     fi
 }
 
 function add_editorconfig
 {
-    local attrfile=".editorconfig";
+    local attrfile=".editorconfig"
 
-    if [ ! -f "${attrfile}" ]; then
+    if [[ ! -f "${attrfile}" ]]; then
         cat > "${attrfile}" <<"EOF"
 # EditorConfig is awesome: https://editorconfig.org
 
@@ -154,15 +181,15 @@ trim_trailing_whitespace = true
 trim_trailing_whitespace = false
 EOF
     else
-        printf "Exist : %s\n" "${attrfile}";
+        printf "Exist : %s\n" "${attrfile}"
     fi
 }
 
 function add_gitattributes
 {
-    local attrfile=".gitattributes";
+    local attrfile=".gitattributes"
 
-    if [ ! -f "${attrfile}" ]; then
+    if [[ ! -f "${attrfile}" ]]; then
         cat > "${attrfile}" <<"EOF"
 # Set the default behavior, in case people don't have core.autocrlf set.
 * text=auto
@@ -180,7 +207,7 @@ function add_gitattributes
 *.jpg binary
 EOF
     else
-        printf "Exist : %s\n" "${attrfile}";
+        printf "Exist : %s\n" "${attrfile}"
     fi
 }
 
@@ -188,23 +215,23 @@ EOF
 # Must call it within git repo path
 function add_submodule
 {
-    local src_url="$1"; shift;
-    local tgt_name="$1"; shift;
-    if [ ! -d "$tgt_name" ]; then
-        printf "%s is adding as submodule %s.\n" "${src_url}" "${tgt_name}";
-        git submodule add "${src_url}" "${tgt_name}"  ||  die 1 "We cannot add ${src_url} as submodule : Please check it" ;
-        printf "\n";
-        git submodule update --init --recursive  ||  die 1 "We cannot init the gitsubmodule : Please check it" ;
+    local src_url="$1"
+    local tgt_name="$2"
+    if [[ ! -d "${tgt_name}" ]]; then
+        printf "%s is adding as submodule %s.\n" "${src_url}" "${tgt_name}"
+        git submodule add "${src_url}" "${tgt_name}" || die "We cannot add ${src_url} as submodule : Please check it"
+        printf "\n"
+        git submodule update --init --recursive || die "We cannot init the gitsubmodule : Please check it"
     else
-        printf "Exist : %s\n" "${tgt_name}";
+        printf "Exist : %s\n" "${tgt_name}"
     fi
 }
 
 function als_ci
 {
-    local cifile=".gitlab-ci.yml";
+    local cifile=".gitlab-ci.yml"
 
-    if [ ! -f "${cifile}" ]; then
+    if [[ ! -f "${cifile}" ]]; then
         cat > "${cifile}" <<"EOF"
 ---
 # Please check the site https://git.als.lbl.gov/alsu/ci
@@ -219,48 +246,43 @@ include:
       - 'env-sitemodules.yml'
       - 'debian13-epics.yml'
       - 'rocky8-epics.yml'
-      - 'rocky9-epics.yml'
+      - 'rocky10-epics.yml'
       - 'mdbook.yml'
-      #- 'debian13-analyzers.yml'
-      #- 'rocky8-analyzers.yml'
-      #- 'rocky9-analyzers.yml'
 
 stages:
   - build
-  - test
-  #- analyzers
   - deploy
 EOF
     else
-        printf "Exist : %s\n" "${cifile}";
+        printf "Exist : %s\n" "${cifile}"
     fi
 }
 
 
 function epics_ci
 {
-    local url="https://github.com/epics-base/ci-scripts";
-    local tgt=".ci";
-    local cifile=".gitlab-ci.yml";
-    local localpath=".ci-local";
-    local localfile1="stable.set";
+    local url="https://github.com/epics-base/ci-scripts"
+    local tgt=".ci"
+    local cifile=".gitlab-ci.yml"
+    local localpath=".ci-local"
+    local localfile1="stable.set"
 
-    add_submodule "$url" "$tgt";
-    if [ ! -d "${localpath}" ]; then
-        echo "CREATE : ${localpath}";
-        mkdir -p "${localpath}";
+    add_submodule "${url}" "${tgt}"
+    if [[ ! -d "${localpath}" ]]; then
+        printf "CREATE : %s\n" "${localpath}"
+        mkdir -p "${localpath}"
     else
-        echo "Exist : ${localpath}";
+        printf "Exist : %s\n" "${localpath}"
     fi
-    pushd "${localpath}" || exit;
-    if [ ! -f "${localfile1}" ]; then
-        echo "BASE=7.0" > "${localfile1}"
+    pushd_q "${localpath}"
+    if [[ ! -f "${localfile1}" ]]; then
+        printf "%s\n" "BASE=7.0" > "${localfile1}"
     else
         printf "Exist : %s\n" "${localfile1}"
     fi
-    popd || exit;
+    popd_q
 
-    if [ ! -f "${cifile}" ]; then
+    if [[ ! -f "${cifile}" ]]; then
         cat > "${cifile}" <<"EOF"
 # .gitlab-ci.yml for testing EPICS Base ci-scripts
 # (see: https://github.com/epics-base/ci-scripts)
@@ -318,59 +340,180 @@ ShellCheck:
     - git ls-files --exclude='*.bash' --ignored | xargs shellcheck || echo "No script found!"
 EOF
     else
-        printf "Exist : %s\n" "${cifile}";
+        printf "Exist : %s\n" "${cifile}"
     fi
 }
 
 function sed_file
 {
-    local appname="$1"; shift;
-    local iocname="$1"; shift;
-    local ioc="$1";     shift;
-    local input="$1";   shift;
-    local output="$1";  shift;
-    #    echo "sed_file $appname $iocname $ioc $input $output"
-    sed -e "s|_APPNAME_|${appname}|g" -e "s|_IOCNAME_|${iocname}|g" -e "s|_IOC_|${ioc}|g" < "${input}" > "${output}"
+    local appname="$1"
+    local iocname="$2"
+    local ioc="$3"
+    local location="$4"
+    local input="$5"
+    local output="$6"
+    local escaped_appname=""
+    local escaped_iocname=""
+    local escaped_ioc=""
+    local escaped_location=""
+
+    sed_replacement_escape escaped_appname "${appname}"
+    sed_replacement_escape escaped_iocname "${iocname}"
+    sed_replacement_escape escaped_ioc "${ioc}"
+    sed_replacement_escape escaped_location "${location}"
+
+    sed -e "s|_APPNAME_|${escaped_appname}|g" -e "s|_IOCNAME_|${escaped_iocname}|g" -e "s|_IOC_|${escaped_ioc}|g" -e "s|_LOCATION_|${escaped_location}|g" < "${input}" > "${output}"
 }
 
 function yes_or_no_to_go
 {
 
-    read -p ">> Do you want to continue (Y/n)? " answer
+    local answer=""
+    read -rp ">> Do you want to continue (Y/n)? " answer || answer=""
     case ${answer:0:1} in
     n|N )
-        printf ">> Stop here.\n";
-        exit;
+        printf "%s\n" ">> Stop here."
+        exit 1
         ;;
     * )
-        printf ">> We are moving forward .\n";
+        printf "%s\n" ">> We are moving forward ."
         ;;
     esac
 }
 
-function IsIn
+function is_in
 {
-    local i;
-    local element="$1"; shift;
-    for i; do [[ "$i" == "$element" ]] && return 0; done
-    return 1;
+    local element="$1"
+    shift
+    local item
+
+    for item in "$@"; do
+        if [[ "${item}" == "${element}" ]]; then
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+# Escape replacement text for sed expressions that use a fixed delimiter.
+function sed_replacement_escape
+{
+    local output_var="$1"
+    local value="$2"
+
+    value="${value//\\/\\\\}"
+    value="${value//&/\\&}"
+    value="${value//|/\\|}"
+    printf -v "${output_var}" "%s" "${value}"
+}
+
+# Enforce the byte contract for values that become generated file names,
+# paths, and template replacement text. Beyond the allowed-byte pattern, a
+# value may not embed a template placeholder token: the token would reach
+# the sed substitution pass and be re-expanded by a later replacement.
+function validate_byte_contract
+{
+    local label="$1"
+    local value="$2"
+    local pattern="$3"
+    local allowed="$4"
+    local token
+
+    if [[ -z "${value}" ]]; then
+        printf "%s argument SHALL NOT be empty\n" "${label}" >&2
+        usage
+    fi
+
+    if [[ ! "${value}" =~ ${pattern} ]]; then
+        printf "%s argument contains unsupported bytes\n" "${label}" >&2
+        printf "Allowed bytes: %s\n" "${allowed}" >&2
+        usage
+    fi
+
+    for token in "${TEMPLATE_TOKENS[@]}"; do
+        if [[ "${value}" == *"${token}"* ]]; then
+            printf "%s argument SHALL NOT contain the template token %s\n" "${label}" "${token}" >&2
+            usage
+        fi
+    done
+}
+
+# Reject a name containing a reserved substring or a discouraged
+# separator. $1 is a human-facing label used in the rejection message.
+function validate_name
+{
+    local label="$1"
+    local value="$2"
+    local token
+
+    for token in "${RESERVED_SUBSTRINGS[@]}"; do
+        if [[ "${value}" == *"${token}"* ]]; then
+            printf "\n"
+            printf ">> %s argument SHALL NOT contain an ioc string\n" "${label}"
+            printf "%s\n" ">> Please NOT use an ioc string"
+            usage
+        fi
+    done
+
+    for token in "${DISCOURAGED_CHARS[@]}"; do
+        if [[ "${value}" == *"${token}"* ]]; then
+            printf "\n"
+            printf ">> The %s is not recommended to use\n" "${token}"
+            printf "%s\n" ">> Please use the '_' instead."
+            usage
+        fi
+    done
+}
+
+# Resolve the iocBoot directory name created by makeBaseApp.pl. The tool
+# omits the extra "ioc" prefix when IOCNAME already contains lowercase "ioc".
+function resolve_iocboot_ioc_path
+{
+    local apptop="$1"
+    local iocname="$2"
+    local ioc="$3"
+    local candidate=""
+    local -a candidate_paths=()
+
+    if [[ "${iocname}" == *ioc* ]]; then
+        candidate_paths=(
+            "${apptop}/iocBoot/${iocname}"
+            "${apptop}/iocBoot/${ioc}"
+        )
+    else
+        candidate_paths=(
+            "${apptop}/iocBoot/${ioc}"
+            "${apptop}/iocBoot/${iocname}"
+        )
+    fi
+
+    for candidate in "${candidate_paths[@]}"; do
+        if [[ -d "${candidate}" ]]; then
+            printf "%s\n" "${candidate}"
+            return 0
+        fi
+    done
+
+    return 1
 }
 
 function main
 {
-    # cannot protect ioC, iOc, ioC, and so on...
-    local filter="ioc"
-    local filter2="Ioc"
-    local filter3="IOC"
-    local filter4="-"
-    local filter5="+"
-    local options="p:l:f:n:d:"
+    local options=":p:l:f:n:d:h"
     local APPNAME=""
     local IOCNAME=""
-    local FOLDERNAME="";
+    local FOLDERNAME=""
     local LOCATION=""
-    local ALS_CI="YES"
+    local DEVICE=""
     local APPNAME_EXIST="FALSE"
+    local TOP=""
+    local APPTOP=""
+    local IOC=""
+    local IOCBOOT_IOC_PATH=""
+    local README=""
+    local infolderApp=""
+    local infolder=""
     local LOCATION_LIST=(
       gtl ln ltb inj br bts lnrf brrf srrf arrf bl acc als cr
       ar01 ar02 ar03 ar04 ar05 ar06 ar07 ar08 ar09 ar10 ar11 ar12
@@ -379,291 +522,184 @@ function main
       fe01 fe02 fe03 fe04 fe05 fe06 fe07 fe08 fe09 fe10 fe11 fe12
       alsu bta ats sta lab testlab
     )
-    ADDONLYCONFIG="NO"
-    APPTEMPLATE="YES"
-
-
 
     while getopts "${options}" opt; do
         case "${opt}" in
             # At least we protect APPNAME and LOCATION should not have "/" aka "directory path"
             #
-            p) APPNAME="${OPTARG//\/}"    ;;
-            l) LOCATION="${OPTARG//\/}"   ;;
-            d) DEVICE="${OPTARG//\/}"   ;;
-            f) FOLDERNAME="${OPTARG//\/}" ;;
-            n) IOCNAME="${OPTARG//\/}" ;;
+            p) APPNAME="${OPTARG}" ;;
+            l) LOCATION="${OPTARG}" ;;
+            d) DEVICE="${OPTARG}" ;;
+            f) FOLDERNAME="${OPTARG}" ;;
+            n) IOCNAME="${OPTARG}" ;;
             :)
-                echo "Option -$OPTARG requires an argument." >&2
-                usage ;;
+                printf "Option -%s requires an argument.\n" "${OPTARG}" >&2
+                usage
+                ;;
             h)
-                usage ;;
+                usage 0
+                ;;
             \?)
-                echo "Invalid option: -$OPTARG" >&2
-                usage ;;
+                printf "Invalid option: -%s\n" "${OPTARG}" >&2
+                usage
+                ;;
         esac
     done
     shift $((OPTIND-1))
 
+    if [[ -z "${APPNAME}" ]]; then
+        printf "%s\n" "Option -p is required." >&2
+        usage
+    fi
+
+    if [[ -z "${LOCATION}" ]]; then
+        printf "%s\n" "Option -l is required." >&2
+        usage
+    fi
+
+    if [[ -z "${FOLDERNAME}" ]]; then
+        FOLDERNAME="${APPNAME}"
+    fi
+
+    validate_name "Location" "${LOCATION}"
+    validate_name "APPNAME" "${APPNAME}"
+    validate_byte_contract "Location" "${LOCATION}" "${NAME_COMPONENT_PATTERN}" "${NAME_COMPONENT_ALLOWED}"
+    validate_byte_contract "APPNAME" "${APPNAME}" "${NAME_COMPONENT_PATTERN}" "${NAME_COMPONENT_ALLOWED}"
+    validate_byte_contract "FOLDER" "${FOLDERNAME}" "${NAME_COMPONENT_PATTERN}" "${NAME_COMPONENT_ALLOWED}"
+    if [[ -n "${DEVICE}" ]]; then
+        validate_byte_contract "DEVICE" "${DEVICE}" "${IOC_NAME_PATTERN}" "${IOC_NAME_ALLOWED}"
+    fi
+
+    if [[ -z "${IOCNAME}" ]]; then
+        if [[ -z "${DEVICE}" ]]; then
+            IOCNAME="${LOCATION}-${APPNAME}"
+        else
+            IOCNAME="${LOCATION}-${DEVICE}"
+        fi
+    fi
+    validate_byte_contract "IOCNAME" "${IOCNAME}" "${IOC_NAME_PATTERN}" "${IOC_NAME_ALLOWED}"
+
     #: "${EPICS_BASE:?}"
 
-    if [ -z "$EPICS_BASE" ]; then
-        echo ""
-        echo "Please set EPICS_BASE, and other EPICS environment variables first."
-        echo "Here is the example for them.";
-        echo "  export EPICS_BASE=/somewhere/your_base";
-        echo "  export EPICS_HOST_ARCH=linux-x86_64";
-        echo "  export PATH=\${EPICS_BASE}/bin/\${EPICS_HOST_ARCH}:\${PATH}";
-        echo "  export LD_LIBRARY_PATH=\${EPICS_BASE}/lib/\${EPICS_HOST_ARCH}:\${LD_LIBRARY_PATH}";
-        echo "";
-        exit;
+    if [[ -z "${EPICS_BASE:-}" ]]; then
+        printf "\n"
+        printf "%s\n" "Please set EPICS_BASE, and other EPICS environment variables first."
+        printf "%s\n" "Here is the example for them."
+        printf "%s\n" "  export EPICS_BASE=/somewhere/your_base"
+        printf "%s\n" "  export EPICS_HOST_ARCH=linux-x86_64"
+        printf "%s\n" "  export PATH=\${EPICS_BASE}/bin/\${EPICS_HOST_ARCH}:\${PATH}"
+        printf "%s\n" "  export LD_LIBRARY_PATH=\${EPICS_BASE}/lib/\${EPICS_HOST_ARCH}:\${LD_LIBRARY_PATH}"
+        printf "\n"
+        exit 1
     fi
 
-    # echo "APPNAME  ${APPNAME}"
-    # echo "LOCATION ${LOCATION}"
+    if is_in "${LOCATION}" "${LOCATION_LIST[@]}"; then
+        printf "%s\n" "The following ALS / ALS-U locations are defined."
+        printf "%s\n" "----> ${LOCATION_LIST[*]}"
+        printf "Your Location ---%s--- was defined within the predefined list.\n" "${LOCATION}"
+    else
+        printf "Your Location ---%s--- was NOT defined in the predefined ALS/ALS-U locations\n" "${LOCATION}"
+        printf "%s\n" "----> ${LOCATION_LIST[*]}"
+        printf ">>\n"
+        printf ">> \n"
+        yes_or_no_to_go
+    fi
 
-    # Always NO!
-    if [[ "$ADDONLYCONFIG" == "NO" ]]; then
+    TOP="${PWD}"
 
-        if [ -z "$APPNAME" ]; then
-            echo "Option -p is required." >&2
-            usage;
+    if [[ "${TOP}" == "$SC_TOP" ]]; then
+        printf "Please call %s outside %s\n" "$0" "${SC_TOP}"
+        exit 1
+    fi
+
+    APPTOP="${TOP}/${FOLDERNAME}"
+
+    printf "\n"
+    printf ">> We are now creating a folder with >>> %s <<<\n" "${FOLDERNAME}"
+    printf ">> If the folder is exist, we can go into %s \n" "${FOLDERNAME}"
+    printf ">> in the >>> %s <<<\n" "${TOP}"
+
+
+    if [[ "${OSTYPE}" == darwin* ]]; then
+        printf "\n"
+        printf "%s\n" ">> MacOS filesystem is a case insensitive by default."
+        printf "%s\n" ">> Please carefully use your folder and application name."
+        yes_or_no_to_go
+    fi
+
+    if [[ ! -d "${APPTOP}" ]]; then
+        mkdir -p "${APPTOP}"
+    fi
+    pushd_q "${APPTOP}"
+    printf ">> Entering into %s\n" "${APPTOP}"
+
+    for infolderApp in *; do
+        infolder=${infolderApp%"App"}
+        if [[ "${infolder}" == *"${APPNAME}"* ]]; then
+            APPNAME_EXIST="TRUE"
+        elif [[ "${infolder,,}" == "${APPNAME,,}" ]]; then
+            printf "\n"
+            printf "%s\n" ">> We detected the APPNAME is the different lower-and uppercases APPNAME."
+            printf ">> APPNAME : %s should use the same as the existing one : %s.\n" "${APPNAME}" "${infolder}"
+            printf "%s\n" ">> Please use the CASE-SENSITIVITY APPNAME to match the existing APPNAME "
+            usage
         fi
+    done
 
-        if [ -z "$LOCATION" ]; then
-            echo "Option -l is required." >&2
-            usage;
-        fi
+    export EPICS_MBA_TEMPLATE_TOP="${SC_TOP}"/templates/makeBaseApp/top
+    if [[ "${APPNAME_EXIST}" == "FALSE" ]]; then
+        printf ">> makeBaseApp.pl -t ioc\n"
+        makeBaseApp.pl -t ioc "${APPNAME}" || exit 1
+    fi
 
-        if [ -z "$FOLDERNAME" ]; then
-            FOLDERNAME=${APPNAME}
-        fi
+    #IOCNAME="${LOCATION}-${APPNAME}"
+    IOC="ioc${IOCNAME}"
 
-        # Is there any way to make this better?
-        if test "${APPNAME#*$filter}" != "$APPNAME"; then
-            printf "\n";
-            printf ">> APPNAME argument SHALL NOT contain an ioc string\n";
-            printf ">> Please NOT use an ioc string\n";
-            usage;
-        fi
+    printf ">>> Making IOC application with IOCNAME %s and IOC %s\n" "${IOCNAME}" "${IOC}"
+    printf ">>> \n"
+    printf ">> makeBaseApp.pl -i -t ioc -p %s %s\n" "${APPNAME}" "${IOCNAME}"
+    makeBaseApp.pl -i -t ioc -p "${APPNAME}" "${IOCNAME}" || exit 1
+    printf ">>> \n"
 
-        if test "${APPNAME#*$filter2}" != "$APPNAME"; then
-            printf "\n";
-            printf ">> APPNAME argument SHALL NOT contain an ioc string\n";
-            printf ">> Please NOT use an ioc string\n";
-            usage;
-        fi
+    if ! IOCBOOT_IOC_PATH="$(resolve_iocboot_ioc_path "${APPTOP}" "${IOCNAME}" "${IOC}")"; then
+        die "Cannot locate generated iocBoot path for IOCNAME ${IOCNAME}"
+    fi
 
-        if test "${APPNAME#*$filter3}" != "$APPNAME"; then
-            printf "\n";
-            printf ">> APPNAME argument SHALL NOT contain an ioc string\n";
-            printf ">> Please NOT use an ioc string\n";
-            usage;
-        fi
+    printf "\n"
+    printf ">>> IOCNAME : %s\n" "${IOCNAME}"
+    printf ">>> IOC     : %s\n" "${IOC}"
+    printf ">>> iocBoot IOC path %s\n" "${IOCBOOT_IOC_PATH}"
+    printf "\n"
 
-        if test "${APPNAME#*$filter4}" != "$APPNAME"; then
-            printf "\n";
-            printf ">> The %s is not recommended to use\n", "$filter4";
-            printf ">> Please use the '_' instead.\n";
-            usage;
-        fi
-
-       if test "${APPNAME#*$filter5}" != "$APPNAME"; then
-            printf "\n";
-            printf ">> The %s is not recommended to use\n", "$filter5";
-            printf ">> Please use the '_' instead.\n";
-            usage;
-        fi
-
-        if [ -z "$IOCNAME" ]; then
-            if [ -z "$DEVICE" ]; then
-                IOCNAME="${LOCATION}-${APPNAME}"
-            else
-                IOCNAME="${LOCATION}-${DEVICE}"
-            fi
-        fi
-
-        if test "${LOCATION#*$filter}" != "$LOCATION"; then
-            printf "\n";
-            printf ">> Location argument SHALL NOT contain an ioc string\n";
-            printf ">> Please NOT use an ioc string\n";
-            usage;
-        fi
-
-        if test "${LOCATION#*$filter2}" != "$LOCATION"; then
-            printf "\n";
-            printf ">> Location argument SHALL NOT contain an ioc string\n";
-            printf ">> Please NOT use an ioc string\n";
-            usage;
-        fi
-
-        if test "${LOCATION#*$filter3}" != "$LOCATION"; then
-            printf "\n";
-            printf ">> Location argument SHALL NOT contain an ioc string\n";
-            printf ">> Please NOT use an ioc string\n";
-            usage;
-        fi
-
-        if test "${LOCATION#*$filter4}" != "$LOCATION"; then
-            printf "\n";
-            printf ">> The %s is not recommended to use\n", "$filter4";
-            printf ">> Please use the '_' instead.\n";
-            usage;
-        fi
-
-       if test "${LOCATION#*$filter5}" != "$LOCATION"; then
-            printf "\n";
-            printf ">> The %s is not recommended to use\n", "$filter5";
-            printf ">> Please use the '_' instead.\n";
-            usage;
-        fi
-
-
-        if IsIn "${LOCATION}" "${LOCATION_LIST[@]}"; then
-            echo "The following ALS / ALS-U locations are defined."
-            echo "----> ${LOCATION_LIST[@]}";
-            echo "Your Location ---${LOCATION}--- was defined within the predefined list."
-        else
-            echo "Your Location ---${LOCATION}--- was NOT defined in the predefined ALS/ALS-U locations"
-            echo "----> ${LOCATION_LIST[@]}";
-            echo ">>"
-            echo ">> "
-            yes_or_no_to_go
-        fi
-
-        TOP=${PWD};
-
-        if [[ "${TOP}" == "$SC_TOP" ]]; then
-            echo "Please call $0 outside ${SC_TOP}"
-            exit;
-        fi
-
-        APPTOP="${TOP}/${FOLDERNAME}"
-
-        printf "\n";
-        printf ">> We are now creating a folder with >>> %s <<<\n" "${FOLDERNAME}";
-        printf ">> If the folder is exist, we can go into %s \n" "${FOLDERNAME}";
-        printf ">> in the >>> %s <<<\n" "${TOP}";
-
-
-        if test "${OSTYPE#darwin*}" != "$OSTYPE"; then
-            printf "\n";
-            printf ">> MacOS filesystem is a case insensitive by default.\n";
-            printf ">> Please carefully use your folder and application name.\n";
-            yes_or_no_to_go;
-        fi
-
-        if [ ! -d "${APPTOP}" ]; then
-            mkdir -p "${APPTOP}"
-        fi
-        pushd "${APPTOP}" || exit
-        printf ">> Entering into %s\n" "${APPTOP}"
-
-        for infolderApp in *
-            do
-            infolder=${infolderApp%"App"}
-#            echo "infolder ${infolder} APPNAME ${APPNAME}";
-            if test "${infolder#*"$APPNAME"}" != "$infolder"; then
-                APPNAME_EXIST="TRUE";
-            elif [ "${infolder,,}" = "${APPNAME,,}" ]; then
-                echo ""
-                printf ">> We detected the APPNAME is the different lower-and uppercases APPNAME.\n";
-                printf ">> APPNAME : %s should use the same as the existing one : %s.\n" "${APPNAME}" "${infolder}";
-                printf ">> Please use the CASE-SENSITIVITY APPNAME to match the existing APPNAME \n" ;
-                usage;
-            else
-                APPNAME_EXIST="FALSE";
-            fi
-        done
-
-        # Always YES
-        if [[ "$APPTEMPLATE" == "YES" ]]; then
-            export EPICS_MBA_TEMPLATE_TOP="${SC_TOP}"/templates/makeBaseApp/top
-            if [[ "$APPNAME_EXIST" == "FALSE" ]]; then
-                printf ">> makeBaseApp.pl -t ioc\n"
-                makeBaseApp.pl -t ioc "${APPNAME}" || exit
-            fi
-        fi
-
-        #IOCNAME="${LOCATION}-${APPNAME}"
-        IOC="ioc${IOCNAME}"
-
-        printf ">>> Making IOC application with IOCNAME %s and IOC %s\n" "${IOCNAME}" "${IOC}"
-        printf ">>> \n";
-        printf ">> makeBaseApp.pl -i -t ioc -p %s $s\n" "${APPNAME}" "${IOCNAME}"
-        makeBaseApp.pl -i -t ioc -p "${APPNAME}" "${IOCNAME}" || exit
-        printf ">>> \n";
-        # makeBasApp.pl strange behaviour, it could be an intension
-        # if IOCNAME contains "ioc" string, the prefix "ioc" will not be in the iocBoot path
-        # Thus, copying all files into a specific directory will not work.
-        # If IOCNAME contains "ioc" string in anywhere, makeBaseApp will create the path without
-        # ioc prefix. So we need a logic to change their path properly.
-        # 2022-03-21 JeongLee@lbl.gov
-
-        if test "${APPNAME#*$filter}" != "$APPNAME"; then
-            IOCBOOT_IOC_PATH="${APPTOP}/iocBoot/${IOCNAME}"
-        else
-            IOCBOOT_IOC_PATH="${APPTOP}/iocBoot/${IOC}"
-        fi
-
-        printf "\n";
-        printf ">>> IOCNAME : %s\n" "$IOCNAME";
-        printf ">>> IOC     : %s\n" "$IOC";
-        printf ">>> iocBoot IOC path %s\n" "${IOCBOOT_IOC_PATH}";
-        printf "\n";
-
-        file_list=( "attach" "run" "st.screen" "screenrc" );
-        #file_list=( "attach" "run" "st.screen" "screenrc" "logrotate.conf" "logrotate.run" );
-        # Always YES
-        if [[ "$APPTEMPLATE" == "YES" ]]; then
-        #
-        # We don't have APPNAME in a file in file_list, but leave there
-        #
-            for afile in "${file_list[@]}"; do
-
-                if [ ! -f "${IOCBOOT_IOC_PATH}/${afile}" ]; then
-                    sed_file "${APPNAME}"  "${IOCNAME}" "${IOC}" "$EPICS_MBA_TEMPLATE_TOP/../als/${afile}" "${IOCBOOT_IOC_PATH}/${afile}"
-                    chmod +x "${IOCBOOT_IOC_PATH}/${afile}"
-                else
-                    printf ">> Exist : %s\n" "${IOCBOOT_IOC_PATH}/${afile}";
-                fi
-            done
-#            chmod -x "${IOCBOOT_IOC_PATH}/screenrc";
-#            chmod -x "${IOCBOOT_IOC_PATH}/logrotate.conf";
-            sed_file "${APPNAME}" "${IOCNAME}" "${IOC}" "${IOCBOOT_IOC_PATH}/st.cmd" "${IOCBOOT_IOC_PATH}/st.cmd~"
-            mv "${IOCBOOT_IOC_PATH}/st.cmd~" "${IOCBOOT_IOC_PATH}/st.cmd"
-            chmod +x "${IOCBOOT_IOC_PATH}/st.cmd"
+    sed_file "${APPNAME}" "${IOCNAME}" "${IOC}" "${LOCATION}" "${IOCBOOT_IOC_PATH}/st.cmd" "${IOCBOOT_IOC_PATH}/st.cmd~"
+    mv "${IOCBOOT_IOC_PATH}/st.cmd~" "${IOCBOOT_IOC_PATH}/st.cmd"
+    chmod +x "${IOCBOOT_IOC_PATH}/st.cmd"
 #
-            sed -e "s|@APPNAME@|${APPNAME}|g"  < "${APPTOP}/book.toml" > "${APPTOP}/book.toml~"
-            mv  "${APPTOP}/book.toml~" "${APPTOP}/book.toml"
-        fi
+    local escaped_book_appname=""
+    sed_replacement_escape escaped_book_appname "${APPNAME}"
+    sed -e "s|@APPNAME@|${escaped_book_appname}|g"  < "${APPTOP}/book.toml" > "${APPTOP}/book.toml~"
+    mv  "${APPTOP}/book.toml~" "${APPTOP}/book.toml"
 
-        README=README.md
+    README="README.md"
 
-        if [[ ! -f "${README}" ]]; then
-            echo "# EPICS IOCs for ${APPNAME}"  > "${README}"
-            echo ""                             >> "${README}"
-            echo ""                             >> "${README}"
-        fi
-
+    if [[ ! -f "${README}" ]]; then
+        printf "# EPICS IOCs for %s\n" "${APPNAME}" > "${README}"
+        printf "\n"                                 >> "${README}"
+        printf "\n"                                 >> "${README}"
     fi
 
-    # Always YES!
-    if [[ "$ALS_CI" == "YES" ]]; then
-       if [ ! -d .git ]; then
-        git init --initial-branch=master
-       fi
-       als_ci;
-       add_gitignore;
-       add_gitattributes;
-       add_editorconfig;
-       git add .;
+    if [[ ! -d .git ]]; then
+        git init --initial-branch="${DEFAULT_GIT_BRANCH}"
     fi
+    als_ci
+    add_gitignore
+    add_gitattributes
+    add_editorconfig
+    git add .
 
-    printf ">> leaving from %s\n" "${APPTOP}";
-    popd
-    printf ">> We are in %s\n" "${TOP}";
+    printf ">> leaving from %s\n" "${APPTOP}"
+    popd_q
+    printf ">> We are in %s\n" "${TOP}"
 }
 
 main "$@"
-

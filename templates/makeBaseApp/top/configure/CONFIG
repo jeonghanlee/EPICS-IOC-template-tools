@@ -5,6 +5,10 @@
 # Allow user to override where the build rules come from
 RULES = $(EPICS_BASE)
 
+# Capture the sourced EPICS_BASE before RELEASE overrides it, so the conf site
+# target in RULES_ALSU can record the environment's value rather than make's.
+ALSU_ENV_BASE := $(EPICS_BASE)
+
 # RELEASE files point to other application tops
 include $(TOP)/configure/RELEASE
 -include $(TOP)/configure/RELEASE.$(EPICS_HOST_ARCH).Common
@@ -14,7 +18,15 @@ ifdef T_A
 endif
 
 CONFIG = $(RULES)/configure
+
+# Degrade into recovery mode when the recorded EPICS base is gone, instead of
+# aborting the parse at the hard include below (see configure/CONFIG_ALSU).
+ALSU_BASE_FOUND := $(wildcard $(CONFIG)/CONFIG)
+ifeq ($(ALSU_BASE_FOUND),)
+include $(TOP)/configure/CONFIG_ALSU
+else
 include $(CONFIG)/CONFIG
+endif
 
 # Override the Base definition:
 INSTALL_LOCATION = $(TOP)

@@ -14,7 +14,10 @@
 int main(int argc,char *argv[])
 {
     if(argc>=2) {
-        iocsh(argv[1]);
+        if(iocsh(argv[1])) {
+            fprintf(stderr, "Error in %s\n", argv[1]);
+            epicsExit(2);
+        }
         epicsThreadSleep(.2);
     }
     iocsh(NULL);
