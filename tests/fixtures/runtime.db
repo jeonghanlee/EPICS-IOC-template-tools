@@ -1,0 +1,10 @@
+record(longout, "$(P)Value") {
+    field(DESC, "Runtime acceptance value")
+    field(VAL, "17")
+    info(autosaveFields, "VAL")
+}
+
+record(longout, "$(P)Other") {
+    field(DESC, "Independent mapping control")
+    field(VAL, "43")
+}

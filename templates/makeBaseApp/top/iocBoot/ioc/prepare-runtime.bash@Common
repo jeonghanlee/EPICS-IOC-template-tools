@@ -1,0 +1,175 @@
+#!/usr/bin/env bash
+# Prepare per-IOC storage and validate statistics selection before commonIocsh starts services.
+set -euo pipefail
+
+AS_TOP="${AS_TOP:-${TOP}/var/autosave}"
+: "${TARGET_TOP:?TARGET_TOP must name the diagnostic root}"
+: "${IOCNAME:?IOCNAME must name this instance}"
+: "${TOP:?TOP must name the project root}"
+
+declare -A STARTUP_ENV_MAP=()
+EXPANDED_MACRO_VALUE=""
+
+function expand_startup_macros {
+    local raw="$1"
+    local depth=0 prefix="" rest="" expr="" var_name="" default_val="" resolved=""
+    while (( depth < 16 )); do
+        if [[ "${raw}" =~ ^([^$]*)(\$\(([^()]+)\)|\$\{([^{}]+)\})(.*)$ ]]; then
+            prefix="${BASH_REMATCH[1]}"
+            expr="${BASH_REMATCH[3]:-${BASH_REMATCH[4]}}"
+            rest="${BASH_REMATCH[5]}"
+            if [[ "${expr}" == *=* ]]; then
+                var_name="${expr%%=*}"
+                default_val="${expr#*=}"
+                if [[ -n "${STARTUP_ENV_MAP["v:${var_name}"]+set}" ]]; then
+                    resolved="${STARTUP_ENV_MAP["v:${var_name}"]}"
+                elif [[ -n "${!var_name+set}" ]]; then
+                    resolved="${!var_name}"
+                else
+                    resolved="${default_val}"
+                fi
+            else
+                var_name="${expr}"
+                if [[ -n "${STARTUP_ENV_MAP["v:${var_name}"]+set}" ]]; then
+                    resolved="${STARTUP_ENV_MAP["v:${var_name}"]}"
+                else
+                    resolved="${!var_name:-}"
+                fi
+            fi
+            raw="${prefix}${resolved}${rest}"
+            depth=$((depth + 1))
+        else
+            break
+        fi
+    done
+    EXPANDED_MACRO_VALUE="${raw}"
+}
+
+function validate_statistics_selection {
+    local script_path="$1"
+    local line="" trimmed="" key="" frag="" macros="" pair="" raw_prefix="" resolved_prefix=""
+    local has_explicit_prefix=0
+    local -A stats_prefixes=() linstat_prefixes=()
+    local -a macro_pairs=()
+    [[ -n "${script_path}" && -f "${script_path}" ]] || return 0
+
+    STARTUP_ENV_MAP=()
+    STARTUP_ENV_MAP["v:TOP"]="${TOP}"
+    STARTUP_ENV_MAP["v:IOCNAME"]="${IOCNAME}"
+    STARTUP_ENV_MAP["v:IOC"]="${IOC:-}"
+
+    while IFS= read -r line || [[ -n "${line:-}" ]]; do
+        line="${line//$'\r'/}"
+        trimmed="${line#"${line%%[![:space:]]*}"}"
+        [[ -n "${trimmed}" && "${trimmed}" != \#* ]] || continue
+        if [[ "${trimmed}" =~ ^epicsEnvSet[[:space:]]*\([[:space:]]*\"([^\"]+)\"[[:space:]]*,[[:space:]]*\"([^\"]*)\" ]]; then
+            key="${BASH_REMATCH[1]}"
+            expand_startup_macros "${BASH_REMATCH[2]}"
+            STARTUP_ENV_MAP["v:${key}"]="${EXPANDED_MACRO_VALUE}"
+            continue
+        fi
+        if [[ "${trimmed}" =~ ^epicsEnvSet[[:space:]]+\"([^\"]+)\"[[:space:]]+\"([^\"]*)\" ]]; then
+            key="${BASH_REMATCH[1]}"
+            expand_startup_macros "${BASH_REMATCH[2]}"
+            STARTUP_ENV_MAP["v:${key}"]="${EXPANDED_MACRO_VALUE}"
+            continue
+        fi
+        if [[ "${trimmed}" =~ ^iocshLoad[[:space:]]*\([[:space:]]*\"([^\"]*/)?(iocStatsAdmin|linStat|linStatHost|linStatProc)\.iocsh\"([[:space:]]*,[[:space:]]*\"([^\"]*)\")? ]]; then
+            frag="${BASH_REMATCH[2]}.iocsh"
+            macros="${BASH_REMATCH[4]:-}"
+            raw_prefix=""
+            has_explicit_prefix=0
+            if [[ -n "${macros}" ]]; then
+                IFS=',' read -r -a macro_pairs <<< "${macros}"
+                for pair in "${macro_pairs[@]}"; do
+                    pair="${pair#"${pair%%[![:space:]]*}"}"
+                    pair="${pair%"${pair##*[![:space:]]}"}"
+                    if [[ "${pair}" == IOC=* ]]; then
+                        raw_prefix="${pair#IOC=}"
+                        has_explicit_prefix=1
+                    fi
+                done
+            fi
+            if (( has_explicit_prefix == 0 )); then
+                raw_prefix="${STARTUP_ENV_MAP["v:IOC"]:-}"
+            fi
+            expand_startup_macros "${raw_prefix}"
+            resolved_prefix="${EXPANDED_MACRO_VALUE}"
+            if [[ "${frag}" == "iocStatsAdmin.iocsh" ]]; then
+                stats_prefixes["p:${resolved_prefix}"]="${resolved_prefix}"
+            elif [[ -n "${linstat_prefixes["p:${resolved_prefix}"]:-}" ]]; then
+                linstat_prefixes["p:${resolved_prefix}"]="${linstat_prefixes["p:${resolved_prefix}"]}, ${frag}"
+            else
+                linstat_prefixes["p:${resolved_prefix}"]="${frag}"
+            fi
+        fi
+    done < "${script_path}"
+
+    for key in "${!stats_prefixes[@]}"; do
+        resolved_prefix="${stats_prefixes["${key}"]}"
+        if (( ${#resolved_prefix} > 21 )); then
+            printf 'iocStatsAdmin IOC prefix exceeds 21 characters (%d): %s\n' \
+                "${#resolved_prefix}" "${resolved_prefix}" >&2
+            exit 1
+        fi
+        if [[ -n "${linstat_prefixes["${key}"]:-}" ]]; then
+            printf 'Conflicting statistics selection for IOC prefix %s: iocStatsAdmin cannot combine with %s\n' \
+                "${resolved_prefix}" "${linstat_prefixes["${key}"]}" >&2
+            exit 1
+        fi
+    done
+}
+
+resolved_startup=""
+if [[ -z "${IOCSH_STARTUP_SCRIPT:-}" ]]; then
+    if [[ -n "${1:-}" ]]; then
+        resolved_startup=$(readlink -m -- "$1")
+    fi
+elif [[ "${IOCSH_STARTUP_SCRIPT}" == /* ]]; then
+    resolved_startup=$(readlink -m -- "${IOCSH_STARTUP_SCRIPT}")
+elif [[ -n "${IOC:-}" && -f "${TOP}/iocBoot/${IOC}/${IOCSH_STARTUP_SCRIPT}" ]]; then
+    resolved_startup=$(readlink -m -- "${TOP}/iocBoot/${IOC}/${IOCSH_STARTUP_SCRIPT}")
+else
+    resolved_startup=$(readlink -m -- "${TOP}/${IOCSH_STARTUP_SCRIPT}")
+fi
+
+startup_file=""
+if [[ -n "${resolved_startup}" && -f "${resolved_startup}" ]]; then
+    startup_file="${resolved_startup}"
+elif [[ -n "${1:-}" && -f "$1" ]]; then
+    startup_file="$1"
+fi
+validate_statistics_selection "${startup_file}"
+
+# Absolute paths cannot become options in the installed fragment's shell calls.
+case "${AS_TOP}" in
+    /*) ;;
+    *) AS_TOP="${TOP}/${AS_TOP}" ;;
+esac
+
+# The installed autosave fragment uses unquoted shell path arguments.
+case "${AS_TOP}" in
+    *[!a-zA-Z0-9_./-]*)
+        printf 'Unsupported autosave path: %s\n' "${AS_TOP}" >&2
+        exit 1
+        ;;
+esac
+case "${IOCNAME}" in
+    *[!a-zA-Z0-9_-]*)
+        printf 'Unsupported IOC identity: %s\n' "${IOCNAME}" >&2
+        exit 1
+        ;;
+esac
+
+install -d -- "${AS_TOP}/${IOCNAME}/save" "${AS_TOP}/${IOCNAME}/req" \
+    "${TARGET_TOP}/epics-pvinfo/env" "${TARGET_TOP}/epics-pvinfo/names"
+# A later failed export must not pass by leaving a previous run's diagnostics.
+: > "${TARGET_TOP}/epics-pvinfo/env/${IOCNAME}.softioc"
+: > "${TARGET_TOP}/epics-pvinfo/names/${IOCNAME}"
+# The child shell cannot change the IOC environment; import this after success.
+{
+    printf 'on error break\nepicsEnvSet("AS_TOP", "%s")\n' "${AS_TOP}"
+    if [[ -n "${resolved_startup}" && "${resolved_startup}" != *[\"\\$'\n']* ]]; then
+        printf 'epicsEnvSet("IOCSH_STARTUP_SCRIPT", "%s")\n' "${resolved_startup}"
+    fi
+} > "${TARGET_TOP}/epics-pvinfo/env/${IOCNAME}.paths.iocsh"

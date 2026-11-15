@@ -1,0 +1,11 @@
+{
+    "$(P)Group": {
+        "+id": "tools:runtime:1.0",
+        "value": {
+            "+type": "plain",
+            "+channel": "$(P)Value.VAL",
+            "+putorder": 0,
+            "+trigger": "*"
+        }
+    }
+}

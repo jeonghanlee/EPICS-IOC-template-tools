@@ -1,0 +1,9 @@
+id	file	change	intended_failures	other_expected_failures
+compiled-iocname	templates/makeBaseApp/top/iocBoot/ioc/st.cmd@Common	Replace the single IOCNAME value _IOCNAME_ with BROKEN	A011/generation/<each of eight input rows>/shared/st.cmd-IOCNAME/substitution	None in M2_GENERATION_ONLY=1
+makefile-ioc-token	templates/makeBaseApp/top/iocApp/src/Makefile	Append a comment containing the literal _IOC_ token	A012/generation/<each of eight input rows>/shared/<app_directory>/src/Makefile/_IOC_/token-count	None in M2_GENERATION_ONLY=1
+cli-epics-exit-zero	generate_ioc_structure.bash	Change exit 1 to exit 0 in the missing EPICS_BASE block	M2/T2/A019/cli/missing-epics-env/shared/command/status	None in M2_GENERATION_ONLY=1
+cli-epics-stdout-text	generate_ioc_structure.bash	Change the missing EPICS_BASE stdout message text	M2/T2/A020/cli/missing-epics-env/shared/stdout/content	None in M2_GENERATION_ONLY=1
+cli-missing-p-stderr-text	generate_ioc_structure.bash	Change the missing required -p stderr message text	M2/T2/A021/cli/missing-required-p/shared/stderr/content	None in M2_GENERATION_ONLY=1
+source-unstage-readme	generate_ioc_structure.bash	Unstage README.md from the Git index immediately after git add .	M2/T2/A022/source/generated-project/shared/README.md/tracked	None in M2_GENERATION_ONLY=1
+source-ignore-db	generate_ioc_structure.bash	Append /*App/Db/acceptance.db to add_gitignore	M2/T2/A023/source/generated-project/shared/gitchkApp/Db/acceptance.db/ignored	None in M2_GENERATION_ONLY=1
+source-unignore-objdir	generate_ioc_structure.bash	Remove O.*/ from add_gitignore	M2/T2/A024/source/generated-project/shared/gitchkApp/src/O.linux-x86_64/gitchkMain.o/ignored	None in M2_GENERATION_ONLY=1

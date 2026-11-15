@@ -1,0 +1,4 @@
+record(longin, "$(P)Fixture") {
+    field(DESC, "Dual startup acceptance input")
+    field(VAL, "17")
+}

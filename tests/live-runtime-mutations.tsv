@@ -1,0 +1,2 @@
+Id	Change	Intended failing assertion	Other expected failures
+wrong-mapping	In runtime.json replace Value.VAL with Other.VAL exactly once	<variant>-initial/pva-value	None; later state transitions for that variant are Incomplete

@@ -1,5 +1,14 @@
 recordtype(xxx) {
-	include "dbCommon.dbd" 
+	include "dbCommon.dbd"
+	%
+	%/* Declare Device Support Entry Table */
+	%struct xxxRecord;
+	%typedef struct xxxdset {
+	%    dset common;
+	%    long (*read_xxx)(struct xxxRecord *prec);
+	%} xxxdset;
+	%#define HAS_xxxdset
+	%
 	field(VAL,DBF_DOUBLE) {
 		prompt("Current EGU Value")
                 promptgroup("40 - Input")

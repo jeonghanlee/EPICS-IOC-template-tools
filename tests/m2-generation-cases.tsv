@@ -1,0 +1,9 @@
+case_id	app	location	device	ioc_override	folder	project	app_directory	iocname	boot_directory
+base	motor	sr01	-	-	-	motor	motorApp	sr01-motor	iocsr01-motor
+device	motor	sr01	pump	-	-	motor	motorApp	sr01-pump	iocsr01-pump
+name	motor	sr01	-	named	-	motor	motorApp	named	iocnamed
+name-device	motor	sr01	pump	named	-	motor	motorApp	named	iocnamed
+folder	motor	sr01	-	-	plant	plant	motorApp	sr01-motor	iocsr01-motor
+all	motor	sr01	pump	named	plant	plant	motorApp	named	iocnamed
+name-ioc	mouse	sr01	-	iocSpecial	nioc	nioc	mouseApp	iocSpecial	iocSpecial
+device-ioc	mouse	sr01	iocDevice	-	dioc	dioc	mouseApp	sr01-iocDevice	sr01-iocDevice

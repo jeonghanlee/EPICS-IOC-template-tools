@@ -3,13 +3,101 @@
 
 ## Requirements
 
-* Setup: git, tree, bash, and EPICS_BASE
-* IOC runtime: epics-ioc-runner
+* Setup: git, tree, Bash, and a sourced EPICS-env-distribution 1.5.0 environment
+* Loader runtime: installed iocsh.bash, readelf, and GNU env with -S support
+* Supervised IOC runtime: epics-ioc-runner
 * Automated smoke test: see the "Automated Smoke Test" section below
 
 ## `generate_ioc_structure.bash`
 
 This script automates the manual process described in the EPICS IOC Development Guide (AL-1451-7629).
+
+Each generated IOC directory contains both `st.cmd` for the compiled
+application and `st.loader.cmd` for the installed module loader. Both enable
+linStat, autosave and retools. Run one startup at a time from that directory;
+its generated `README` contains the build/start commands and path overrides.
+The loader reads application source DB/iocsh files and needs no build.
+Runtime files default to project-local `var/autosave` and `var/epics-pvinfo`.
+Repeat generation preserves existing startup files, including their modes.
+Application identity is the complete name before the `App` directory suffix:
+`motor` and `tor` can share a project; `Motor` is rejected when `motorApp`
+exists. Input names ending in `App` are kept literally: `torApp` creates
+`torAppApp` and executable `torApp`. Other files and directories do not
+identify applications.
+
+The dual-startup test requires the matching EPICS environment and a host that
+permits normal loopback sockets and linStat netlink queries:
+
+```bash
+bash tests/test-dual-startup.bash
+```
+
+It retains successful and failed runs under `work/m2-verification/`, including
+source hashes, commands, output and native statuses. This test covers startup,
+DB loading, storage and build independence, including loader preview and both
+startups across build, clean and rebuild. Live CA/PVA writes and autosave
+restore use the runtime test below.
+The scratch mutation cases are declared in `tests/dual-startup-mutations.tsv`;
+their results and remaining coverage are recorded in the M2 milestone.
+
+The module-support test uses the same sourced environment and runtime
+permissions. It builds separate QPC, feed-core, measComp and iocStats projects,
+checks their loader startups, and verifies QSRV2 in the main and example IOCs:
+
+```bash
+bash tests/test-module-support.bash
+```
+
+It retains configuration, source hashes, build/startup output and results under
+`work/tmp/modules.*`. The measComp check requires uldaq to resolve from the
+selected distribution's `vendor/lib`. These checks cover module selection,
+assets and registration; they do not configure or verify hardware.
+
+The application-identity test uses the same environment and runtime permissions:
+
+```bash
+bash tests/test-app-identity.bash
+```
+
+It verifies distinct names, exact reuse, case rejection and preserved user
+files, then starts motor, tor and torApp through both startup types. Each startup
+creates fresh project-local storage. Commands, source hashes, outputs and
+storage trees are retained under `work/tmp/identity.*`.
+
+The runtime test starts a separate generated project for each startup type
+through a real terminal. It verifies CA/PVA values 17, 29 and 0, rejects
+missing channels, then saves 29 and verifies restoration after restarting:
+
+```bash
+bash tests/test-live-runtime.bash
+```
+
+It requires the sourced 1.5.0 environment, `caget`, `caput`, `pvxget`, `pvxput`,
+`script`, `setsid`, `ss`, `timeout`, `rg`, build tools, and GNU `env` supporting
+`--default-signal`. Run it on a host permitting loopback sockets and linStat
+netlink queries. `M6_STARTUPS=loader` or `M6_STARTUPS=compiled` selects one
+independent case; the default runs both. Results, client receipts, PTY
+transcripts, source hashes and generated projects remain under
+`work/m2-verification/live.*`. The mapping fault is specified in
+`tests/live-runtime-mutations.tsv`.
+
+The evidence test invokes that same runtime driver with invalid setup,
+filesystem write faults and TERM interruption, observing the owned IOC and
+ports before and after each live fault:
+
+```bash
+bash tests/test-live-evidence.bash
+```
+
+Its receipts remain under `work/m2-verification/evidence.*`. Additional M2
+suites under `tests/` cover fragment and environment contracts
+(`test-inventory-env.bash`), default records, writable-path overrides and init
+hooks (`test-defaults-paths-hooks.bash`), multi-pass autosave and protocol
+access (`test-protocols-autosave.bash`), optional `commonIocsh` services
+(`test-services.bash`), startup and permission faults (`test-faults.bash`), and
+frozen-bundle replay (`m2-replay.pl`), retaining displaced scratch artifacts
+through `tests/test-trash.bash`. Supervised `ioc-runner` lifecycle remains in
+`test-runtime.bash`; none of the `tests/` drivers changes shared systemd units.
 
 The script requires two mandatory options: **APPNAME** (Device Name) and **LOCATION**. These options must be defined according to the IOC Naming Convention document [1]. Please adhere to the following rules:
 
@@ -67,46 +155,51 @@ Initialized empty Git repository in /home/user/gitsrc/mouse/.git/
 >> We are in /home/user/gitsrc
 
 $ tree --charset=ascii -L 3 mouse/
-[jeonglee 4.0K]  mouse
-|-- [jeonglee 1.7K]  book.toml
-|-- [jeonglee 4.0K]  configure
-|   |-- [jeonglee 1.3K]  CONFIG
-|   |-- [jeonglee 5.0K]  CONFIG_ALSU
-|   |-- [jeonglee   61]  CONFIG_IOCSH
-|   |-- [jeonglee 1.7K]  CONFIG_SITE
-|   |-- [jeonglee  157]  Makefile
-|   |-- [jeonglee 3.3K]  RELEASE
-|   |-- [jeonglee  154]  RULES
-|   |-- [jeonglee 2.1K]  RULES_ALSU
-|   |-- [jeonglee   75]  RULES_DIRS
-|   |-- [jeonglee   73]  RULES.ioc
-|   `-- [jeonglee  111]  RULES_TOP
-|-- [jeonglee 4.0K]  docs
-|   |-- [jeonglee   79]  not-found.md
-|   |-- [jeonglee 4.7K]  README_autosave.md
-|   |-- [jeonglee  139]  README.md
-|   |-- [jeonglee 3.5K]  SoftwareRequirementsSpecification.md
-|   `-- [jeonglee  157]  SUMMARY.md
-|-- [jeonglee 4.0K]  iocBoot
-|   |-- [jeonglee 4.0K]  iochome-mouse
-|   |   |-- [jeonglee  124]  Makefile
-|   |   `-- [jeonglee 3.1K]  st.cmd
-|   `-- [jeonglee  128]  Makefile
-|-- [jeonglee  900]  Makefile
-|-- [jeonglee 4.0K]  mouseApp
-|   |-- [jeonglee 4.0K]  Db
-|   |   |-- [jeonglee  157]  accessSecurityFile.acf
-|   |   |-- [jeonglee  39K]  AL-1499-2878_EPICS_IOC_PV_naming_template.ods
-|   |   |-- [jeonglee 1.5K]  Makefile
-|   |   `-- [jeonglee  647]  mouse.json
-|   |-- [jeonglee 4.0K]  iocsh
-|   |   |-- [jeonglee  154]  Makefile
-|   |   `-- [jeonglee 2.0K]  mouse.iocsh
-|   |-- [jeonglee  363]  Makefile
-|   `-- [jeonglee 4.0K]  src
-|       |-- [jeonglee 4.0K]  Makefile
-|       `-- [jeonglee  497]  mouseMain.cpp
-`-- [jeonglee   25]  README.md
+mouse/
+|-- Makefile
+|-- README.md
+|-- book.toml
+|-- configure
+|   |-- CONFIG
+|   |-- CONFIG_ALSU
+|   |-- CONFIG_IOCSH
+|   |-- CONFIG_SITE
+|   |-- Makefile
+|   |-- RELEASE
+|   |-- RULES
+|   |-- RULES.ioc
+|   |-- RULES_ALSU
+|   |-- RULES_DIRS
+|   `-- RULES_TOP
+|-- docs
+|   |-- README.md
+|   |-- README_autosave.md
+|   |-- SUMMARY.md
+|   |-- SoftwareRequirementsSpecification.md
+|   `-- not-found.md
+|-- iocBoot
+|   |-- Makefile
+|   `-- iochome-mouse
+|       |-- Makefile
+|       |-- README
+|       |-- prepare-runtime.bash
+|       |-- st.cmd
+|       `-- st.loader.cmd
+`-- mouseApp
+    |-- Db
+    |   |-- AL-1499-2878_EPICS_IOC_PV_naming_template.ods
+    |   |-- Makefile
+    |   |-- accessSecurityFile.acf
+    |   `-- mouse.json
+    |-- Makefile
+    |-- iocsh
+    |   |-- Makefile
+    |   `-- mouse.iocsh
+    `-- src
+        |-- Makefile
+        `-- mouseMain.cpp
+
+9 directories, 34 files
 
 
 ```
@@ -161,14 +254,22 @@ Exist : .editorconfig
 >> We are in /home/user/gitsrc
 
 $ tree --charset=ascii -L 2 mouse/iocBoot/
-[jeonglee 4.0K]  mouse/iocBoot/
-|-- [jeonglee 4.0K]  iochome-mouse
-|   |-- [jeonglee  124]  Makefile
-|   `-- [jeonglee 3.1K]  st.cmd
-|-- [jeonglee 4.0K]  iocpark-mouse
-|   |-- [jeonglee  124]  Makefile
-|   `-- [jeonglee 3.1K]  st.cmd
-`-- [jeonglee  128]  Makefile
+mouse/iocBoot/
+|-- Makefile
+|-- iochome-mouse
+|   |-- Makefile
+|   |-- README
+|   |-- prepare-runtime.bash
+|   |-- st.cmd
+|   `-- st.loader.cmd
+`-- iocpark-mouse
+    |-- Makefile
+    |-- README
+    |-- prepare-runtime.bash
+    |-- st.cmd
+    `-- st.loader.cmd
+
+3 directories, 11 files
 
 ```
 
@@ -210,17 +311,28 @@ Exist : .editorconfig
 >> We are in /home/user/gitsrc
 
 $ tree --charset=ascii -L 2 mouse/iocBoot/
-[jeonglee 4.0K]  mouse/iocBoot/
-|-- [jeonglee 4.0K]  iochome-mouse
-|   |-- [jeonglee  124]  Makefile
-|   `-- [jeonglee 3.1K]  st.cmd
-|-- [jeonglee 4.0K]  iocpark-mouse
-|   |-- [jeonglee  124]  Makefile
-|   `-- [jeonglee 3.1K]  st.cmd
-|-- [jeonglee 4.0K]  iocpark-woodmouse
-|   |-- [jeonglee  124]  Makefile
-|   `-- [jeonglee 3.1K]  st.cmd
-`-- [jeonglee  128]  Makefile
+mouse/iocBoot/
+|-- Makefile
+|-- iochome-mouse
+|   |-- Makefile
+|   |-- README
+|   |-- prepare-runtime.bash
+|   |-- st.cmd
+|   `-- st.loader.cmd
+|-- iocpark-mouse
+|   |-- Makefile
+|   |-- README
+|   |-- prepare-runtime.bash
+|   |-- st.cmd
+|   `-- st.loader.cmd
+`-- iocpark-woodmouse
+    |-- Makefile
+    |-- README
+    |-- prepare-runtime.bash
+    |-- st.cmd
+    `-- st.loader.cmd
+
+4 directories, 16 files
 
 ```
 
@@ -259,20 +371,34 @@ Exist : .editorconfig
 >> We are in /home/user/gitsrc
 
 $  tree --charset=ascii -L 2 iocmouse/iocBoot/
-[jeonglee 4.0K]  iocmouse/iocBoot/
-|-- [jeonglee 4.0K]  iocBTA-mouse
-|   |-- [jeonglee  124]  Makefile
-|   `-- [jeonglee 3.1K]  st.cmd
-|-- [jeonglee 4.0K]  iochome-mouse
-|   |-- [jeonglee  124]  Makefile
-|   `-- [jeonglee 3.1K]  st.cmd
-|-- [jeonglee 4.0K]  iocpark-mouse
-|   |-- [jeonglee  124]  Makefile
-|   `-- [jeonglee 3.1K]  st.cmd
-|-- [jeonglee 4.0K]  iocpark-woodmouse
-|   |-- [jeonglee  124]  Makefile
-|   `-- [jeonglee 3.1K]  st.cmd
-`-- [jeonglee  128]  Makefile
+iocmouse/iocBoot/
+|-- Makefile
+|-- iocBTA-mouse
+|   |-- Makefile
+|   |-- README
+|   |-- prepare-runtime.bash
+|   |-- st.cmd
+|   `-- st.loader.cmd
+|-- iochome-mouse
+|   |-- Makefile
+|   |-- README
+|   |-- prepare-runtime.bash
+|   |-- st.cmd
+|   `-- st.loader.cmd
+|-- iocpark-mouse
+|   |-- Makefile
+|   |-- README
+|   |-- prepare-runtime.bash
+|   |-- st.cmd
+|   `-- st.loader.cmd
+`-- iocpark-woodmouse
+    |-- Makefile
+    |-- README
+    |-- prepare-runtime.bash
+    |-- st.cmd
+    `-- st.loader.cmd
+
+5 directories, 21 files
 
 ```
 
@@ -358,7 +484,7 @@ workspace handling, verdicts, and the run summary) through `test-lib.bash`.
 | 2, generation | `mouse` / `home` | 5 | New IOC creation, re-entry, reset-and-recreate, case-sensitivity guard, and `-d` device naming |
 | 2, generation | `Mouse` / `SR12` | 5 | The same five cases with a capitalized APPNAME in a predefined location |
 | 2, generation | literal substitution | 4 | Allowed underscore and hyphen bytes reach `st.cmd` and `book.toml` literally |
-| 2, generation | generated artifacts | 47 | `st.cmd` and `book.toml` exist, `st.cmd` is executable, placeholders are removed, IOC naming values (including `LOCATION`) are expanded, the site-standard `epics-pvinfo` PV-info redirect exports are present, the PVA group JSON carries its typed `+id` and operable macro gates, `st.cmd` and the application iocsh file start with `on error break`, `st.cmd` keeps `on error continue` and the linStat fragment example commented, the IOC main checks the startup script result, and no screen files are generated |
+| 2, generation | generated artifacts | 47 | `st.cmd` and `book.toml` exist; startup is executable and has expanded names, active linStat, diagnostic exports and startup error handling. The PVA group JSON has its typed `+id` and macro gates. No screen files are generated. Dual-startup generation and runtime checks are in `tests/test-dual-startup.bash`. |
 | 2, generation | generated repository files | 24 | `.gitlab-ci.yml` includes the `alsu/ci` project files and declares the `build` and `deploy` stages; `.gitignore` excludes build outputs, `envPaths`, and local configure overrides; `.editorconfig` and `.gitattributes` carry the editor and line-ending policy |
 | 2, generation | abort paths after the EPICS check | 4 | User refusal at the location prompt, same-directory invocation, and both makeBaseApp.pl failures abort with stable diagnostics |
 | 2, generation | iocBoot path resolution | 3 | Explicit `-n` and `-d` values resolve to the actual makeBaseApp.pl iocBoot directory |

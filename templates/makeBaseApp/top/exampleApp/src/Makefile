@@ -5,7 +5,7 @@ include $(TOP)/configure/CONFIG
 #  ADD MACRO DEFINITIONS BELOW HERE
 
 # Use typed rset structure (see 3.16.1 release notes)
-USR_CPPFLAGS += -DUSE_TYPED_RSET
+USR_CPPFLAGS += -DUSE_TYPED_RSET -DUSE_TYPED_DSET
 
 # xxxRecord.h will be created from xxxRecord.dbd
 DBDINC += xxxRecord
@@ -80,12 +80,10 @@ ifneq ($(SNCSEQ),)
     sncProgram_LIBS += $(EPICS_BASE_HOST_LIBS)
 endif
 
-# Link QSRV (pvAccess Server) if available
-ifdef EPICS_QSRV_MAJOR_VERSION
-    _APPNAME__LIBS += qsrv
-    _APPNAME__LIBS += $(EPICS_BASE_PVA_CORE_LIBS)
-    _APPNAME__DBD += PVAServerRegister.dbd
-    _APPNAME__DBD += qsrv.dbd
+# QSRV2 support from the selected distribution.
+ifneq ($(PVXS),)
+    _APPNAME__LIBS += pvxsIoc pvxs
+    _APPNAME__DBD += pvxsIoc.dbd
 endif
 
 # Finally link IOC to the EPICS Base libraries

@@ -47,6 +47,12 @@ epicsEnvSet("REC", "BBBB:")
 dbLoadDatabase "dbd/_APPNAME_.dbd"
 _CSAFEAPPNAME__registerRecordDeviceDriver pdbbase
 
+#-- AS_TOP defaults in prepare-runtime.bash to $(TOP)/var/autosave and is imported from paths.iocsh.
+epicsEnvSet("TARGET_TOP", "$(TARGET_TOP=$(TOP)/var)")
+epicsEnvSet("IOCSH_STARTUP_SCRIPT", "$(IOCSH_STARTUP_SCRIPT=$(TOP)/iocBoot/$(IOC)/st.cmd)")
+system('bash "$TOP/iocBoot/$IOC/prepare-runtime.bash" "$TOP/iocBoot/$IOC/st.cmd"')
+iocshLoad("$(TARGET_TOP)/epics-pvinfo/env/$(IOCNAME).paths.iocsh")
+
 #--
 #-- The following termination defintion should be in st.cmd or .iocsh. 
 #-- Mostly, it should be .iocsh file. Please don't use them within .proto file
@@ -57,12 +63,16 @@ _CSAFEAPPNAME__registerRecordDeviceDriver pdbbase
 #-- asynOctetSetOutputEos($(PORT), 0, "\r")
 
 #--
-#-- Common iocsh fragment example. The commonIocsh layer comes with EPICS-env 1.4.0
-#-- and later; a missing fragment stops this script. linStat.iocsh also needs LINSTAT
-#-- in configure/RELEASE, and linStat.dbd with the linStat library in src/Makefile.
-#-- iocshLoad("$(IOCSH_TOP)/iocsh/linStat.iocsh", "IOC=$(IOCNAME)")
+#-- Shared services use the logical IOC identity, without the boot-directory prefix.
+iocshLoad("$(IOCSH_TOP)/iocsh/linStat.iocsh", "IOC=$(IOCNAME)")
+#-- Nested fragments do not inherit this script's error policy.
+dbpr("$(IOCNAME):HOST_SCAN", 0)
+dbpr("$(IOCNAME):PROCESS_ID", 0)
+iocshLoad("$(IOCSH_TOP)/iocsh/autosave.iocsh", "IOC=$(IOCNAME)")
+dbpr("$(IOCNAME)-as:SR_statusStr", 0)
 
-cd "${TOP}/iocBoot/${IOC}"
+#-- Keep relative application and storage paths anchored at TOP.
+iocshLoad("$(IOCSH_LOCAL_TOP)/_APPNAME_.iocsh", "P=$(PRE),R=$(REC),DATABASE_TOP=$(DB_TOP),PORT=,IPADDR=,IPPORT=")
 
 #--epicsEnvSet("PORT1",      "AABBCCDD")
 #--epicsEnvSet("PORT1_IP",   "xxx.xxx.xxx.xxx")
@@ -75,8 +85,9 @@ iocInit
 #-- Enable the next line to keep a running IOC alive when a command below fails.
 #-- on error continue
 ##
-epicsEnvShow > $(TARGET_TOP=/opt)/epics-pvinfo/env/$(IOCNAME).softioc
-dbl > $(TARGET_TOP=/opt)/epics-pvinfo/names/$(IOCNAME)
+epicsEnvShow > "$(TARGET_TOP)/epics-pvinfo/env/$(IOCNAME).softioc"
+dbl > "$(TARGET_TOP)/epics-pvinfo/names/$(IOCNAME)"
+system('test -s "$TARGET_TOP/epics-pvinfo/env/$IOCNAME.softioc" && test -s "$TARGET_TOP/epics-pvinfo/names/$IOCNAME"')
 ##
 # pvasr
 ClockTime_Report

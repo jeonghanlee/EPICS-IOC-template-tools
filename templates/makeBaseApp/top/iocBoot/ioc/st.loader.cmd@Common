@@ -1,0 +1,44 @@
+#!/usr/bin/env -S _EPICS_BASE_/bin/_ARCH_/iocsh.bash -e _EPICS_BASE_/..
+# Module directives belong in this top-level loader startup.
+on error break
+module linStat
+module autosave
+module retools
+
+epicsEnvSet("TOP", "_TOP_")
+cd "$(TOP)"
+epicsEnvSet("IOCNAME", "_IOCNAME_")
+epicsEnvSet("IOC", "_IOC_")
+
+# IOC_META_* in the ioc-runner configuration owns operational metadata.
+epicsEnvSet("ENGINEER", "_USER_")
+epicsEnvSet("LOCATION", "_LOCATION_")
+epicsEnvSet("WIKI", "")
+epicsEnvSet("PRE", "AAAA:")
+epicsEnvSet("REC", "BBBB:")
+
+# Read application sources directly, independently of build products.
+epicsEnvSet("DB_TOP", "$(TOP)/_APPNAME_App/Db")
+epicsEnvSet("IOCSH_LOCAL_TOP", "$(TOP)/_APPNAME_App/iocsh")
+epicsEnvSet("EPICS_DB_INCLUDE_PATH", "$(DB_TOP)")
+epicsEnvSet("STREAM_PROTOCOL_PATH", "$(DB_TOP)")
+epicsEnvSet("IOCSH_TOP", "$(EPICS_MODULES)/commonIocsh")
+# AS_TOP defaults in prepare-runtime.bash to $(TOP)/var/autosave and is imported from paths.iocsh.
+epicsEnvSet("TARGET_TOP", "$(TARGET_TOP=$(TOP)/var)")
+system('bash "$TOP/iocBoot/$IOC/prepare-runtime.bash" "$TOP/iocBoot/$IOC/st.loader.cmd"')
+iocshLoad("$(TARGET_TOP)/epics-pvinfo/env/$(IOCNAME).paths.iocsh")
+
+iocshLoad("$(IOCSH_TOP)/iocsh/linStat.iocsh", "IOC=$(IOCNAME)")
+# Nested fragments do not inherit this script's error policy.
+dbpr("$(IOCNAME):HOST_SCAN", 0)
+dbpr("$(IOCNAME):PROCESS_ID", 0)
+iocshLoad("$(IOCSH_TOP)/iocsh/autosave.iocsh", "IOC=$(IOCNAME)")
+dbpr("$(IOCNAME)-as:SR_statusStr", 0)
+iocshLoad("$(IOCSH_LOCAL_TOP)/_APPNAME_.iocsh", "P=$(PRE),R=$(REC),DATABASE_TOP=$(DB_TOP),PORT=,IPADDR=,IPPORT=")
+
+iocInit
+# on error continue
+epicsEnvShow > "$(TARGET_TOP)/epics-pvinfo/env/$(IOCNAME).softioc"
+dbl > "$(TARGET_TOP)/epics-pvinfo/names/$(IOCNAME)"
+system('test -s "$TARGET_TOP/epics-pvinfo/env/$IOCNAME.softioc" && test -s "$TARGET_TOP/epics-pvinfo/names/$IOCNAME"')
+ClockTime_Report

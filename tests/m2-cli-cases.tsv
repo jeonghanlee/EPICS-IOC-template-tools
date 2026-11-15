@@ -1,0 +1,88 @@
+case_id	mode	expected_status	expected_stdout	expected_stderr	argv_spec
+help	normal	0	Usage    :	EMPTY	-h
+invalid-option-z	normal	1	EMPTY	Invalid option: -z	-z
+missing-arg-p	normal	1	EMPTY	Option -p requires an argument.	-p
+missing-arg-l	normal	1	EMPTY	Option -l requires an argument.	-p|sample|-l
+missing-arg-d	normal	1	EMPTY	Option -d requires an argument.	-p|sample|-l|sr01|-d
+missing-arg-n	normal	1	EMPTY	Option -n requires an argument.	-p|sample|-l|sr01|-n
+missing-arg-f	normal	1	EMPTY	Option -f requires an argument.	-p|sample|-l|sr01|-f
+missing-required-p	normal	1	EMPTY	Option -p is required.	-l|sr01
+missing-required-l	normal	1	EMPTY	Option -l is required.	-p|sample
+missing-epics-env	unset-epics	1	Please set EPICS_BASE	EMPTY	-p|sample|-l|sr01
+name-p-ioc	normal	1	>> APPNAME argument SHALL NOT contain an ioc string	Usage    :	-p|iocName|-l|BTA
+name-p-Ioc	normal	1	>> APPNAME argument SHALL NOT contain an ioc string	Usage    :	-p|MyIoc|-l|sr01
+name-p-IOC	normal	1	>> APPNAME argument SHALL NOT contain an ioc string	Usage    :	-p|MyIOC|-l|sr01
+name-p-hyphen	normal	1	>> Please use the '_' instead.	Usage    :	-p|my-app|-l|sr01
+name-p-plus	normal	1	>> Please use the '_' instead.	Usage    :	-p|my+app|-l|sr01
+name-l-ioc	normal	1	>> Location argument SHALL NOT contain an ioc string	Usage    :	-p|good|-l|ioclab
+name-l-Ioc	normal	1	>> Location argument SHALL NOT contain an ioc string	Usage    :	-p|good|-l|srIoc
+name-l-IOC	normal	1	>> Location argument SHALL NOT contain an ioc string	Usage    :	-p|good|-l|srIOC
+name-l-hyphen	normal	1	>> Please use the '_' instead.	Usage    :	-p|good|-l|sr-01
+name-l-plus	normal	1	>> Please use the '_' instead.	Usage    :	-p|good|-l|sr+01
+token-p-appname	normal	1	EMPTY	APPNAME argument SHALL NOT contain the template token _APPNAME_	-p|app_APPNAME_x|-l|sr01
+token-p-iocname	normal	1	>> APPNAME argument SHALL NOT contain an ioc string	Usage    :	-p|app_IOCNAME_x|-l|sr01
+token-p-ioc	normal	1	>> APPNAME argument SHALL NOT contain an ioc string	Usage    :	-p|app_IOC_x|-l|sr01
+token-p-location	normal	1	EMPTY	APPNAME argument SHALL NOT contain the template token _LOCATION_	-p|app_LOCATION_x|-l|sr01
+token-l-appname	normal	1	EMPTY	Location argument SHALL NOT contain the template token _APPNAME_	-p|good|-l|sr_APPNAME_x
+token-l-iocname	normal	1	>> Location argument SHALL NOT contain an ioc string	Usage    :	-p|good|-l|sr_IOCNAME_x
+token-l-ioc	normal	1	>> Location argument SHALL NOT contain an ioc string	Usage    :	-p|good|-l|sr_IOC_x
+token-l-location	normal	1	EMPTY	Location argument SHALL NOT contain the template token _LOCATION_	-p|good|-l|sr_LOCATION_x
+token-d-appname	normal	1	EMPTY	DEVICE argument SHALL NOT contain the template token _APPNAME_	-p|good|-l|sr01|-d|dev_APPNAME_x
+token-d-iocname	normal	1	EMPTY	DEVICE argument SHALL NOT contain the template token _IOCNAME_	-p|good|-l|sr01|-d|dev_IOCNAME_x
+token-d-ioc	normal	1	EMPTY	DEVICE argument SHALL NOT contain the template token _IOC_	-p|good|-l|sr01|-d|d_IOC_x
+token-d-location	normal	1	EMPTY	DEVICE argument SHALL NOT contain the template token _LOCATION_	-p|good|-l|sr01|-d|dev_LOCATION_x
+token-n-appname	normal	1	EMPTY	IOCNAME argument SHALL NOT contain the template token _APPNAME_	-p|good|-l|sr01|-n|ioc_APPNAME_x
+token-n-iocname	normal	1	EMPTY	IOCNAME argument SHALL NOT contain the template token _IOCNAME_	-p|good|-l|sr01|-n|ioc_IOCNAME_x
+token-n-ioc	normal	1	EMPTY	IOCNAME argument SHALL NOT contain the template token _IOC_	-p|good|-l|sr01|-n|a_IOC_b
+token-n-location	normal	1	EMPTY	IOCNAME argument SHALL NOT contain the template token _LOCATION_	-p|good|-l|sr01|-n|ioc_LOCATION_x
+token-f-appname	normal	1	EMPTY	FOLDER argument SHALL NOT contain the template token _APPNAME_	-p|good|-l|sr01|-f|f_APPNAME_r
+token-f-iocname	normal	1	EMPTY	FOLDER argument SHALL NOT contain the template token _IOCNAME_	-p|good|-l|sr01|-f|f_IOCNAME_r
+token-f-ioc	normal	1	EMPTY	FOLDER argument SHALL NOT contain the template token _IOC_	-p|good|-l|sr01|-f|f_IOC_r
+token-f-location	normal	1	EMPTY	FOLDER argument SHALL NOT contain the template token _LOCATION_	-p|good|-l|sr01|-f|f_LOCATION_r
+byte-p-space	normal	1	EMPTY	APPNAME argument contains unsupported bytes	-p|bad<SPACE>app|-l|sr01
+byte-p-tab	normal	1	EMPTY	APPNAME argument contains unsupported bytes	-p|bad<TAB>app|-l|sr01
+byte-p-newline	normal	1	EMPTY	APPNAME argument contains unsupported bytes	-p|bad<LF>app|-l|sr01
+byte-p-star	normal	1	EMPTY	APPNAME argument contains unsupported bytes	-p|bad*app|-l|sr01
+byte-p-slash	normal	1	EMPTY	APPNAME argument contains unsupported bytes	-p|bad/app|-l|sr01
+byte-p-ampersand	normal	1	EMPTY	APPNAME argument contains unsupported bytes	-p|bad&app|-l|sr01
+byte-p-backslash	normal	1	EMPTY	APPNAME argument contains unsupported bytes	-p|bad\app|-l|sr01
+byte-l-space	normal	1	EMPTY	Location argument contains unsupported bytes	-p|good|-l|sr<SPACE>01
+byte-l-tab	normal	1	EMPTY	Location argument contains unsupported bytes	-p|good|-l|sr<TAB>01
+byte-l-newline	normal	1	EMPTY	Location argument contains unsupported bytes	-p|good|-l|sr<LF>01
+byte-l-star	normal	1	EMPTY	Location argument contains unsupported bytes	-p|good|-l|sr*01
+byte-l-slash	normal	1	EMPTY	Location argument contains unsupported bytes	-p|good|-l|sr/01
+byte-l-ampersand	normal	1	EMPTY	Location argument contains unsupported bytes	-p|good|-l|sr&01
+byte-l-backslash	normal	1	EMPTY	Location argument contains unsupported bytes	-p|good|-l|sr\01
+byte-d-space	normal	1	EMPTY	DEVICE argument contains unsupported bytes	-p|good|-l|sr01|-d|dev<SPACE>1
+byte-d-tab	normal	1	EMPTY	DEVICE argument contains unsupported bytes	-p|good|-l|sr01|-d|dev<TAB>1
+byte-d-newline	normal	1	EMPTY	DEVICE argument contains unsupported bytes	-p|good|-l|sr01|-d|dev<LF>1
+byte-d-star	normal	1	EMPTY	DEVICE argument contains unsupported bytes	-p|good|-l|sr01|-d|dev*1
+byte-d-slash	normal	1	EMPTY	DEVICE argument contains unsupported bytes	-p|good|-l|sr01|-d|dev/1
+byte-d-ampersand	normal	1	EMPTY	DEVICE argument contains unsupported bytes	-p|good|-l|sr01|-d|dev&1
+byte-d-backslash	normal	1	EMPTY	DEVICE argument contains unsupported bytes	-p|good|-l|sr01|-d|dev\1
+byte-n-space	normal	1	EMPTY	IOCNAME argument contains unsupported bytes	-p|good|-l|sr01|-n|ioc<SPACE>bad
+byte-n-tab	normal	1	EMPTY	IOCNAME argument contains unsupported bytes	-p|good|-l|sr01|-n|ioc<TAB>bad
+byte-n-newline	normal	1	EMPTY	IOCNAME argument contains unsupported bytes	-p|good|-l|sr01|-n|ioc<LF>bad
+byte-n-star	normal	1	EMPTY	IOCNAME argument contains unsupported bytes	-p|good|-l|sr01|-n|ioc*bad
+byte-n-slash	normal	1	EMPTY	IOCNAME argument contains unsupported bytes	-p|good|-l|sr01|-n|ioc/bad
+byte-n-ampersand	normal	1	EMPTY	IOCNAME argument contains unsupported bytes	-p|good|-l|sr01|-n|ioc&bad
+byte-n-backslash	normal	1	EMPTY	IOCNAME argument contains unsupported bytes	-p|good|-l|sr01|-n|ioc\bad
+byte-f-space	normal	1	EMPTY	FOLDER argument contains unsupported bytes	-p|good|-l|sr01|-f|fold<SPACE>1
+byte-f-tab	normal	1	EMPTY	FOLDER argument contains unsupported bytes	-p|good|-l|sr01|-f|fold<TAB>1
+byte-f-newline	normal	1	EMPTY	FOLDER argument contains unsupported bytes	-p|good|-l|sr01|-f|fold<LF>1
+byte-f-star	normal	1	EMPTY	FOLDER argument contains unsupported bytes	-p|good|-l|sr01|-f|fold*1
+byte-f-slash	normal	1	EMPTY	FOLDER argument contains unsupported bytes	-p|good|-l|sr01|-f|fold/1
+byte-f-ampersand	normal	1	EMPTY	FOLDER argument contains unsupported bytes	-p|good|-l|sr01|-f|fold&1
+byte-f-backslash	normal	1	EMPTY	FOLDER argument contains unsupported bytes	-p|good|-l|sr01|-f|fold\1
+byte-f-traversal	normal	1	EMPTY	FOLDER argument contains unsupported bytes	-p|good|-l|sr01|-f|../good
+byte-f-hyphen	normal	1	EMPTY	FOLDER argument contains unsupported bytes	-p|good|-l|sr01|-f|fold-1
+byte-f-plus	normal	1	EMPTY	FOLDER argument contains unsupported bytes	-p|good|-l|sr01|-f|fold+1
+location-prompt-refusal	stdin-N	1	>> Stop here.	EMPTY	-p|sample|-l|customloc
+same-directory	same-dir	1	Please call	EMPTY	-p|sample|-l|sr01
+unwritable-parent	readonly-cwd	1	>> We are now creating a folder with >>> sample <<<	Permission denied	-p|sample|-l|sr01
+case-mismatch	case-mismatch	1	should use the same as the existing one	Usage    :	-p|Motor|-l|sr01|-f|motor
+positive-underscore-all	stdin-Y	0	>>> IOCNAME : named_1	EMPTY	-p|motor_1|-l|sr_01|-d|axis_2|-n|named_1|-f|motor_1_repo
+positive-hyphen-device	normal	0	>>> IOCNAME : sr01-axis-2	EMPTY	-p|motor_2|-l|sr01|-d|axis-2|-f|motor_2_repo
+positive-hyphen-iocname	normal	0	>>> IOCNAME : sr01-named-3	EMPTY	-p|motor_3|-l|sr01|-n|sr01-named-3|-f|motor_3_repo
+positive-ioc-in-iocname	normal	0	iocBoot/iocSpecial	EMPTY	-p|mouse|-l|sr01|-n|iocSpecial|-f|nioc
+positive-ioc-in-device	normal	0	iocBoot/sr01-iocDevice	EMPTY	-p|mouse|-l|sr01|-d|iocDevice|-f|dioc

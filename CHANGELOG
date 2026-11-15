@@ -10,3 +10,4 @@
 * 2026-09-11: Template st.cmd names the ioc-runner IOC_META keys as the metadata source, pins the network defaults, and exports PV info under epics-pvinfo
 * 2026-10-02: A failing startup command makes the IOC exit nonzero (on error break in the startup scripts, result check in the IOC main); IOCSH_TOP points at the commonIocsh layer
 * 2026-10-04: Smoke suite runs in two phases with shared helpers (test-lib.bash) and checks the generated repository files and an example-template application
+* 2026-11-14: Generate both compiled st.cmd and iocsh.bash st.loader.cmd startup files for EPICS-env 1.5.0 and commonIocsh; match exact app names, update module paths and C23 exampleApp, and add direct-IOC tests

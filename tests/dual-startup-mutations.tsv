@@ -1,0 +1,5 @@
+Id	Change	Intended failing assertion	Other expected failures
+loader-processing	Skip st.loader.cmd in the generator startup processing loop	dual-files/st.loader.cmd	None; generation checks stop before runtime
+linstat-call	Remove the loader linStat fragment call	loader/record/<IOCNAME>:PROCESS_ID	For loader, loader-built, loader-clean and loader-rebuilt: status, initialized, diagnostics, all record checks, environment, relative/status, relative/absolute-path, LINSTAT/reason, AUTOSAVE/reason; overrides/status; overrides/record; startup-fault/reason
+names-export	Remove the loader record-name export	loader/status	For loader, loader-built, loader-clean and loader-rebuilt: status, diagnostics, all record checks, relative/status; overrides/status; overrides/record; startup-fault/reason
+compiled-early-exit	Insert exit before compiled envPaths loading	compiled/initialized	For compiled and compiled-rebuilt: initialized, all record checks, environment, relative/absolute-path, relative/directories, LINSTAT/status, LINSTAT/reason, AUTOSAVE/status, AUTOSAVE/reason

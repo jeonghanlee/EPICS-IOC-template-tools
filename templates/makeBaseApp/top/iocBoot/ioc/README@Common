@@ -1,0 +1,134 @@
+# Start this IOC
+
+This directory contains two alternative startup files for one IOC.
+Run one at a time. Both enable linStat, autosave and retools.
+
+Open Bash and activate the EPICS tree used to generate this project:
+
+```bash
+source "_EPICS_BASE_/../setEpicsEnv.bash"
+cd "_TOP_/iocBoot/_IOC_"
+```
+
+Start the loader directly, without building the application:
+
+```bash
+./st.loader.cmd
+```
+
+It loads module support from the selected tree and reads application inputs
+from `_TOP_/_APPNAME_App/Db` and `_TOP_/_APPNAME_App/iocsh`.
+Keep additional `module` directives in `st.loader.cmd`, not in nested files.
+
+To inspect resolved module support without starting the IOC:
+
+```bash
+iocsh.bash --show st.loader.cmd
+```
+
+To use the compiled application, build first and run its startup:
+
+```bash
+make -C "_TOP_"
+./st.cmd
+```
+
+Select support in `configure/RELEASE` and `_APPNAME_App/src/Makefile`.
+The compiled startup reads application inputs installed under `db/` and
+`iocsh/`. Both startups load `_APPNAME_.iocsh` with `DATABASE_TOP` pointing
+at their respective database directory. Configure device-specific inputs
+in that application fragment.
+
+Enter `exit` at the IOC prompt to stop it. Initialization alone does not
+verify device communication.
+
+## Runtime files
+
+Both startups change the working directory to `_TOP_` before loading services.
+Autosave uses `var/autosave/<IOCNAME>/{req,save}`; diagnostic files use
+`var/epics-pvinfo/{env,names}`. These directories are created at startup.
+The first launch has no saved values to restore; later launches can restore
+values tagged with autosave DB info.
+
+Override the roots before starting either file:
+
+```bash
+export AS_TOP=/path/to/writable/autosave
+export TARGET_TOP=/path/to/writable/diagnostics
+```
+
+Relative roots resolve from `_TOP_`. Preparation writes the absolute autosave
+root to `epics-pvinfo/env/<IOCNAME>.paths.iocsh`; startup imports it before
+calling commonIocsh. This also supports relative names beginning with a hyphen.
+Autosave paths may contain ASCII
+letters, digits, underscore, dot, slash and hyphen; other bytes are rejected
+because the installed fragment passes that path to a shell command.
+TARGET_TOP holds the `epics-pvinfo` directory.
+
+Before initialization, startup requires the default linStat host/process and
+autosave status records. Missing records stop startup even when a nested
+fragment continues after a database load error. These presence checks do not
+verify every field, optional record or later device operation.
+
+With ioc-runner, select `st.cmd` or `st.loader.cmd` explicitly in the IOC
+configuration. Both files are executable, so do not rely on an automatic
+choice when generating that configuration.
+
+## Optional shared services
+
+Default startups enable `linStat`, `autosave` and `retools`. Optional
+`commonIocsh` fragments are configured before `iocInit` in `st.cmd` (after
+enabling the corresponding module in `configure/RELEASE` and rebuilding) or in
+`st.loader.cmd` (after adding the top-level `module` directive):
+
+- Optional `linStat` interface and filesystem checks:
+
+```iocsh
+iocshLoad("$(IOCSH_TOP)/iocsh/linStat.iocsh", "IOC=$(IOCNAME),NICENABLE=,NIC=eth0,FSENABLE=,FSID=DATA,DIR=$(TOP)")
+```
+
+- `iocStatsAdmin` (alternative to `linStat` host/process statistics; uncomment
+  `devIocStats = $(MODULES)/iocStats` in `configure/RELEASE` or add
+  `module iocStats` in `st.loader.cmd`, and disable `linStat.iocsh` together
+  with its `HOST_SCAN`/`PROCESS_ID` `dbpr` checks):
+
+```iocsh
+# Compiled startup (st.cmd):
+iocshLoad("$(IOCSH_TOP)/iocsh/iocStatsAdmin.iocsh", "IOC=$(IOCNAME)")
+
+# Loader startup (st.loader.cmd):
+iocshLoad("$(IOCSH_TOP)/iocsh/iocStatsAdmin.iocsh", "IOC=$(IOCNAME),devIocStats=$(IOCSTATS)")
+```
+
+  Startup validation in `prepare-runtime.bash` stops before `iocInit` if
+  `iocStatsAdmin` is selected with an `IOC` prefix exceeding 21 characters or
+  combined with `linStat`, `linStatHost` or `linStatProc` under the same prefix.
+
+- `reccaster` (`RECCASTER = $(MODULES)/recsync` in `configure/RELEASE` or
+  `module recsync` in `st.loader.cmd`):
+
+```iocsh
+# Compiled startup (st.cmd):
+iocshLoad("$(IOCSH_TOP)/iocsh/reccaster.iocsh", "IOC=$(IOCNAME)")
+
+# Loader startup (st.loader.cmd):
+iocshLoad("$(IOCSH_TOP)/iocsh/reccaster.iocsh", "IOC=$(IOCNAME),RECCASTER=$(RECSYNC)")
+```
+
+- External logging (`iocLog.iocsh` uses Base; `caPutLog.iocsh` requires
+  `CAPUTLOG = $(MODULES)/caPutLog` or `module caPutLog` plus an access-security
+  file with `TRAPWRITE` loaded before `iocInit`):
+
+```iocsh
+iocshLoad("$(IOCSH_TOP)/iocsh/iocLog.iocsh", "IOC=$(IOCNAME),LOG_INET=127.0.0.1,LOG_INET_PORT=7004")
+asSetFilename("$(DB_TOP)/accessSecurityFile.acf")
+iocshLoad("$(IOCSH_TOP)/iocsh/caPutLog.iocsh", "LOG_INET=127.0.0.1,LOG_INET_PORT=7004,OPTION=0")
+```
+
+- Optional serial configuration (`ASYN = $(MODULES)/asyn` or `module asyn`;
+  create the port inside the application config before calling
+  `setSerialParams.iocsh`):
+
+```iocsh
+iocshLoad("$(IOCSH_TOP)/iocsh/serial.iocsh", "SERIAL_ENABLE=,SERIAL_CONFIG=$(IOCSH_LOCAL_TOP)/serial-ports.iocsh")
+```

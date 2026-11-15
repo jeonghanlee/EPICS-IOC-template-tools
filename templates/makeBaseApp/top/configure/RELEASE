@@ -62,12 +62,12 @@ MODULES = $(EPICS_BASE)/../modules
 ###---------------- VACUUM Modules
 #RGAMV2=$(MODULES)/rgamv2
 #UNIDRV=$(MODULES)/unidrv
-#QPC=$(MODULES)/qpc
+#QPC=$(MODULES)/QPC
 ###---------------- Instrumentation
 #EVENTGENERATORSUP=$(MODULES)/eventGeneratorSup
 #BPMSUP=$(MODULES)/bpmSup
 ###----------------- FEED for LLRF
-#FEED=$(MODULES)/feed
+#FEED=$(MODULES)/feed-core
 ###----------------- PSC Modules
 #PSCDRV=$(MODULES)/pscdrv
 ###----------------- MOTION Modules
@@ -76,14 +76,16 @@ MODULES = $(EPICS_BASE)/../modules
 #PMAC=$(MODULES)/pmac
 #
 #
-### --- ALS-U Default Modules : All IOC should have them all
+### --- Default IOC services
 AUTOSAVE = $(MODULES)/autosave
-RECCASTER = $(MODULES)/recsync
+LINSTAT = $(MODULES)/linStat
 RETOOLS = $(MODULES)/retools
-CAPUTLOG = $(MODULES)/caPutLog
-#### devIocStats : EPICS community iocStats
-devIocStats = $(MODULES)/iocStats
 PVXS=$(MODULES)/pvxs
+### --- Optional services
+#RECCASTER = $(MODULES)/recsync
+#CAPUTLOG = $(MODULES)/caPutLog
+#### Do not load iocStatsAdmin and linStat host/process DBs with the same prefix.
+#devIocStats = $(MODULES)/iocStats
 
 # EPICS_BASE should appear last so earlier modules can override stuff:
 EPICS_BASE = _EPICS_BASE_
@@ -92,10 +94,6 @@ EPICS_BASE = _EPICS_BASE_
 # other than EPICS_BASE:
 #RULES = $(MODULES)/build-rules
 
-#-- https://epics.anl.gov/tech-talk/2024/msg00460.php
-#-- When PVXS is included in RELEASE, then PVXS_MAJOR_VERSION will be defined
-#-- Here, we use the installed ALS-U EPICS Environment PVXS Version
--include $(PVXS)/configure/CONFIG_PVXS_VERSION
 #-- These lines allow developers to override these RELEASE settings
 #-- without having to modify this file directly.
 -include $(TOP)/../RELEASE.local

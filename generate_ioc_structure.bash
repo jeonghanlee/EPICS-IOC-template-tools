@@ -96,6 +96,7 @@ function add_gitignore
 /lib/
 /dbd/
 /db/
+/var/
 /html/
 /include/
 /templates/
@@ -514,6 +515,8 @@ function main
     local README=""
     local infolderApp=""
     local infolder=""
+    local startup=""
+    local -a existing_startups=()
     local LOCATION_LIST=(
       gtl ln ltb inj br bts lnrf brrf srrf arrf bl acc als cr
       ar01 ar02 ar03 ar04 ar05 ar06 ar07 ar08 ar09 ar10 ar11 ar12
@@ -633,9 +636,10 @@ function main
     pushd_q "${APPTOP}"
     printf ">> Entering into %s\n" "${APPTOP}"
 
-    for infolderApp in *; do
+    for infolderApp in *App; do
+        [[ -d "${infolderApp}" ]] || continue
         infolder=${infolderApp%"App"}
-        if [[ "${infolder}" == *"${APPNAME}"* ]]; then
+        if [[ "${infolder}" == "${APPNAME}" ]]; then
             APPNAME_EXIST="TRUE"
         elif [[ "${infolder,,}" == "${APPNAME,,}" ]]; then
             printf "\n"
@@ -649,7 +653,8 @@ function main
     export EPICS_MBA_TEMPLATE_TOP="${SC_TOP}"/templates/makeBaseApp/top
     if [[ "${APPNAME_EXIST}" == "FALSE" ]]; then
         printf ">> makeBaseApp.pl -t ioc\n"
-        makeBaseApp.pl -t ioc "${APPNAME}" || exit 1
+        # makeBaseApp strips one App suffix from this directory name.
+        makeBaseApp.pl -t ioc "${APPNAME}App" || exit 1
     fi
 
     #IOCNAME="${LOCATION}-${APPNAME}"
@@ -658,6 +663,7 @@ function main
     printf ">>> Making IOC application with IOCNAME %s and IOC %s\n" "${IOCNAME}" "${IOC}"
     printf ">>> \n"
     printf ">> makeBaseApp.pl -i -t ioc -p %s %s\n" "${APPNAME}" "${IOCNAME}"
+    existing_startups=("${APPTOP}"/iocBoot/*/st.cmd "${APPTOP}"/iocBoot/*/st.loader.cmd)
     makeBaseApp.pl -i -t ioc -p "${APPNAME}" "${IOCNAME}" || exit 1
     printf ">>> \n"
 
@@ -671,9 +677,14 @@ function main
     printf ">>> iocBoot IOC path %s\n" "${IOCBOOT_IOC_PATH}"
     printf "\n"
 
-    sed_file "${APPNAME}" "${IOCNAME}" "${IOC}" "${LOCATION}" "${IOCBOOT_IOC_PATH}/st.cmd" "${IOCBOOT_IOC_PATH}/st.cmd~"
-    mv "${IOCBOOT_IOC_PATH}/st.cmd~" "${IOCBOOT_IOC_PATH}/st.cmd"
-    chmod +x "${IOCBOOT_IOC_PATH}/st.cmd"
+    for startup in "${IOCBOOT_IOC_PATH}/st.cmd" "${IOCBOOT_IOC_PATH}/st.loader.cmd"; do
+        if is_in "${startup}" "${existing_startups[@]}"; then
+            continue
+        fi
+        sed_file "${APPNAME}" "${IOCNAME}" "${IOC}" "${LOCATION}" "${startup}" "${startup}~"
+        mv "${startup}~" "${startup}"
+        chmod +x "${startup}"
+    done
 #
     local escaped_book_appname=""
     sed_replacement_escape escaped_book_appname "${APPNAME}"

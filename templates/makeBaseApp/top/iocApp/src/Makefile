@@ -17,6 +17,11 @@ Common_DBDs += system.dbd
 
 Common_SRCs +=
 
+ifneq ($(LINSTAT),)
+Common_DBDs += linStat.dbd
+Common_LIBs += linStat
+endif
+
 ifneq ($(ASYN),)
 Common_DBDs += asyn.dbd
 Common_DBDs += drvAsynIPPort.dbd
@@ -46,12 +51,6 @@ Common_LIBs += calc
 endif
 
 
-#ifneq ($(IOCSTATS),)
-#Common_DBDs += devIocStats.dbd
-#Common_LIBs += devIocStats
-#endif
-
-
 ifneq ($(SNCSEQ),)
 # sncExample_SNCFLAGS += +r
 ## Common_DBDs += sncExample.dbd
@@ -73,8 +72,8 @@ endif
 
 ifneq ($(MEASCOMP),)
 Common_DBDs += measCompSupport.dbd
-Common_LIBs += measComp
-_APPNAME__SYS_LIBS += uldaq
+Common_LIBs += measComp uldaq
+uldaq_DIR = $(EPICS_BASE)/../vendor/lib
 endif
 
 ifneq ($(SSCAN),)
@@ -187,18 +186,10 @@ Common_LIBs += pmacAsynMotorPort
 Common_LIBs += powerPmacAsynPort
 endif
 
-# https://epics.anl.gov/tech-talk/2024/msg00460.php
-# QSRV2
-ifdef PVXS_MAJOR_VERSION # prefer QSRV2 :)
+# QSRV2 support from the selected distribution.
+ifneq ($(PVXS),)
 Common_DBDs += pvxsIoc.dbd
 Common_LIBs += pvxsIoc pvxs
-else
-ifdef EPICS_QSRV_MAJOR_VERSION # fallback to QSRV1
-Common_LIBs += qsrv
-Common_LIBs += $(EPICS_BASE_PVA_CORE_LIBS)
-Common_DBDs += PVAServerRegister.dbd
-Common_DBDs += qsrv.dbd
-endif
 endif
 
 # Include dbd files from all support applications:
