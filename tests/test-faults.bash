@@ -329,7 +329,23 @@ function run_fault_subcase {
     fi
 }
 
-function match_fault_diagnostic {
+# The product printed an error line of its own. Lines the startup merely echoes
+# (the injected command or path) never begin with these anchors.
+function fault_error_line_present {
+    local dispatch="$1"
+    [[ -f "${dispatch}" ]] || return 1
+    grep -Eq "^(ERROR|Can't open |iocsh Error|install: cannot |Unsupported autosave path: |iocsh\.bash: )|prepare-runtime\.bash: line [0-9]+: " "${dispatch}"
+}
+
+# Exposure: the injected input reached the startup and the product reported an
+# error. The echoed input alone proves only that the startup read the line.
+function match_fault_exposure {
+    local sub="$1" dispatch="$2"
+    match_fault_input_reached "${sub}" "${dispatch}" && fault_error_line_present "${dispatch}"
+}
+
+# The injected input appears in the startup transcript.
+function match_fault_input_reached {
     local sub="$1" dispatch="$2"
     [[ -f "${dispatch}" ]] || return 1
     case "${sub}" in
@@ -390,6 +406,69 @@ function match_fault_diagnostic {
     esac
 }
 
+# Diagnostic content: an error line the product printed for the injected fault.
+# Echoed startup lines cannot satisfy these anchored patterns.
+function match_fault_diagnostic {
+    local sub="$1" dispatch="$2"
+    [[ -f "${dispatch}" ]] || return 1
+    case "${sub}" in
+        missing-common-fragment)
+            grep -Eq "^Can't open .*missing-common-fragment\.iocsh" "${dispatch}"
+            ;;
+        missing-linstat)
+            grep -Eq "^ERROR: (Can't open file|Failed to load) '.*/missing-linstat-dir/" "${dispatch}"
+            ;;
+        missing-autosave)
+            grep -Eq "^ERROR: (Can't open file|Failed to load) '.*/missing-autosave-dir/" "${dispatch}"
+            ;;
+        absent-app-iocsh)
+            grep -Eq "^Can't open .*/flt\.iocsh" "${dispatch}"
+            ;;
+        absent-fixture-db)
+            grep -Eq "^ERROR: (Can't open file|Failed to load) '.*/missing-fixture\.db'" "${dispatch}"
+            ;;
+        malformed-fixture-db)
+            grep -Eq "^ERROR: Failed to load '.*/malformed\.db'" "${dispatch}"
+            ;;
+        missing-loader-module)
+            grep -Eq '^iocsh\.bash: Module nonexistentM2Module ' "${dispatch}"
+            ;;
+        missing-envPaths)
+            grep -Eq "^Can't open envPaths" "${dispatch}"
+            ;;
+        missing-application-dbd)
+            grep -Eq "^ERROR: Can't open file '.*flt\.dbd'" "${dispatch}"
+            ;;
+        unknown-top-command)
+            grep -Eq "^ERROR .*Command 'unknownM2TopCommand' not registered" "${dispatch}"
+            ;;
+        unknown-nested-command)
+            grep -Eq "^ERROR .*Command 'unknownM2NestedCommand' not registered" "${dispatch}"
+            ;;
+        target-top-regular-file)
+            grep -Eq '^install: cannot create directory .*blocked-target-top.*: (Not a directory|File exists)' "${dispatch}"
+            ;;
+        denied-target-top-parent)
+            grep -Eq '^install: cannot create directory .*denied-target-parent.*: Permission denied' "${dispatch}"
+            ;;
+        denied-as-top-parent)
+            grep -Eq '^install: cannot create directory .*denied-as-parent.*: Permission denied' "${dispatch}"
+            ;;
+        directory-at-paths-iocsh)
+            grep -Eiq 'prepare-runtime\.bash: line [0-9]+: .*\.paths\.iocsh: .*directory' "${dispatch}"
+            ;;
+        as-top-space|as-top-tab|as-top-ampersand|as-top-semicolon)
+            grep -Eq '^Unsupported autosave path: ' "${dispatch}"
+            ;;
+        as-top-newline|as-top-quote)
+            grep -Eq '^Unsupported autosave path: |Unbalanced quote' "${dispatch}"
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
 function eval_fault_subcase {
     local sub="$1" startup="$2"
     local case_dir="${M2_RUN_DIR}/cells/${sub}/${startup}"
@@ -411,9 +490,11 @@ function eval_fault_subcase {
     stop_state="${stop_state//$'\r'/}"
 
     local diag_match="unmatched" exposure="unexposed"
+    if match_fault_exposure "${sub}" "${dispatch}"; then
+        exposure="exposed"
+    fi
     if match_fault_diagnostic "${sub}" "${dispatch}"; then
         diag_match="matched"
-        exposure="exposed"
     fi
     m2_eval_check "M2/T8/A110/faults/${sub}/${startup}/operation/exposure" "${exposure}"
 

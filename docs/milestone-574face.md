@@ -5,9 +5,10 @@ Milestone index: 574face
 Canonical path: `docs/milestone-574face.md`
 Canonical branch or ref: master
 Git upstream: origin/master
-Remote tracker: none. `origin` is an internal GitLab repository; the GitHub
-mirror has issues enabled, but this register does not project work to it. This
-file is the status source of truth.
+Remote tracker: none. This repository is the public one; this register does
+not project work to its issues and is the status source of truth. The commit
+hashes, the `docs/MILESTONES.md` history and the `work/` evidence paths cited
+below come from the maintainers' working tree and are not present here.
 
 Scope: the IOC generator, generated templates and repository files, tests,
 and user documentation.
@@ -57,8 +58,7 @@ Tally: 2 tasks. Complete 2.
 
 No earlier decision is carried into this generation. The decisions, rows, and records
 behind completed work are in `docs/MILESTONES.md` at the prior state commit
-listed under `## History`; read it with
-`git show 574facea475d4e923a32cb145e0e1c587699e22c:docs/MILESTONES.md`.
+listed under `## History`; it is kept in the maintainers' working tree.
 
 ### Milestone Details
 
@@ -122,8 +122,8 @@ generated files that lack them.
    and exits 0`, `invalid option exits 1 to stderr`, `missing argument exits 1
    to stderr`), so a failure names the same assertion as the baseline list.
 4. Coverage: assert the content, not only the presence, of the generated
-   `.gitlab-ci.yml` (included files and stages), `.gitignore`, `.editorconfig`,
-   and `.gitattributes`; generate, build, and boot an `example` application
+   CI file (since removed), `.gitignore`, `.editorconfig`, and
+   `.gitattributes`; generate, build, and boot an `example` application
    from the repository templates and check its startup exit status.
 5. Documentation: update the `README.md` test section to the new structure.
 
@@ -1312,11 +1312,36 @@ scope and record new Docker evidence in separate result entries.
 | T3 | 2026-11-15T02:58:45Z | Six 1.5.0 derived Docker images / Base 7.0.10 | Pass | `tests/test-dual-startup.bash` passed `1482/1482` (exit 0) on all six targets (`dual.cdGv46`, `dual.k1BghW`/`dual.fWeTvD`, `dual.2iJWlN`, `dual.uMXKm6`, `dual.I9DgR0`, `dual.Ts6Uzm`) across pre-build `iocsh.bash --show`, pre-build loader start, `make`, compiled start, post-build loader start, `make clean uninstall` loader start, and rebuild compiled/loader starts with preserved `var/` user file under D16; four `ds-*` and two D16 negative controls failed only their declared targets. |
 | T4 | 2026-11-15T02:58:45Z | Six 1.5.0 derived Docker images / Base 7.0.10 | Pass | `tests/test-app-identity.bash` passed `67/67` (exit 0) on all six targets (`matrix-6os/<target>/evidence/test-app-identity/identity.*`), verifying `motor`/`tor`/`torApp` exact identity, unrelated entries, exact reuse, case-mismatch rejection, first-run `var/` creation, and old-generator negative regression. |
 | T5 | 2026-11-15T02:58:45Z | Six 1.5.0 derived Docker images / Base 7.0.10 | Pass | `tests/test-module-support.bash` passed `59/59` (exit 0) on all six targets (`matrix-6os/<target>/evidence/test-module-support/modules.*`) across `QPC`, `feed-core`, `measComp`/`uldaq`, `iocStats`, `linStat`, main QSRV2, and `exampleApp` QSRV2 (including Ubuntu 26 GCC 15 C23 `USE_TYPED_DSET` alignment in `templates/makeBaseApp/top/exampleApp/src/`). |
-| T6 | 2026-11-15T02:58:45Z | Six 1.5.0 derived Docker images / Base 7.0.10 | Pass | `tests/test-defaults-paths-hooks.bash` (`156/156`), `tests/test-live-runtime.bash` (`117/117`), `tests/test-protocols-autosave.bash` (`178/178`), and `tests/test-services.bash` (`416/416`) passed (exit 0) on all six targets (`matrix-6os/<target>/evidence/`), covering default/override `AS_TOP`/`TARGET_TOP`, `initHook` call counts and order, `pass0`/`pass1` autosave restore, `reccaster`, `iocStatsAdmin` + D15 `IOCNAME` length/conflict rules, `iocLog` (`IPPROTO_TCP` receiver), `caPutLog` (`caPutLogToConsole`), and `asynRecord` (`pty` serial loopback); scratch hook mutant `work/m2-verification/final-checks/t6-proof/` exited 1 (`26 Passed, 8 Failed`) on `SETTINGS_FILES=wrong_settings`. |
-| T7 | 2026-11-15T02:58:45Z | Real `caget`/`caput`/`pvxget`/`pvxput` in all six 1.5.0 derived Docker images | Pass | `tests/test-live-runtime.bash` (`117/117`) and `tests/test-protocols-autosave.bash` (`178/178`) passed (exit 0) across all six targets (`matrix-6os/<target>/evidence/`), verifying exact initial `17`, CA write `29`, PVA write `0`, absent-PV/group negative queries, and multi-pass `31`/`47` -> `61`/`79` restore on both `loader` and `compiled` startups; scratch `wrong-mapping` mutant (`live.yjJNOS`, `27 Passed, 2 Failed`, exit 1) rejected `43 != 17`. |
+| T6 | 2026-11-15T02:58:45Z | Six 1.5.0 derived Docker images / Base 7.0.10 | Pass | `tests/test-defaults-paths-hooks.bash` (`156/156`), `tests/test-live-runtime.bash` (`117/117`), `tests/test-protocols-autosave.bash` (`178/178`), and `tests/test-services.bash` (`416/416`) passed (exit 0) on all six targets (`matrix-6os/<target>/evidence/`), covering default/override `AS_TOP`/`TARGET_TOP`, `initHook` call counts and order, `pass0`/`pass1` autosave save files (`37`/`53`), `reccaster`, `iocStatsAdmin` + D15 `IOCNAME` length/conflict rules, `iocLog` (`IPPROTO_TCP` receiver), `caPutLog` (`caPutLogToConsole`), and `asynRecord` (`pty` serial loopback); scratch hook mutant `work/m2-verification/final-checks/t6-proof/` exited 1 (`26 Passed, 8 Failed`) on `SETTINGS_FILES=wrong_settings`. |
+| T7 | 2026-11-15T02:58:45Z | Real `caget`/`caput`/`pvxget`/`pvxput` in all six 1.5.0 derived Docker images | Pass | `tests/test-live-runtime.bash` (`117/117`) and `tests/test-protocols-autosave.bash` (`178/178`) passed (exit 0) across all six targets (`matrix-6os/<target>/evidence/`), verifying exact initial `17`, CA write `29`, PVA write `0`, absent-PV/group negative queries, and settings restore of `29` after a restart on both `loader` and `compiled` startups; scratch `wrong-mapping` mutant (`live.yjJNOS`, `27 Passed, 2 Failed`, exit 1) rejected `43 != 17`. |
 | T8 | 2026-11-15T02:58:45Z | Six 1.5.0 derived Docker images (non-root UID) / Base 7.0.10 | Pass | `tests/test-faults.bash` (`160/160`), `tests/test-defaults-paths-hooks.bash` (`156/156`), and `tests/test-dual-startup.bash` (`1482/1482`) passed (exit 0) across all six targets (`matrix-6os/<target>/evidence/`), verifying first-run directory creation, missing required variable/file/module stops before `iocInit`, malformed DB/iocsh failures, non-writable output roots, disallowed `AS_TOP` bytes, and restored-permission recovery. |
 | T9 | 2026-11-15T02:58:45Z | Six 1.5.0 derived Docker images / Base 7.0.10 | Pass | Direct PTY startup, normal `exit` (`0`), and process/port/FIFO absence passed across all six targets in `test-live-runtime.bash`, `test-protocols-autosave.bash`, and `test-services.bash`, and Debian 13 `work/m2-verification/final-checks/live-evidence/evidence/evidence.C8irxI` passed `331/331` (exit 0) across normal exit, storage faults, and `INT`/`TERM` while preserving the independent control IOC (`value=37`) and moving scratch workspaces via `tests/test-trash.bash`. |
-| T10 | 2026-11-15T02:59:44Z | Host static/Perl gates plus all six 1.5.0 derived Docker images | Pass | `work/m2-verification/rehearsal-debian13/static-final` passed `bash -n`, `shellcheck -x -s bash -S warning` (`0` findings across 24 Bash scripts), `perl -wc` + `podchecker` (`m2-replay.pl`, `m2-tcp-receiver.pl`), `git diff --check`, pure ASCII check, and all `299` `m2-legacy-assertions.tsv` checks; unmodified `test.bash` passed `212/212` (`0` stderr bytes) on all six OS targets (`2,996/2,996` per OS across 10 suites); `final-checks/live-evidence/evidence/evidence.C8irxI` passed `331/331` (7 persistence boundaries x `INT`/`TERM`, `--finalize`, frozen replay with `tests/test-trash.bash`, `sha256sum` fallback, and 13 corruptions); `final-checks/readme-ci/` (`Verdict: Passed`) verified real generated `README` commands and `.gitlab-ci.yml` structure. |
+| T10 | 2026-11-15T02:59:44Z | Host static/Perl gates plus all six 1.5.0 derived Docker images | Pass | `work/m2-verification/rehearsal-debian13/static-final` passed `bash -n`, `shellcheck -x -s bash -S warning` (`0` findings across 24 Bash scripts), `perl -wc` + `podchecker` (`m2-replay.pl`, `m2-tcp-receiver.pl`), `git diff --check`, pure ASCII check, and all `299` `m2-legacy-assertions.tsv` checks; unmodified `test.bash` passed `212/212` (`0` stderr bytes) on all six OS targets (`2,996/2,996` per OS across 10 suites); `final-checks/live-evidence/evidence/evidence.C8irxI` passed `331/331` (7 persistence boundaries x `INT`/`TERM`, `--finalize`, frozen replay with `tests/test-trash.bash`, `sha256sum` fallback, and 13 corruptions); `final-checks/readme-ci/` (`Verdict: Passed`) verified real generated `README` commands and the generated CI file structure (the file is no longer generated). |
+
+Review note (2026-11-16): the counts in the table are those of the recorded
+runs. The tracked tree holds 23 Bash scripts (22 under the repository root and
+`tests/`, plus the `prepare-runtime.bash` template), and `docs/CLOSED_DOORS.md`
+and `test-runtime.bash` contain non-ASCII punctuation. After the recorded runs,
+`tests/test-services.bash` and `tests/test-faults.bash` judge missing-input and
+fault diagnostics from product error lines only, and
+`tests/test-inventory-env.bash` takes its expected OS and image identity from
+`M2_TARGET_OS` and `M2_EXPECTED_IMAGE_DIGEST` and, when the caller supplies
+none, records the two comparisons as not applicable; rerun on Debian 13 with
+the 1.5.0 host tree, the services, faults and inventory suites report `416`,
+`160` and `149` Passed (the inventory count is `149` with both values supplied
+and `147` without).
+The generator no longer generates a CI file. Its removal drops the ten CI
+content assertions and the CI tracking assertion from `test.bash` (one
+assertion now checks that no CI file is generated, and three check the SRS
+title, its placeholders and the `prepare-runtime.bash` `TOP` message), so
+`test.bash` reports `205/205`; it drops the six assertions that named the file in
+`tests/test-dual-startup.bash` (`A015` and `A016` for both repeat and add,
+`A022`, `A023`), so that suite reports `1476/1476` and the matrix declares
+`1328` assertions; and `tests/m2-legacy-assertions.tsv` keeps `295` rows. The
+T1-T10 rows and the six-OS counts above are the recorded runs and were not
+repeated after this removal. `A139` and the `documentation` profile of
+`tests/m2-case-spec.md` now check that no CI file is generated; the order 7
+and `docs-ci` plan text above still mentions executing generated CI commands.
 
 ###### Six-OS Product Matrix, C23 Example Fix, Trash Retention And Final Checks
 
@@ -1350,12 +1375,12 @@ read-only `/src` mount, all scratch and trash confined to `work/`):
   Rocky 8 (`sha256:b413fa0da47265bab9f1a5c88de87411c0518bd2e1607611bf1d89fe4ba704d8`),
   Rocky 10 (`sha256:7d1735cf4cc96e2106c27db5160369ac7e8fad454caf44dbc061587189e8fd02`),
   Ubuntu 24 (`sha256:8332ca3630af223b809cb1098f42e109f5ca189dd8138944ad0a5e06f1c58744`),
-  and Ubuntu 26 (`sha256:fe71427fa5f537b3e5e1387f2ef56252b541de53d35d45d31e1fd421fa9d9`).
+  and Ubuntu 26 (`sha256:fe71427fa5f537b3e5e1387f2ef56252b541de53d35d45d51d31e1fd421fa9d9`).
 - Final Debian 13 checks (`work/m2-verification/final-checks/`):
   `live-evidence/evidence/evidence.C8irxI` passed `331/331` (exit 0);
   `readme-ci/result.txt` (`Verdict: Passed`) verified real generated `README`
-  preview/loader/build/compiled/override commands and `.gitlab-ci.yml` (`0`
-  local script blocks, `alsu-epics-ci`, `debian13`/`rocky8`/`rocky10` includes);
+  preview/loader/build/compiled/override commands and the generated CI
+  file (since removed; `0` local script blocks);
   `t6-proof/` confirmed baseline `34/34` vs `SETTINGS_FILES=wrong_settings`
   mutant `26 Passed, 8 Failed` (`mutant_rc=1`). `rehearsal-debian13/static-final`
   passed all Bash, Perl, ASCII, whitespace, and legacy assertion gates after the
@@ -1473,7 +1498,7 @@ Earlier slice runs remain in `work/tmp/m2-generation-step`:
 | Compiled IOCNAME scratch change | `proofs/compiled-iocname` | 983 Passed, exactly the eight declared A011 failures; exit 1 |
 | Makefile token scratch change | `proofs/makefile-ioc-token` | 983 Passed, exactly the eight declared A012 failures; exit 1 |
 
-The 1334 declared matrix assertions (`792` `A007-A013`, `190` `A014-A018`,
+The 1334 declared matrix assertions (`824` `A007-A013`, `158` `A014-A018`,
 `261` `A019-A021` and `91` `A022-A024`) were present exactly once and their
 expected values matched `generation-matrix/required.tsv`. The original 148
 assertion triples (ID, expected, actual) matched `dual.a8ZUP5` after replacing
@@ -1852,8 +1877,12 @@ finalization/replay and individual negative proof remain unexecuted.
   (2026-11-14 23:23 PST) after `git fetch`; `origin/master` equals
   `95e52b3e9058a529f7df898eccd3bffe1a63b4ed`, and all 53 committed paths show
   no difference from the commit.
-- Every completion criterion is met by T1-T10 above across all six EPICS-env
-  1.5.0 derived Docker images; no external gate.
+- T1-T10 above record the verification executed across all six EPICS-env
+  1.5.0 derived Docker images; no external gate. Negative proof was executed
+  for the controls named in the Verification Results, not for every expanded
+  assertion; the assertions listed as unproven in the slice evidence above
+  remain unproven. The generated CI file was checked for its include
+  structure only; it is no longer generated.
 
 ## Backlog
 
@@ -1923,7 +1952,7 @@ environment, and stops with exit 1 without leaving its workspace behind.
 | Case-sensitivity guard | A case-mismatched APPNAME against an existing app exits 1 with the documented diagnostic. |
 | Literal substitution | Allowed underscore and hyphen bytes reach `st.cmd` and `book.toml` literally. |
 | Generated artifacts | Runtime files exist, `st.cmd` is executable, naming values are expanded with no template tokens, the startup scripts stop on the first failing command, and no screen runtime files are generated. |
-| Generated repository files | `.gitlab-ci.yml`, `.gitignore`, `.editorconfig`, and `.gitattributes` carry the site CI includes and stages, the build-output and local-override ignores, and the editor and line-ending policy. |
+| Generated repository files | `.gitignore`, `.editorconfig`, and `.gitattributes` carry the build-output and local-override ignores and the editor and line-ending policy, and no CI file is generated. |
 | Abort paths after the EPICS check | A refused location prompt, a same-directory invocation, and both `makeBaseApp.pl` failures abort with the documented diagnostic. |
 | iocBoot path resolution | Explicit `-n` and `-d` values resolve to the actual `makeBaseApp.pl` output path. |
 | Generated git state | The staged set tracks the expected sources and excludes screen files, build residue, and editor backups. |

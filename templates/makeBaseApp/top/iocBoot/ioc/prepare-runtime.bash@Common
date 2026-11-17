@@ -2,10 +2,10 @@
 # Prepare per-IOC storage and validate statistics selection before commonIocsh starts services.
 set -euo pipefail
 
-AS_TOP="${AS_TOP:-${TOP}/var/autosave}"
 : "${TARGET_TOP:?TARGET_TOP must name the diagnostic root}"
 : "${IOCNAME:?IOCNAME must name this instance}"
 : "${TOP:?TOP must name the project root}"
+AS_TOP="${AS_TOP:-${TOP}/var/autosave}"
 
 declare -A STARTUP_ENV_MAP=()
 EXPANDED_MACRO_VALUE=""

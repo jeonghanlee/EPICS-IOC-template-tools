@@ -172,7 +172,7 @@ function source_matrix {
     local source_dir="" source_top="" member="" line="" actual="" ls_id="" ign_id="" ls_rc="" ign_rc=""
     local -A tracked_set=() ignored_set=()
     local -a expected_tracked=(
-        ".editorconfig" ".gitattributes" ".gitignore" ".gitlab-ci.yml"
+        ".editorconfig" ".gitattributes" ".gitignore"
         "Makefile" "README.md" "book.toml"
         "configure/CONFIG" "configure/CONFIG_ALSU" "configure/CONFIG_IOCSH" "configure/CONFIG_SITE"
         "configure/Makefile" "configure/RELEASE" "configure/RULES" "configure/RULES.ioc"

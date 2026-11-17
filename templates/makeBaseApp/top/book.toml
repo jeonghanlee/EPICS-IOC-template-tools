@@ -17,9 +17,9 @@ default-theme = "rust"
 preferred-dark-theme = "ayu"
 smart-punctuation = true
 no-section-label = false
-git-repository-url = "https://git.example.com/alsu/epics/iocs/@APPNAME@"
-git-repository-icon = "fa-gitlab"
-edit-url-template = "https://git.example.com/alsu/epics/iocs/@APPNAME@/edit/master/{path}"
+git-repository-url = "https://github.com/jeonghanlee/@APPNAME@"
+git-repository-icon = "fa-github"
+edit-url-template = "https://github.com/jeonghanlee/@APPNAME@/edit/master/{path}"
 mathjax-support = true
 input-404="not-found.md"
 

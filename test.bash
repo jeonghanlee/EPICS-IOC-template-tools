@@ -747,7 +747,11 @@ function artifact_assertion_test {
     assert_file_contains "IOC main checks the startup script result" "${top}/${appname}App/src/${appname}Main.cpp" "if(iocsh(argv[1])) {"
     assert_file_contains "st.cmd loads app dbd" "${iocboot}/st.cmd" "dbLoadDatabase \"dbd/${appname}.dbd\""
     assert_file_contains "book.toml title uses APPNAME" "${top}/book.toml" "ALS-U EPICS IOC --- ${appname} ---"
-    assert_file_contains "book.toml repository uses APPNAME" "${top}/book.toml" "iocs/${appname}"
+    assert_file_contains "book.toml repository uses APPNAME" "${top}/book.toml" "github.com/jeonghanlee/${appname}"
+    assert_file_contains "SRS title uses APPNAME" "${top}/docs/SoftwareRequirementsSpecification.md" "# EPICS IOC ${appname} Software Requirements Specification"
+    assert_file_lacks_tokens "SRS has no template placeholders" "${top}/docs/SoftwareRequirementsSpecification.md"
+    assert_command_fails "prepare-runtime rejects a missing TOP" "TOP must name the project root" \
+        env -u TOP -u AS_TOP TARGET_TOP="${WORKSPACE}" IOCNAME="${iocname}" bash "${iocboot}/prepare-runtime.bash"
 
     assert_file_absent "attach not generated" "${iocboot}/attach"
     assert_file_absent "run not generated" "${iocboot}/run"
@@ -954,7 +958,7 @@ function git_state_test {
 
     local path
     local -a expected=(
-        ".editorconfig" ".gitattributes" ".gitignore" ".gitlab-ci.yml"
+        ".editorconfig" ".gitattributes" ".gitignore"
         "Makefile" "book.toml"
         "configure/CONFIG" "configure/RELEASE" "configure/RULES"
         "${appname}App/Makefile" "${appname}App/src/Makefile"
@@ -1055,26 +1059,20 @@ function additional_iocboot_test {
     reset_dataset_tree "${folder}"
 }
 
-# The generator writes the repository's CI, ignore, editor, and attribute
+# The generator writes the repository's ignore, editor, and attribute
 # files; their content, not only their presence, carries the site policy.
 function generated_files_test {
     local appname="repofiles"
     local location="sr10"
     local folder="repofiles_repo"
     local top="${WORKSPACE}/${folder}"
-    local inc
 
     print_dataset "generated repository files"
-    why "The generated .gitlab-ci.yml, .gitignore, .editorconfig, and .gitattributes must carry the site CI includes and stages, the build-output and local-override ignores, and the editor and line-ending policy."
+    why "The generated .gitignore, .editorconfig, and .gitattributes must carry the build-output and local-override ignores and the editor and line-ending policy, and no CI file is generated."
 
     run_case "generated repository files baseline" success "${appname}" "${location}" "${folder}"
 
-    assert_line_equals "CI includes the alsu/ci project" "${top}/.gitlab-ci.yml" "  - project: alsu/ci"
-    for inc in workflow.yml alsu-vars.yml env-sitemodules.yml debian13-epics.yml rocky8-epics.yml rocky10-epics.yml mdbook.yml; do
-        assert_line_equals "CI includes ${inc}" "${top}/.gitlab-ci.yml" "      - '${inc}'"
-    done
-    assert_line_equals "CI declares the build stage" "${top}/.gitlab-ci.yml" "  - build"
-    assert_line_equals "CI declares the deploy stage" "${top}/.gitlab-ci.yml" "  - deploy"
+    assert_file_absent "no CI file is generated" "${top}/.gitlab-ci.yml"
 
     assert_line_equals "gitignore excludes bin" "${top}/.gitignore" "/bin/"
     assert_line_equals "gitignore excludes lib" "${top}/.gitignore" "/lib/"

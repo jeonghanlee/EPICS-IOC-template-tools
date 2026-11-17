@@ -1,4 +1,4 @@
-# EPICS IOC __APPNAME__ Software Requirements Specification
+# EPICS IOC @APPNAME@ Software Requirements Specification
 
 -------- snip snip -------
 
@@ -83,7 +83,7 @@ This subsection should provide the definitions of all terms, acronyms, and abbre
 
 #### Software interface: EPICS base 
 
-* EPICS Base: __EPICS_BASE__
+* EPICS Base: _EPICS_BASE_
 ** Source: source code url or ALS-U EPICS environment
 
 #### Software interface: Dependent Modules

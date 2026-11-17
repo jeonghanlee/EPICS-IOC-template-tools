@@ -586,6 +586,34 @@ function run_expected_error_startup {
     fi
 }
 
+# Report whether the enabled service call exposed its missing input: an error
+# line printed by the real operation, or for a missing FSID the record that
+# the DB load created with an empty instance tag.
+function service_missing_input_exposed {
+    local sub="$1" dispatch="$2" names_file="$3" identity="$4"
+    [[ -f "${dispatch}" ]] || return 1
+    case "${sub}" in
+        nic-missing)
+            grep -Eq 'ERROR devLinInitRecord, "ifstat\|\|[A-Za-z_]+" : Empty instance not allowed' "${dispatch}"
+            ;;
+        fs-missing-fsid)
+            [[ -f "${names_file}" ]] && grep -qxF "${identity}::FS_SCAN" "${names_file}"
+            ;;
+        fs-missing-dir)
+            grep -Fq 'ERROR unable to stat ""' "${dispatch}"
+            ;;
+        serial-missing-config)
+            grep -Eq "^Can't open .*absent-serial\.iocsh" "${dispatch}"
+            ;;
+        serial-missing-port)
+            grep -Fq 'connectDevice port M2SER not found' "${dispatch}"
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
 function judge_enabled_service_receipt {
     local sub="$1" case_dir="$2" identity="$3" nic="$4"
     local dispatch="${case_dir}/terminal/dispatch.txt"
@@ -594,7 +622,9 @@ function judge_enabled_service_receipt {
         printf 'Incomplete'
         return 0
     fi
-    if grep -Eq 'macLib:|undefined|Can'\''t open|cannot open|failed|ERROR|error|statvfs|findInterface|Unable to find' "${dispatch}"; then
+    # Judge from the error line the missing input produced; echoed startup
+    # lines such as "on error break" must not decide the verdict.
+    if service_missing_input_exposed "${sub}" "${dispatch}" "${names_file}" "${identity}"; then
         printf 'Failed'
         return 0
     fi
@@ -1241,23 +1271,9 @@ function evaluate_subcase {
                 return 0
             fi
             actual="unexposed"
-            case "${sub}" in
-                nic-missing)
-                    grep -Eq 'NIC|ifstat|linStatNIC' "${dispatch}" && grep -Eq 'macLib:|undefined|error|ERROR|failed' "${dispatch}" && actual="exposed"
-                    ;;
-                fs-missing-fsid)
-                    grep -Eq 'FSID|linStatFS' "${dispatch}" && grep -Eq 'macLib:|undefined|error|ERROR|failed' "${dispatch}" && actual="exposed"
-                    ;;
-                fs-missing-dir)
-                    grep -Eq 'DIR|statvfs|linStatFS' "${dispatch}" && grep -Eq 'macLib:|undefined|error|ERROR|failed|statvfs' "${dispatch}" && actual="exposed"
-                    ;;
-                serial-missing-config)
-                    grep -Fq 'absent-serial.iocsh' "${dispatch}" && actual="exposed"
-                    ;;
-                serial-missing-port)
-                    grep -Fq 'M2SER' "${dispatch}" && grep -Eq 'asynSetOption|findInterface|Unable|failed|error|ERROR' "${dispatch}" && actual="exposed"
-                    ;;
-            esac
+            if service_missing_input_exposed "${sub}" "${dispatch}" "${names_file}" "${identity}"; then
+                actual="exposed"
+            fi
             m2_eval_check "M2/T8/A075/services/${sub}/${startup}/failed-operation/exposed" "${actual}"
             cand_verdict=$(judge_enabled_service_receipt "${sub}" "${case_dir}" "${identity}" "${nic}")
             printf '%s\n' "${cand_verdict}" > "${case_dir}/evaluation/negative-receipt-verdict.txt" 2>/dev/null || true

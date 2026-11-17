@@ -504,8 +504,8 @@ real generator with its TSV arguments and an independent project directory.
 `generation-matrix/required.tsv` records concrete A007-A024 IDs and expected
 values; the static positive-generation (`m2-generation-cases.tsv`), CLI
 (`m2-cli-cases.tsv`, 87 rows x status/stdout/stderr = 261 assertions) and Git
-source/ignore (38 index-tracked, 40 source non-ignored, 13 pre-created
-runtime/build/local/backup ignored = 91 assertions) denominators are declared
+source/ignore (37 index-tracked, 39 source non-ignored, 13 pre-created
+runtime/build/local/backup ignored = 89 assertions) denominators are declared
 before any matrix generation runs. Preservation IDs (`A014-A018`) are declared
 from the independent original-file snapshot before each repeat/add invocation.
 Duplicate declarations, duplicate results and missing declared results prevent
@@ -558,10 +558,8 @@ checks; preserve their raw diagnostics in the clean-container rehearsal.
 
 `documentation` runs every generated boot README command from its stated cwd
 in fresh projects, including preview, build, each direct start, overrides and
-normal exit. Freeze the command list first. Inspect generated CI and run its
-actual declared local commands; inaccessible external includes are missing
-evidence, not invented commands. Remote CI acceptance requires a real run
-and is not inferred from this local procedure.
+normal exit. Freeze the command list first. The generated project holds no CI
+file; assert its absence in the generated inventory.
 
 ## Inventory And Harness Profiles
 
@@ -581,6 +579,10 @@ makeBaseApp.pl, iocsh.bash, caget/caput/pvxget/pvxput, script, setsid,
 timeout, ss, readelf, ldd, stat, cmp and sha256sum. Record concrete argv
 and native status for each probe. Verify signal disposition by actual launch
 before accepting INT cases. No absent dependency becomes an optional cell.
+The expected OS and image identity are inputs, not dependencies: they come from
+the caller (`M2_TARGET_OS`, `M2_EXPECTED_IMAGE_DIGEST`). When a value is absent
+that comparison is not applicable: it is recorded with its reason in
+`inputs/not-applicable.tsv` before collection and is not in the frozen plan.
 
 `static` uses `bash -n` and ShellCheck with `-x`, both a warning/error gate
 and unfiltered inventory, on the generator and every shipped Bash test/helper.

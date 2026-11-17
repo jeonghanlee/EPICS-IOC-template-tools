@@ -17,13 +17,13 @@
 #
 # Author  : Jeong Han Lee
 # email   : jeonghan.lee@gmail.com
-# version : 0.1.2
+# version : 0.1.3
 #
 #
-# 0.0.9 : gitlab-ci Clone depth 2
 # 0.1.0 : introduce a folder name
 # 0.1.1 : add mdbook support, use master as the default branch name
 # 0.1.2 : add the string limitation such as ioc, Ioc, IOC, -, and +
+# 0.1.3 : generate st.cmd and st.loader.cmd together, expand the SRS title, drop the unused epics ci helpers, stop generating the site CI file
 
 set -euo pipefail
 
@@ -213,138 +213,6 @@ EOF
 }
 
 
-# Must call it within git repo path
-function add_submodule
-{
-    local src_url="$1"
-    local tgt_name="$2"
-    if [[ ! -d "${tgt_name}" ]]; then
-        printf "%s is adding as submodule %s.\n" "${src_url}" "${tgt_name}"
-        git submodule add "${src_url}" "${tgt_name}" || die "We cannot add ${src_url} as submodule : Please check it"
-        printf "\n"
-        git submodule update --init --recursive || die "We cannot init the gitsubmodule : Please check it"
-    else
-        printf "Exist : %s\n" "${tgt_name}"
-    fi
-}
-
-function als_ci
-{
-    local cifile=".gitlab-ci.yml"
-
-    if [[ ! -f "${cifile}" ]]; then
-        cat > "${cifile}" <<"EOF"
----
-# Please check the site https://git.example.com/alsu/ci
-# If IOC does need the site modules. create .sitmodules in $TOP folder
-#
-include:
-  - project: alsu/ci
-    ref: master          # branch name, tag name, Commit SHA
-    file:
-      - 'workflow.yml'
-      - 'alsu-vars.yml'
-      - 'env-sitemodules.yml'
-      - 'debian13-epics.yml'
-      - 'rocky8-epics.yml'
-      - 'rocky10-epics.yml'
-      - 'mdbook.yml'
-
-stages:
-  - build
-  - deploy
-EOF
-    else
-        printf "Exist : %s\n" "${cifile}"
-    fi
-}
-
-
-function epics_ci
-{
-    local url="https://github.com/epics-base/ci-scripts"
-    local tgt=".ci"
-    local cifile=".gitlab-ci.yml"
-    local localpath=".ci-local"
-    local localfile1="stable.set"
-
-    add_submodule "${url}" "${tgt}"
-    if [[ ! -d "${localpath}" ]]; then
-        printf "CREATE : %s\n" "${localpath}"
-        mkdir -p "${localpath}"
-    else
-        printf "Exist : %s\n" "${localpath}"
-    fi
-    pushd_q "${localpath}"
-    if [[ ! -f "${localfile1}" ]]; then
-        printf "%s\n" "BASE=7.0" > "${localfile1}"
-    else
-        printf "Exist : %s\n" "${localfile1}"
-    fi
-    popd_q
-
-    if [[ ! -f "${cifile}" ]]; then
-        cat > "${cifile}" <<"EOF"
-# .gitlab-ci.yml for testing EPICS Base ci-scripts
-# (see: https://github.com/epics-base/ci-scripts)
-
-cache:
-  key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
-  paths:
-    - .cache/
-
-variables:
-  GIT_SUBMODULE_STRATEGY: "recursive"
-  SETUP_PATH: ".ci-local:.ci"
-  BASE_RECURSIVE: "NO"
-  CMP: "gcc"
-  BGFC: "default"
-
-# Template for build jobs (hidden)
-.build:
-  image: centos:7.9.2009
-  stage: build
-  before_script:
-    - cat /etc/os-release
-    - yum -y install git bash sudo
-    - yum -y update
-    - git clone https://github.com/jeonghanlee/pkg_automation
-    - bash ${CI_PROJECT_DIR}/pkg_automation/pkg_automation.bash -y
-    - python .ci/cue.py prepare
-  script:
-    - python .ci/cue.py build
-    - python .ci/cue.py test
-    - python .ci/cue.py test-results
-
-# Build on Linux using default gcc for Base branches 7.0 and 3.15
-
-gcc_base_7_0:
-  extends: .build
-  variables:
-    BASE: "7.0"
-    SET: stable
-
-gcc_base_3_15:
-  extends: .build
-  variables:
-    BASE: "3.15"
-    SET: stable
-
-ShellCheck:
-    image: alpine
-    stage: test
-    before_script:
-    - apk update
-    - apk --no-cache add bash git shellcheck
-    - shellcheck -V
-    script:
-    - git ls-files --exclude='*.bash' --ignored | xargs shellcheck || echo "No script found!"
-EOF
-    else
-        printf "Exist : %s\n" "${cifile}"
-    fi
-}
-
 function sed_file
 {
     local appname="$1"
@@ -513,6 +381,7 @@ function main
     local IOC=""
     local IOCBOOT_IOC_PATH=""
     local README=""
+    local SRS=""
     local infolderApp=""
     local infolder=""
     local startup=""
@@ -616,6 +485,7 @@ function main
     fi
 
     APPTOP="${TOP}/${FOLDERNAME}"
+    SRS="${APPTOP}/docs/SoftwareRequirementsSpecification.md"
 
     printf "\n"
     printf ">> We are now creating a folder with >>> %s <<<\n" "${FOLDERNAME}"
@@ -690,6 +560,12 @@ function main
     sed_replacement_escape escaped_book_appname "${APPNAME}"
     sed -e "s|@APPNAME@|${escaped_book_appname}|g"  < "${APPTOP}/book.toml" > "${APPTOP}/book.toml~"
     mv  "${APPTOP}/book.toml~" "${APPTOP}/book.toml"
+    # makeBaseApp.pl copies docs/ without an application name; an already
+    # expanded or user-edited file carries no token and is left untouched.
+    if [[ -f "${SRS}" ]] && grep -qF -- "@APPNAME@" "${SRS}"; then
+        sed -e "s|@APPNAME@|${escaped_book_appname}|g" < "${SRS}" > "${SRS}~"
+        mv "${SRS}~" "${SRS}"
+    fi
 
     README="README.md"
 
@@ -702,7 +578,6 @@ function main
     if [[ ! -d .git ]]; then
         git init --initial-branch="${DEFAULT_GIT_BRANCH}"
     fi
-    als_ci
     add_gitignore
     add_gitattributes
     add_editorconfig

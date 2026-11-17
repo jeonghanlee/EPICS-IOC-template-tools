@@ -26,23 +26,19 @@ Each info tag should be matched with what one would like to use such as
   - `values_pass1.sav`    : in `$(AS_TOP)/$(IOCNAME)/save`
   - `values_pass1.req`    : in `$(AS_TOP)/$(IOCNAME)/req`
 
-## How to enable it 
+## How it is enabled
 
-EPICS-env 1.4.0 and later install the `autosave.iocsh` fragment under `modules/commonIocsh/iocsh`; earlier environments do not have it. Its header lists every macro it accepts. Before adding the line below, confirm that the sourced environment carries the fragment, because a missing fragment stops the IOC under the `on error break` at the top of `st.cmd`:
-
-```bash
-ls "${EPICS_BASE}/../modules/commonIocsh/iocsh/autosave.iocsh"
-```
- The generated `st.cmd` sets `IOCSH_TOP` to that `commonIocsh` directory and does not load the fragment. To enable autosave, add the following line to `st.cmd` between the `registerRecordDeviceDriver` call and `iocInit`.
-
+The generated `st.cmd` and `st.loader.cmd` already load the `autosave.iocsh` fragment from `modules/commonIocsh/iocsh` of the sourced EPICS-env 1.5.0 tree. Do not add a second load. The fragment header lists every macro it accepts.
 
 ```bash
-iocshLoad("$(IOCSH_TOP)/iocsh/autosave.iocsh", "IOC=$(IOCNAME),AS_TOP=$(TOP)")
+iocshLoad("$(IOCSH_TOP)/iocsh/autosave.iocsh", "IOC=$(IOCNAME)")
 ```
+
+To change a fragment macro, add it to that existing line in each startup file you run (`st.cmd`, `st.loader.cmd`).
 
 * `IOC` : the fragment's name macro, given `$(IOCNAME)`; it is the prefix of the status records, `$(IOCNAME)-as:`, and the name of the per-IOC directory under `AS_TOP`
-* `AS_TOP` : writable root directory of the save and request files
-* `AUTOSAVE` : install directory of the autosave module, which `envPaths` provides from `configure/RELEASE`
+* `AS_TOP` : writable root directory of the save and request files. `prepare-runtime.bash` sets it to `$(TOP)/var/autosave` unless the environment provides `AS_TOP`, and the startup file imports that value before the fragment runs
+* `AUTOSAVE` : install directory of the autosave module, which `envPaths` provides from `configure/RELEASE` for `st.cmd` and the loader module metadata provides for `st.loader.cmd`
 
 The fragment needs `asSupport.dbd`, `system.dbd`, and the `autosave` library, which the generated application `src/Makefile` already links when `AUTOSAVE` is defined in `configure/RELEASE`. The commands that must run after `iocInit` are registered inside the fragment with `afterIocRunning` of EPICS Base, so the single line above covers both steps.
 
@@ -52,13 +48,15 @@ The fragment needs `asSupport.dbd`, `system.dbd`, and the `autosave` library, wh
 It is highly recommended to use `info` tag instead of the seperated request files. However, this file would like to help them to use existent request files within `autosave.iocsh` according to existent all EPICS modules' req files, own req files, or both. 
 
 
+In the examples below, the `autosave.iocsh` line is the one the generated startup file already contains; add only the other lines around it.
+
 ### Example 1
 
 ```bash
 ...
 dbLoadRecords("spinnaker.db", "P=$(PREFIX),R=,PORT=$(PORT)")
 ...
-iocshLoad("$(IOCSH_TOP)/iocsh/autosave.iocsh", "IOC=$(IOCNAME),AS_TOP=$(TOP)")
+iocshLoad("$(IOCSH_TOP)/iocsh/autosave.iocsh", "IOC=$(IOCNAME)")
 #
 iocInit()
 ```
@@ -106,7 +104,7 @@ NDStdArraysConfigure("$(IMAGE)", 5, 0, "$(PORT)", 0, 0)
 dbLoadRecords("NDStdArrays.template", "P=$(PREFIX),R=,PORT=$(IMAGE),ADDR=0,TIMEOUT=1,NDARRAY_PORT=$(PORT),TYPE=Int16,FTVL=SHORT,NELEMENTS=$(NELEMENTS)")
 iocshLoad("$(ADCORE)/iocsh/commPlugins.iocsh", "P=$(PREFIX),UNIT=1,PORT=$(IMAGE),QSIZE=$(QSIZE),XSIZE=$(XSIZE),YSIZE=$(YSIZE),NCHANS=$(NCHANS),CBUFFS=$(CBUFFS)")
 
-iocshLoad("$(IOCSH_TOP)/iocsh/autosave.iocsh", "IOC=$(IOCNAME),AS_TOP=$(TOP)")
+iocshLoad("$(IOCSH_TOP)/iocsh/autosave.iocsh", "IOC=$(IOCNAME)")
 
 iocInit()
 

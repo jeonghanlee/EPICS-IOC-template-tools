@@ -22,23 +22,12 @@ readonly -a OPTION_PROBES=(
     opt-timeout-bound opt-ss-port-filter opt-git-init
 )
 
-function detect_expected_os_token {
-    if [[ -n "${M2_TARGET_OS:-}" ]]; then
-        printf '%s' "${M2_TARGET_OS}"
-        return 0
-    fi
-    local os_id="" ver_id="" major=""
-    if [[ -r /etc/os-release ]]; then
-        # shellcheck disable=SC1091
-        source /etc/os-release
-        os_id="${ID:-unknown}"
-        ver_id="${VERSION_ID:-0}"
-        major="${ver_id%%.*}"
-        printf '%s%s' "${os_id}" "${major}"
-        return 0
-    fi
-    printf 'unknown0'
-}
+# Expected identities come only from the caller. A value derived from the
+# environment under test would compare that environment with itself. When the
+# caller supplies none, the comparison is not applicable: it is left out of the
+# frozen plan and its reason is recorded in inputs/not-applicable.tsv.
+readonly OS_IDENTITY_ID="M2/T10/A004/environment/preflight/shared/OS/identity"
+readonly DIGEST_IDENTITY_ID="M2/T10/A004/environment/preflight/shared/image-digest/identity"
 
 function declare_inventory_env_plan {
     local contract_file="$1" expected_os="$2" expected_digest="$3"
@@ -53,10 +42,14 @@ function declare_inventory_env_plan {
         m2_plan_declare "M2/T1/A003/inventory/macros/shared/${frag}:${macro}/consumer" "${cmds}|${phase}|${wdest}"
     done < "${contract_file}"
 
-    m2_plan_declare "M2/T10/A004/environment/preflight/shared/OS/identity" "${expected_os}"
+    if [[ -n "${expected_os}" ]]; then
+        m2_plan_declare "${OS_IDENTITY_ID}" "${expected_os}"
+    fi
     m2_plan_declare "M2/T10/A004/environment/preflight/shared/distribution/identity" "1.5.0/7.0.10"
     m2_plan_declare "M2/T10/A004/environment/preflight/shared/architecture/identity" "x86_64:linux-x86_64"
-    m2_plan_declare "M2/T10/A004/environment/preflight/shared/image-digest/identity" "${expected_digest}"
+    if [[ -n "${expected_digest}" ]]; then
+        m2_plan_declare "${DIGEST_IDENTITY_ID}" "${expected_digest}"
+    fi
     m2_plan_declare "M2/T10/A005/environment/preflight/shared/UID/privilege" "non-root"
 
     for tool in "${REQUIRED_TOOLS[@]}"; do
@@ -324,6 +317,25 @@ function run_tool_probe {
     esac
 }
 
+# An assertion absent from the frozen plan is judged only when its omission was
+# recorded with a reason before collection; otherwise the plan is incomplete.
+function eval_identity_or_not_applicable {
+    local concrete_id="$1" actual="$2" na_file="${M2_RUN_DIR}/inputs/not-applicable.tsv" row_id="" reason=""
+    if [[ -n "${M2_PLAN_EXPECTED[${concrete_id}]+set}" ]]; then
+        m2_eval_check "${concrete_id}" "${actual}"
+        return 0
+    fi
+    if [[ -f "${na_file}" ]]; then
+        while IFS=$'\t' read -r row_id reason || [[ -n "${row_id:-}" ]]; do
+            if [[ "${row_id}" == "${concrete_id}" && -n "${reason//$'\r'/}" ]]; then
+                printf '[ N/A  ] %s (%s)\n' "${concrete_id}" "${reason//$'\r'/}"
+                return 0
+            fi
+        done < "${na_file}"
+    fi
+    m2_eval_incomplete "${concrete_id}" "not in the frozen plan and no recorded reason"
+}
+
 function evaluate_inventory_env {
     m2_eval_load_plan || return 0
     local inv_file="${M2_RUN_DIR}/artifacts/installed-inventory.txt"
@@ -373,13 +385,13 @@ function evaluate_inventory_env {
     if [[ ! -f "${env_obs}" ]]; then
         m2_eval_incomplete_prefix "environment/preflight/shared" "missing environment-identity.tsv"
     else
-        m2_eval_check "M2/T10/A004/environment/preflight/shared/OS/identity" \
+        eval_identity_or_not_applicable "${OS_IDENTITY_ID}" \
             "$(m2_read_kv_tsv "${env_obs}" OS || printf 'MISSING')"
         m2_eval_check "M2/T10/A004/environment/preflight/shared/distribution/identity" \
             "$(m2_read_kv_tsv "${env_obs}" distribution || printf 'MISSING')"
         m2_eval_check "M2/T10/A004/environment/preflight/shared/architecture/identity" \
             "$(m2_read_kv_tsv "${env_obs}" architecture || printf 'MISSING')"
-        m2_eval_check "M2/T10/A004/environment/preflight/shared/image-digest/identity" \
+        eval_identity_or_not_applicable "${DIGEST_IDENTITY_ID}" \
             "$(m2_read_kv_tsv "${env_obs}" image-digest || printf 'MISSING')"
         m2_eval_check "M2/T10/A005/environment/preflight/shared/UID/privilege" \
             "$(m2_read_kv_tsv "${env_obs}" UID || printf 'MISSING')"
@@ -414,21 +426,26 @@ if [[ ${M2_EVAL_MODE} -eq 1 ]]; then
     exit 0
 fi
 
-: "${EPICS_BASE:?Source setEpicsEnv.bash first}"
-: "${EPICS_MODULES:?EPICS_MODULES is required}"
-: "${EPICS_HOST_ARCH:?EPICS_HOST_ARCH is required}"
+[[ -n "${EPICS_BASE:-}" ]] || m2_evidence_error "EPICS_BASE is unset; source the EPICS 1.5.0 setEpicsEnv.bash first"
+[[ -n "${EPICS_MODULES:-}" ]] || m2_evidence_error "EPICS_MODULES is unset; source the EPICS 1.5.0 setEpicsEnv.bash first"
+[[ -n "${EPICS_HOST_ARCH:-}" ]] || m2_evidence_error "EPICS_HOST_ARCH is unset; source the EPICS 1.5.0 setEpicsEnv.bash first"
 
 contract_src="${M2_MACRO_CONTRACT_TSV:-${SOURCE_ROOT}/tests/m2-macro-contract.tsv}"
 [[ -s "${contract_src}" ]] || m2_evidence_error "missing macro contract TSV: ${contract_src}"
 cp -- "${contract_src}" "${M2_RUN_DIR}/inputs/macro-contract.tsv" || m2_evidence_error "copy macro-contract.tsv"
 printf '%s\n' "${EXPECTED_FRAGMENTS_CSV//,/$'\n'}" > "${M2_RUN_DIR}/inputs/expected-fragments.txt"
 
-expected_os=$(detect_expected_os_token)
-expected_digest="${M2_EXPECTED_IMAGE_DIGEST:-${M2_IMAGE_DIGEST:-}}"
-if [[ -z "${expected_digest}" && -r /etc/epics-bake.manifest ]]; then
-    expected_digest=$(awk '$1 == "EPICS-env-distribution" { print "manifest:" $3; exit }' /etc/epics-bake.manifest)
+expected_os="${M2_TARGET_OS:-}"
+expected_digest="${M2_EXPECTED_IMAGE_DIGEST:-}"
+: > "${M2_RUN_DIR}/inputs/not-applicable.tsv" || m2_evidence_error "inputs/not-applicable.tsv"
+if [[ -z "${expected_os}" ]]; then
+    printf '%s\t%s\n' "${OS_IDENTITY_ID}" "no expected OS supplied in M2_TARGET_OS" \
+        >> "${M2_RUN_DIR}/inputs/not-applicable.tsv" || m2_evidence_error "inputs/not-applicable.tsv"
 fi
-[[ -n "${expected_digest}" ]] || expected_digest="host-tree"
+if [[ -z "${expected_digest}" ]]; then
+    printf '%s\t%s\n' "${DIGEST_IDENTITY_ID}" "no expected image identity supplied in M2_EXPECTED_IMAGE_DIGEST" \
+        >> "${M2_RUN_DIR}/inputs/not-applicable.tsv" || m2_evidence_error "inputs/not-applicable.tsv"
+fi
 
 declare_inventory_env_plan "${M2_RUN_DIR}/inputs/macro-contract.tsv" "${expected_os}" "${expected_digest}"
 

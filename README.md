@@ -10,7 +10,7 @@
 
 ## `generate_ioc_structure.bash`
 
-This script automates the manual process described in the EPICS IOC Development Guide (AL-1451-7629).
+This script automates the manual process described in the EPICS IOC Development Guide (AL-1451-7629, not included in this repository).
 
 Each generated IOC directory contains both `st.cmd` for the compiled
 application and `st.loader.cmd` for the installed module loader. Both enable
@@ -73,8 +73,8 @@ bash tests/test-live-runtime.bash
 ```
 
 It requires the sourced 1.5.0 environment, `caget`, `caput`, `pvxget`, `pvxput`,
-`script`, `setsid`, `ss`, `timeout`, `rg`, build tools, and GNU `env` supporting
-`--default-signal`. Run it on a host permitting loopback sockets and linStat
+`script`, `setsid`, `ss`, `timeout`, `rg`, `perl`, and build tools. Run it on
+a host permitting loopback sockets and linStat
 netlink queries. `M6_STARTUPS=loader` or `M6_STARTUPS=compiled` selects one
 independent case; the default runs both. Results, client receipts, PTY
 transcripts, source hashes and generated projects remain under
@@ -92,12 +92,30 @@ bash tests/test-live-evidence.bash
 Its receipts remain under `work/m2-verification/evidence.*`. Additional M2
 suites under `tests/` cover fragment and environment contracts
 (`test-inventory-env.bash`), default records, writable-path overrides and init
-hooks (`test-defaults-paths-hooks.bash`), multi-pass autosave and protocol
-access (`test-protocols-autosave.bash`), optional `commonIocsh` services
-(`test-services.bash`), startup and permission faults (`test-faults.bash`), and
+hooks (`test-defaults-paths-hooks.bash`), protocol access and settings
+autosave save and restore (`test-protocols-autosave.bash`), optional
+`commonIocsh` services and autosave macro overrides with their pass0 and pass1
+save files (`test-services.bash`), startup and permission faults
+(`test-faults.bash`), and
 frozen-bundle replay (`m2-replay.pl`), retaining displaced scratch artifacts
 through `tests/test-trash.bash`. Supervised `ioc-runner` lifecycle remains in
 `test-runtime.bash`; none of the `tests/` drivers changes shared systemd units.
+Run `test-inventory-env.bash` with the EPICS environment sourced; it needs no
+expected values on a host tree. Its OS and image identity comparisons are meant
+for the Docker images and run only when the caller supplies the expected
+values. Without them those two checks are not applicable: they are left out of
+the run and the reason is recorded in
+`inputs/not-applicable.tsv` of the run's evidence. `M2_TARGET_OS` is the `ID`
+from `/etc/os-release` followed by the major part of `VERSION_ID`, such as
+`debian13`, `rocky8` or `ubuntu24`. `M2_EXPECTED_IMAGE_DIGEST` is
+`manifest:<commit>`, with the commit of the `EPICS-env-distribution` line, where
+`/etc/epics-bake.manifest` exists, and `host-tree` where that file does not
+exist. The first command reports 147 assertions and the second 149:
+
+```bash
+bash tests/test-inventory-env.bash
+M2_TARGET_OS=debian13 M2_EXPECTED_IMAGE_DIGEST=host-tree bash tests/test-inventory-env.bash
+```
 
 The script requires two mandatory options: **APPNAME** (Device Name) and **LOCATION**. These options must be defined according to the IOC Naming Convention document [1]. Please adhere to the following rules:
 
@@ -219,8 +237,8 @@ bash tools/generate_ioc_structure.bash -p APPNAME -l LOCATION2 [-d DEVICE] [-f F
 * Example 1 : Your clone folder name is the same as your application name
 
 ```bash
-$ git clone ssh://git@git.example.com/alsu/tools.git
-$ git clone ssh://git@git.example.com/alsu/mouse.git
+$ git clone <URL of the tools repository> tools
+$ git clone <URL of the mouse repository>
 
 $ bash tools/generate_ioc_structure.bash -l park -p mouse
 Your Location ---park--- was NOT defined in the predefined ALS/ALS-U locations
@@ -234,8 +252,6 @@ Your Location ---park--- was NOT defined in the predefined ALS/ALS-U locations
 >> If the folder is exist, we can go into mouse
 >> in the >>> /home/user/gitsrc <<<
 >> Entering into /home/user/gitsrc/mouse
->> makeBaseApp.pl -t ioc
-mouse exists, not modified.
 >>> Making IOC application with IOCNAME park-mouse and IOC iocpark-mouse
 >>>
 >> makeBaseApp.pl -i -t ioc -p mouse park-mouse
@@ -246,7 +262,6 @@ Using target architecture linux-x86_64 (only one available)
 >>> IOC     : iocpark-mouse
 >>> iocBoot IOC path /home/user/gitsrc/mouse/iocBoot/iocpark-mouse
 
-Exist : .gitlab-ci.yml
 Exist : .gitignore
 Exist : .gitattributes
 Exist : .editorconfig
@@ -276,8 +291,8 @@ mouse/iocBoot/
 * Example 2 : Your application name does not match the device name for this IOC
 
 ```bash
-$ git clone ssh://git@git.example.com/alsu/tools.git
-$ git clone ssh://git@git.example.com/alsu/mouse.git
+$ git clone <URL of the tools repository> tools
+$ git clone <URL of the mouse repository>
 
 $ bash tools/generate_ioc_structure.bash -l park -p mouse -d woodmouse
 Your Location ---park--- was NOT defined in the predefined ALS/ALS-U locations
@@ -291,8 +306,6 @@ Your Location ---park--- was NOT defined in the predefined ALS/ALS-U locations
 >> If the folder is exist, we can go into mouse
 >> in the >>> /home/user/gitsrc <<<
 >> Entering into /home/user/gitsrc/mouse
->> makeBaseApp.pl -t ioc
-mouse exists, not modified.
 >>> Making IOC application with IOCNAME park-woodmouse and IOC iocpark-woodmouse
 >>>
 >> makeBaseApp.pl -i -t ioc -p mouse park-woodmouse
@@ -303,7 +316,6 @@ Using target architecture linux-x86_64 (only one available)
 >>> IOC     : iocpark-woodmouse
 >>> iocBoot IOC path /home/user/gitsrc/mouse/iocBoot/iocpark-woodmouse
 
-Exist : .gitlab-ci.yml
 Exist : .gitignore
 Exist : .gitattributes
 Exist : .editorconfig
@@ -339,8 +351,8 @@ mouse/iocBoot/
 * Example 3 : Your clone folder name is not the same as your application name
 
 ```bash
-$ git clone ssh://git@git.example.com/alsu/tools.git
-$ git clone ssh://git@git.example.com/alsu/mouse.git iocmouse
+$ git clone <URL of the tools repository> tools
+$ git clone <URL of the mouse repository> iocmouse
 
 $ bash tools/generate_ioc_structure.bash -l BTA -p mouse -f iocmouse
 The following ALS / ALS-U locations are defined.
@@ -351,8 +363,6 @@ Your Location ---BTA--- was defined within the predefined list.
 >> If the folder is exist, we can go into iocmouse
 >> in the >>> /home/user/gitsrc <<<
 >> Entering into /home/user/gitsrc/iocmouse
->> makeBaseApp.pl -t ioc
-mouse exists, not modified.
 >>> Making IOC application with IOCNAME BTA-mouse and IOC iocBTA-mouse
 >>>
 >> makeBaseApp.pl -i -t ioc -p mouse BTA-mouse
@@ -363,7 +373,6 @@ Using target architecture linux-x86_64 (only one available)
 >>> IOC     : iocBTA-mouse
 >>> iocBoot IOC path /home/user/gitsrc/iocmouse/iocBoot/iocBTA-mouse
 
-Exist : .gitlab-ci.yml
 Exist : .gitignore
 Exist : .gitattributes
 Exist : .editorconfig
@@ -484,11 +493,11 @@ workspace handling, verdicts, and the run summary) through `test-lib.bash`.
 | 2, generation | `mouse` / `home` | 5 | New IOC creation, re-entry, reset-and-recreate, case-sensitivity guard, and `-d` device naming |
 | 2, generation | `Mouse` / `SR12` | 5 | The same five cases with a capitalized APPNAME in a predefined location |
 | 2, generation | literal substitution | 4 | Allowed underscore and hyphen bytes reach `st.cmd` and `book.toml` literally |
-| 2, generation | generated artifacts | 47 | `st.cmd` and `book.toml` exist; startup is executable and has expanded names, active linStat, diagnostic exports and startup error handling. The PVA group JSON has its typed `+id` and macro gates. No screen files are generated. Dual-startup generation and runtime checks are in `tests/test-dual-startup.bash`. |
-| 2, generation | generated repository files | 24 | `.gitlab-ci.yml` includes the `alsu/ci` project files and declares the `build` and `deploy` stages; `.gitignore` excludes build outputs, `envPaths`, and local configure overrides; `.editorconfig` and `.gitattributes` carry the editor and line-ending policy |
+| 2, generation | generated artifacts | 50 | `st.cmd` and `book.toml` exist; startup is executable and has expanded names, active linStat, diagnostic exports and startup error handling. The PVA group JSON has its typed `+id` and macro gates. No screen files are generated. Dual-startup generation and runtime checks are in `tests/test-dual-startup.bash`. The SRS title carries the APPNAME with no placeholder, and `prepare-runtime.bash` rejects a missing `TOP` with its own message. |
+| 2, generation | generated repository files | 15 | `.gitignore` excludes build outputs, `envPaths`, and local configure overrides; `.editorconfig` and `.gitattributes` carry the editor and line-ending policy; no CI file is generated |
 | 2, generation | abort paths after the EPICS check | 4 | User refusal at the location prompt, same-directory invocation, and both makeBaseApp.pl failures abort with stable diagnostics |
 | 2, generation | iocBoot path resolution | 3 | Explicit `-n` and `-d` values resolve to the actual makeBaseApp.pl iocBoot directory |
-| 2, generation | generated git state | 18 | The `git add .`-staged repo tracks the expected sources and excludes screen files and build residue |
+| 2, generation | generated git state | 17 | The `git add .`-staged repo tracks the expected sources and excludes screen files and build residue |
 | 2, generation | additional iocBoot | 6 | A second location adds only its iocBoot subtree and leaves the first `st.cmd` byte-identical |
 | 2, build | generated build | 16 | `make -C` builds the generated IOC, installs expected bin/dbd/startup and PVA group JSON artifacts, boots the generated `st.cmd` with exit 0, exits non-zero when a startup command in `st.cmd` or in the application iocsh file fails, and rebuilds after clean uninstall |
 | 2, build | build variants | 6 | `-d` and `-n` IOCs build and land `envPaths` in the option-resolved iocBoot directory |
@@ -498,7 +507,7 @@ workspace handling, verdicts, and the run summary) through `test-lib.bash`.
 | 2, build | recovery offer | 11 | Recovery recommends one installed version in the recorded scope (same line preferred, else highest), writes `RELEASE.local` only on a piped `y`, and writes nothing on decline, absent terminal, off-layout path, or relocated root |
 | 2, build | site-target discoverability | 6 | `make site-help` lists `conf` and `site-help` with descriptions in both base-live and base-missing modes, adds the recovery target when the base is missing, and leaves base's own `help` unwarned on a plain make |
 
-Total: 212 assertions; Phase 1 has 33, the Phase 2 generation group 116, and
+Total: 205 assertions; Phase 1 has 33, the Phase 2 generation group 109, and
 the build group 63.
 
 ### Requirements
@@ -552,4 +561,4 @@ bash test-runtime.bash
 
 ## References
 
-[1] AL-1451-7452 : IOC Name Naming Conventions at ALS and its dynamic google sheet in https://docs.example.com/spreadsheet-removed
+[1] AL-1451-7452 : IOC Name Naming Conventions at ALS
